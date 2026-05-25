@@ -1,0 +1,175 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  --background: #fafaf9;
+  --foreground: #1c1917;
+
+  --card: #ffffff;
+  --card-foreground: #1c1917;
+
+  --popover: #ffffff;
+  --popover-foreground: #1c1917;
+
+  --primary: #0f5132;
+  --primary-foreground: #ffffff;
+
+  --secondary: #f5f5f4;
+  --secondary-foreground: #1c1917;
+
+  --accent: #86c232;
+  --accent-foreground: #052e16;
+
+  --muted: #f5f5f4;
+  --muted-foreground: #57534e;
+
+  --destructive: #dc2626;
+  --destructive-foreground: #ffffff;
+
+  --success: #16a34a;
+  --success-foreground: #ffffff;
+
+  --warning: #ca8a04;
+  --warning-foreground: #ffffff;
+
+  --info: #2563eb;
+  --info-foreground: #ffffff;
+
+  --border: #e7e5e4;
+  --input: #e7e5e4;
+  --ring: #0f5132;
+
+  --sidebar: #ffffff;
+  --sidebar-foreground: #1c1917;
+  --sidebar-border: #e7e5e4;
+  --sidebar-accent: #f5f5f4;
+  --sidebar-accent-foreground: #0f5132;
+
+  --radius: 0.625rem;
+
+  --chart-1: #0f5132;
+  --chart-2: #86c232;
+  --chart-3: #ca8a04;
+  --chart-4: #dc2626;
+  --chart-5: #2563eb;
+}
+
+.dark {
+  --background: #0a0a0a;
+  --foreground: #fafaf9;
+
+  --card: #171717;
+  --card-foreground: #fafaf9;
+
+  --popover: #171717;
+  --popover-foreground: #fafaf9;
+
+  --primary: #22c55e;
+  --primary-foreground: #052e16;
+
+  --secondary: #27272a;
+  --secondary-foreground: #fafaf9;
+
+  --accent: #a3e635;
+  --accent-foreground: #052e16;
+
+  --muted: #27272a;
+  --muted-foreground: #a1a1aa;
+
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+
+  --success: #22c55e;
+  --success-foreground: #052e16;
+
+  --warning: #eab308;
+  --warning-foreground: #1c1917;
+
+  --info: #3b82f6;
+  --info-foreground: #ffffff;
+
+  --border: #27272a;
+  --input: #27272a;
+  --ring: #22c55e;
+
+  --sidebar: #0f0f0f;
+  --sidebar-foreground: #fafaf9;
+  --sidebar-border: #27272a;
+  --sidebar-accent: #1c1c1c;
+  --sidebar-accent-foreground: #22c55e;
+
+  --chart-1: #22c55e;
+  --chart-2: #a3e635;
+  --chart-3: #eab308;
+  --chart-4: #ef4444;
+  --chart-5: #3b82f6;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-info: var(--info);
+  --color-info-foreground: var(--info-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+* {
+  border-color: var(--border);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-inter), ui-sans-serif, system-ui, -apple-system, sans-serif;
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+}
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

@@ -1,0 +1,108 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 148" role="img"
+     aria-label="Santana Previdência — Sistema de Gestão Previdenciária">
+  <defs>
+    <clipPath id="escudo-full">
+      <path d="M35,10 L125,10 Q138,10 138,24 L138,82 Q138,104 80,124 Q22,104 22,82 L22,24 Q22,10 35,10 Z"/>
+    </clipPath>
+  </defs>
+
+  <!-- ============ BRASÃO ============ -->
+
+  <!-- Quadrantes -->
+  <g clip-path="url(#escudo-full)">
+    <rect x="22" y="10" width="58" height="57" fill="#1565C0"/>
+    <rect x="80" y="10" width="58" height="57" fill="#1A237E"/>
+    <rect x="22" y="67" width="58" height="60" fill="#2E7D32"/>
+    <rect x="80" y="67" width="58" height="60" fill="#F5F5F5"/>
+    <rect x="78" y="10" width="4" height="115" fill="#C8A94A" opacity="0.9"/>
+    <rect x="22" y="65" width="116" height="4" fill="#C8A94A" opacity="0.9"/>
+
+    <!-- Âncora (topo esq) -->
+    <g transform="translate(51,35)" stroke="white" stroke-width="2.2" fill="none" stroke-linecap="round">
+      <circle cx="0" cy="-17" r="4.5"/>
+      <line x1="0" y1="-12.5" x2="0" y2="8"/>
+      <line x1="-11" y1="-4" x2="11" y2="-4"/>
+      <path d="M-11,8 Q0,13 11,8"/>
+      <circle cx="-11" cy="8" r="2.8" fill="white" stroke="none"/>
+      <circle cx="11" cy="8" r="2.8" fill="white" stroke="none"/>
+    </g>
+
+    <!-- Estrela (topo dir) -->
+    <polygon points="109,17 111.8,26 121.5,26 113.9,31.8 116.7,40.8 109,35.4 101.3,40.8 104.1,31.8 96.5,26 106.2,26"
+             fill="#F9A825"/>
+
+    <!-- Peixe (baixo esq) -->
+    <g transform="translate(51,94)">
+      <ellipse cx="0" cy="0" rx="20" ry="9" fill="#1B5E20"/>
+      <ellipse cx="-14" cy="-1" rx="2.5" ry="1.5" fill="white"/>
+      <path d="M-19,-9 L-30,-18 L-30,9 L-19,9 Z" fill="#1B5E20"/>
+    </g>
+
+    <!-- Cruz + engrenagem (baixo dir) -->
+    <rect x="107" y="72" width="4.5" height="24" fill="#1565C0"/>
+    <rect x="99"  y="80" width="21"  height="4.5" fill="#1565C0"/>
+    <circle cx="109" cy="107" r="8" fill="none" stroke="#1565C0" stroke-width="2.2"/>
+    <circle cx="109" cy="107" r="3.5" fill="#1565C0"/>
+    <g stroke="#1565C0" stroke-width="2.5" stroke-linecap="round">
+      <line x1="109" y1="96" x2="109" y2="99"/>
+      <line x1="109" y1="115" x2="109" y2="118"/>
+      <line x1="98"  y1="107" x2="101" y2="107"/>
+      <line x1="117" y1="107" x2="120" y2="107"/>
+    </g>
+  </g>
+
+  <!-- Ameias -->
+  <g fill="#C8A94A">
+    <rect x="32"  y="2" width="9" height="9" rx="1"/>
+    <rect x="46"  y="2" width="9" height="9" rx="1"/>
+    <rect x="60"  y="2" width="9" height="9" rx="1"/>
+    <rect x="74"  y="2" width="9" height="9" rx="1"/>
+    <rect x="88"  y="2" width="9" height="9" rx="1"/>
+    <rect x="102" y="2" width="9" height="9" rx="1"/>
+  </g>
+
+  <!-- Contorno escudo -->
+  <path d="M35,10 L125,10 Q138,10 138,24 L138,82 Q138,104 80,124 Q22,104 22,82 L22,24 Q22,10 35,10 Z"
+        fill="none" stroke="#C8A94A" stroke-width="3"/>
+
+  <!-- Arara esquerda -->
+  <g transform="translate(22,22)">
+    <ellipse cx="-7" cy="32" rx="9" ry="16" fill="#388E3C" transform="rotate(10,-7,32)"/>
+    <circle cx="-4" cy="17" r="10" fill="#2E7D32"/>
+    <path d="M4,15 L13,17 L4,21 Z" fill="#F57F17"/>
+    <circle cx="0" cy="14" r="2.5" fill="white"/>
+    <circle cx="0" cy="14" r="1.2" fill="#111"/>
+    <ellipse cx="-6" cy="30" rx="5.5" ry="9" fill="#C62828" transform="rotate(10,-6,30)"/>
+    <path d="M-14,44 L-22,62 L-13,59 L-8,50 Z" fill="#1565C0"/>
+  </g>
+
+  <!-- Arara direita (espelhada) -->
+  <g transform="translate(118,22) scale(-1,1)">
+    <ellipse cx="-7" cy="32" rx="9" ry="16" fill="#388E3C" transform="rotate(10,-7,32)"/>
+    <circle cx="-4" cy="17" r="10" fill="#2E7D32"/>
+    <path d="M4,15 L13,17 L4,21 Z" fill="#F57F17"/>
+    <circle cx="0" cy="14" r="2.5" fill="white"/>
+    <circle cx="0" cy="14" r="1.2" fill="#111"/>
+    <ellipse cx="-6" cy="30" rx="5.5" ry="9" fill="#C62828" transform="rotate(10,-6,30)"/>
+    <path d="M-14,44 L-22,62 L-13,59 L-8,50 Z" fill="#1565C0"/>
+  </g>
+
+  <!-- Texto abaixo do brasão -->
+  <text x="80" y="136" font-family="Arial, Helvetica, sans-serif" font-size="8.5" font-weight="600"
+        fill="#0F5132" text-anchor="middle" letter-spacing="1">Prefeitura de</text>
+  <text x="80" y="147" font-family="Arial Black, Arial, Helvetica, sans-serif" font-size="11" font-weight="900"
+        fill="#0F5132" text-anchor="middle" letter-spacing="2">SANTANA</text>
+
+  <!-- ============ DIVISOR VERTICAL ============ -->
+  <line x1="158" y1="12" x2="158" y2="136" stroke="#C8A94A" stroke-width="1.5" opacity="0.6"/>
+
+  <!-- ============ TEXTO PRINCIPAL ============ -->
+  <!-- "SANTANA" -->
+  <text x="172" y="72"
+        font-family="Arial Black, Impact, Arial, Helvetica, sans-serif"
+        font-size="52" font-weight="900" fill="#0F5132" letter-spacing="-1.5">SANTANA</text>
+  <!-- "PREVIDÊNCIA" -->
+  <text x="172" y="130"
+        font-family="Arial Black, Impact, Arial, Helvetica, sans-serif"
+        font-size="46" font-weight="900" fill="#0F5132" letter-spacing="-1.5">PREVIDÊNCIA</text>
+</svg>

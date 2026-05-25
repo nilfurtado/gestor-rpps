@@ -1,0 +1,208 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Orgao {
+  id           Int                    @id @default(autoincrement())
+  nome         String
+  sigla        String                 @unique
+  cor          String?                // HEX color #RRGGBB usado em gráficos
+  status       OrgaoStatus            @default(ATIVO)
+  createdAt    DateTime               @default(now())
+  updatedAt    DateTime               @updatedAt
+  lancamentos  FolhaPrevidenciaria[]
+  acordos      Acordo[]
+
+  @@map("orgaos")
+}
+
+model Exercicio {
+  id          Int                    @id @default(autoincrement())
+  ano         Int                    @unique
+  status      ExercicioStatus        @default(ABERTO)
+  createdAt   DateTime               @default(now())
+  lancamentos FolhaPrevidenciaria[]
+
+  @@map("exercicios")
+}
+
+model Competencia {
+  id          Int                    @id @default(autoincrement())
+  mes         String
+  ordem       Int                    @unique
+  lancamentos FolhaPrevidenciaria[]
+
+  @@map("competencias")
+}
+
+model FolhaPrevidenciaria {
+  id                   Int              @id @default(autoincrement())
+  orgaoId              Int
+  orgao                Orgao            @relation(fields: [orgaoId], references: [id])
+  tipo                 TipoContribuicao
+  exercicioId          Int
+  exercicio            Exercicio        @relation(fields: [exercicioId], references: [id])
+  competenciaId        Int
+  competencia          Competencia      @relation(fields: [competenciaId], references: [id])
+  aliquota             Decimal
+  valorRecolher        Decimal
+  valorRecolhido       Decimal
+  quantidadeServidores Int?
+  folhaBase            Decimal?
+  multas               Decimal?
+  juros                Decimal?
+  parcelado            Boolean          @default(false)
+  deficit              Decimal
+  inadimplencia        Decimal
+  status               LancamentoStatus
+  responsavelId        Int?
+  responsavel          User?            @relation(fields: [responsavelId], references: [id])
+  dataVencimento       DateTime?
+  observacoes          String?
+  acordos              Acordo[]         @relation("AcordoLancamentos")
+  createdAt            DateTime         @default(now())
+  updatedAt            DateTime         @updatedAt
+
+  @@unique([orgaoId, tipo, exercicioId, competenciaId])
+  @@index([exercicioId, competenciaId])
+  @@index([status])
+  @@map("folhas_previdenciarias")
+}
+
+model User {
+  id           Int                    @id @default(autoincrement())
+  email        String                 @unique
+  nome         String
+  passwordHash String
+  role         Role                   @default(OPERADOR)
+  createdAt    DateTime               @default(now())
+  lancamentos  FolhaPrevidenciaria[]
+  acordos      Acordo[]
+
+  @@map("users")
+}
+
+model AuditLog {
+  id         Int      @id @default(autoincrement())
+  userId     Int?
+  entityType String
+  entityId   Int
+  action     String
+  before     Json?
+  after      Json?
+  createdAt  DateTime @default(now())
+
+  @@index([entityType, entityId])
+  @@map("audit_logs")
+}
+
+model InstitutoRpps {
+  id                      Int      @id @default(1)
+  nomeInstituto           String?
+  nomeResponsavel         String?
+  cnpj                    String?
+  enderecoCompleto        String?
+  telefone                String?
+  email                   String?
+  nomeDepartamento        String?
+  responsavelDepartamento String?
+  logoPath                String?
+  updatedAt               DateTime @updatedAt
+
+  @@map("instituto_rpps")
+}
+
+enum OrgaoStatus {
+  ATIVO
+  INATIVO
+}
+
+enum ExercicioStatus {
+  ABERTO
+  ENCERRADO
+}
+
+enum TipoContribuicao {
+  PATRONAL
+  SEGURADO
+}
+
+enum LancamentoStatus {
+  PAGO
+  PARCIAL
+  INADIMPLENTE
+  PARCELADO
+}
+
+enum Role {
+  GESTOR
+  OPERADOR
+  AUDITOR
+}
+
+enum TipoDebitoAcordo {
+  PATRONAL
+  SEGURADO
+  AMBOS
+}
+
+enum FormaGarantia {
+  FPM
+  CAUC
+  RECEITAS_PROPRIAS
+  OUTRA
+}
+
+enum StatusAcordo {
+  VIGENTE
+  QUITADO
+  RESCINDIDO
+  SUSPENSO
+}
+
+model Acordo {
+  id                   Int      @id @default(autoincrement())
+  numero               String
+  dataAcordo           DateTime
+  orgaoId              Int
+  orgao                Orgao    @relation(fields: [orgaoId], references: [id])
+  tipoDebito           TipoDebitoAcordo
+
+  valorOriginal        Decimal
+  atualizacaoMonetaria Decimal  @default(0)
+  jurosAcordo          Decimal  @default(0)
+  multaAcordo          Decimal  @default(0)
+  valorConsolidado     Decimal
+
+  numeroParcelas       Int
+  valorParcela         Decimal
+  diaVencimento        Int
+  primeiroVencimento   DateTime
+
+  parcelasPagas        Int      @default(0)
+  valorPago            Decimal  @default(0)
+  status               StatusAcordo @default(VIGENTE)
+
+  formaGarantia        FormaGarantia?
+  garantiaDetalhes     String?
+  leiAutorizativa      String?
+  observacoes          String?
+
+  responsavelId        Int
+  responsavel          User     @relation(fields: [responsavelId], references: [id])
+
+  lancamentos          FolhaPrevidenciaria[] @relation("AcordoLancamentos")
+
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  @@unique([orgaoId, numero])
+  @@index([status])
+  @@index([orgaoId, status])
+  @@map("acordos")
+}
