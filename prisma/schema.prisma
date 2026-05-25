@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -112,6 +112,8 @@ model InstitutoRpps {
   nomeDepartamento        String?
   responsavelDepartamento String?
   logoPath                String?
+  logoData                Bytes?   // logo armazenado diretamente no banco (Postgres bytea)
+  logoMime                String?  // ex.: image/jpeg, image/png
   updatedAt               DateTime @updatedAt
 
   @@map("instituto_rpps")

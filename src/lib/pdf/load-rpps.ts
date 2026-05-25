@@ -1,5 +1,3 @@
-import fs from "fs";
-import path from "path";
 import { prisma } from "@/lib/db";
 import type { RppsReportInfo } from "./report-document";
 
@@ -17,16 +15,11 @@ export async function loadRppsWithLogo(): Promise<LoadedRpps> {
   let logoBuffer: Buffer | null = null;
   let logoExt: "jpeg" | "png" | null = null;
 
-  if (rppsRecord?.logoPath) {
-    const relativePath = rppsRecord.logoPath.startsWith("/")
-      ? rppsRecord.logoPath.slice(1)
-      : rppsRecord.logoPath;
-    const logoFile = path.join(process.cwd(), "public", relativePath);
-    if (fs.existsSync(logoFile)) {
-      logoBuffer = fs.readFileSync(logoFile);
-      logoBase64 = logoBuffer.toString("base64");
-      logoExt = relativePath.toLowerCase().endsWith(".png") ? "png" : "jpeg";
-    }
+  if (rppsRecord?.logoData) {
+    logoBuffer = Buffer.from(rppsRecord.logoData);
+    logoBase64 = logoBuffer.toString("base64");
+    const mime = rppsRecord.logoMime ?? "image/jpeg";
+    logoExt = mime.includes("png") ? "png" : "jpeg";
   }
 
   const rpps: RppsReportInfo | null = rppsRecord

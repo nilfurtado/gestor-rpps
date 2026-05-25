@@ -4,8 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "next dev --hostname 0.0.0.0 --port 3001",
-    "build": "next build",
+    "build": "prisma generate && next build",
     "start": "next start --hostname 0.0.0.0 --port 3001",
+    "postinstall": "prisma generate",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:push": "prisma db push",
