@@ -61,7 +61,7 @@ export function LancamentosClient({ lancamentos, orgaos, exercicios, competencia
   const [competenciaId, setCompetenciaId] = useState(ALL);
   const [tipo, setTipo] = useState(ALL);
   const [status, setStatus] = useState(ALL);
-  const [vinculo, setVinculo] = useState(ALL); // ALL | "COM" | "SEM"
+  const [vinculo, setVinculo] = useState(ALL);
   const [busyId, setBusyId] = useState<number | null>(null);
 
   const filtered = useMemo(() => {
@@ -98,9 +98,9 @@ export function LancamentosClient({ lancamentos, orgaos, exercicios, competencia
   }
 
   return (
-    <div className="space-y-4">
-      <Card className="p-4">
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-6">
+    <div className="space-y-3">
+      <Card className="p-3">
+        <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-6">
           <FilterSelect
             label="Exercício"
             value={exercicioId}
@@ -151,7 +151,7 @@ export function LancamentosClient({ lancamentos, orgaos, exercicios, competencia
             ]}
           />
           <FilterSelect
-            label="Vínculo com acordo"
+            label="Acordo"
             value={vinculo}
             onChange={setVinculo}
             options={[
@@ -177,83 +177,88 @@ export function LancamentosClient({ lancamentos, orgaos, exercicios, competencia
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Órgão</TableHead>
-                <TableHead>Tipo</TableHead>
-                <TableHead>Competência</TableHead>
-                <TableHead>Exercício</TableHead>
-                <TableHead className="text-right">A recolher</TableHead>
-                <TableHead className="text-right">Recolhido</TableHead>
-                <TableHead className="text-right">Déficit</TableHead>
-                <TableHead className="text-right">Inadimpl.</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Acordo</TableHead>
-                <TableHead className="text-right">Ações</TableHead>
+                <TableHead className="h-10 px-3">Órgão</TableHead>
+                <TableHead className="h-10 px-3">Período</TableHead>
+                <TableHead className="h-10 px-3 text-right">A recolher</TableHead>
+                <TableHead className="hidden h-10 px-3 text-right md:table-cell">
+                  Recolhido
+                </TableHead>
+                <TableHead className="h-10 px-3 text-right">Déficit</TableHead>
+                <TableHead className="h-10 px-3">Status</TableHead>
+                <TableHead className="h-10 px-3 text-right">Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filtered.map((l) => (
                 <TableRow key={l.id}>
-                  <TableCell>
-                    <div className="font-semibold text-foreground">{l.orgao.sigla}</div>
-                    <div className="text-xs text-muted-foreground">{l.orgao.nome}</div>
+                  <TableCell className="px-3 py-2.5">
+                    <div className="font-semibold leading-tight text-foreground">
+                      {l.orgao.sigla}
+                    </div>
+                    <div className="text-[11px] leading-tight text-muted-foreground">
+                      {l.tipo === "PATRONAL" ? "Patronal" : "Segurado"}
+                    </div>
                   </TableCell>
-                  <TableCell>{l.tipo === "PATRONAL" ? "Patronal" : "Segurado"}</TableCell>
-                  <TableCell>{l.competencia.mes}</TableCell>
-                  <TableCell className="tabular-nums">{l.exercicio.ano}</TableCell>
-                  <TableCell className="text-right tabular-nums">
+                  <TableCell className="px-3 py-2.5">
+                    <div className="leading-tight">{l.competencia.mes}</div>
+                    <div className="text-[11px] leading-tight tabular-nums text-muted-foreground">
+                      {l.exercicio.ano}
+                    </div>
+                  </TableCell>
+                  <TableCell className="px-3 py-2.5 text-right tabular-nums">
                     {formatBRL(l.valorRecolher)}
                   </TableCell>
-                  <TableCell className="text-right tabular-nums">
+                  <TableCell className="hidden px-3 py-2.5 text-right tabular-nums md:table-cell">
                     {formatBRL(l.valorRecolhido)}
                   </TableCell>
-                  <TableCell className="text-right tabular-nums">
-                    <span
+                  <TableCell className="px-3 py-2.5 text-right tabular-nums">
+                    <div
                       className={
-                        l.deficit > 0 ? "font-medium text-destructive" : "text-muted-foreground"
+                        l.deficit > 0
+                          ? "font-medium leading-tight text-destructive"
+                          : "leading-tight text-muted-foreground"
                       }
                     >
                       {formatBRL(l.deficit)}
-                    </span>
+                    </div>
+                    <div className="text-[11px] leading-tight tabular-nums text-muted-foreground">
+                      {formatPercent(l.inadimplencia)}
+                    </div>
                   </TableCell>
-                  <TableCell className="text-right tabular-nums">
-                    {formatPercent(l.inadimplencia)}
-                  </TableCell>
-                  <TableCell>
+                  <TableCell className="px-3 py-2.5">
                     <StatusBadge status={l.status} />
-                  </TableCell>
-                  <TableCell>
                     {l.acordo ? (
                       <Link
                         href={`/acordos/${l.acordo.id}/editar`}
-                        className="inline-flex items-center gap-1 text-xs font-semibold text-primary underline-offset-2 hover:underline"
+                        className="mt-0.5 block text-[11px] font-semibold text-primary underline-offset-2 hover:underline"
                         title="Abrir acordo vinculado"
                       >
                         {l.acordo.numero}
                       </Link>
-                    ) : (
-                      <span className="text-xs text-muted-foreground">—</span>
-                    )}
+                    ) : null}
                   </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex items-center justify-end gap-1">
+                  <TableCell className="px-3 py-2.5 text-right">
+                    <div className="flex items-center justify-end gap-0.5">
                       <Button
                         variant="ghost"
                         size="icon"
                         asChild
+                        className="h-8 w-8"
                         aria-label="Editar lançamento"
                       >
                         <Link href={`/lancamentos/${l.id}/editar`}>
-                          <Pencil className="h-4 w-4" />
+                          <Pencil className="h-3.5 w-3.5" />
                         </Link>
                       </Button>
                       <Button
                         variant="ghost"
                         size="icon"
+                        className="h-8 w-8"
                         onClick={() => onDelete(l.id)}
                         disabled={busyId === l.id}
                         aria-label="Excluir lançamento"
                       >
-                        <Trash2 className="h-4 w-4 text-destructive" />
+                        <Trash2 className="h-3.5 w-3.5 text-destructive" />
                       </Button>
                     </div>
                   </TableCell>
@@ -279,12 +284,12 @@ function FilterSelect({
   options: { value: string; label: string }[];
 }) {
   return (
-    <div className="space-y-1.5">
-      <Label className="text-xs uppercase tracking-wide text-muted-foreground">
+    <div className="space-y-1">
+      <Label className="text-[10px] uppercase tracking-wide text-muted-foreground">
         {label}
       </Label>
       <Select value={value} onValueChange={onChange}>
-        <SelectTrigger>
+        <SelectTrigger className="h-9 text-sm">
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
