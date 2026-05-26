@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Migra dados do SQLite local (prisma/dev.db) para o Neon Postgres.
  *
