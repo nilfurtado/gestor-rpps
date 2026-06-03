@@ -49,7 +49,7 @@ export function PdfInstitutionalFooter({
         Emitido por {emittedBy} em {generatedAt}
       </Text>
       <Text
-        style={[reportStyles.footerText, { textAlign: "center" }]}
+        style={[reportStyles.footerText, { textAlign: "center", fontSize: 12, marginTop: 3 }]}
         render={({ pageNumber, totalPages }) =>
           `Página ${pageNumber} de ${totalPages}`
         }
