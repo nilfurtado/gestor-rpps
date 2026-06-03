@@ -130,15 +130,15 @@ export const reportStyles = StyleSheet.create({
     left: PAGE_PADDING_X,
     right: PAGE_PADDING_X,
     bottom: 18,
-    fontSize: 6.5,
+    fontSize: 8.5,
     color: palette.mute,
   },
   footerDivider: {
     borderTopWidth: 0.5,
     borderTopColor: palette.divider,
-    marginBottom: 5,
+    marginBottom: 6,
   },
-  footerText: { fontSize: 6.5, color: palette.mute, marginBottom: 1.5 },
+  footerText: { fontSize: 8.5, color: palette.mute, marginBottom: 2, textAlign: "center" },
   footerRow: {
     flexDirection: "row",
     justifyContent: "space-between",
