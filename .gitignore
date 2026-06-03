@@ -58,3 +58,7 @@ next-env.d.ts
 
 # Build logs temporários
 build.log
+
+# VS Code — configurações e settings locais (sincronizados na nuvem, não no Git)
+.vscode/
+.vs/
