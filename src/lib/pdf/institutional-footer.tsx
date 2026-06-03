@@ -48,12 +48,6 @@ export function PdfInstitutionalFooter({
       <Text style={[reportStyles.footerText, { textAlign: "center" }]}>
         Emitido por {emittedBy} em {generatedAt}
       </Text>
-      <Text
-        style={[reportStyles.footerText, { textAlign: "center" }]}
-        render={({ pageNumber, totalPages }) =>
-          `Página ${pageNumber} de ${totalPages}`
-        }
-      />
     </View>
   );
 }

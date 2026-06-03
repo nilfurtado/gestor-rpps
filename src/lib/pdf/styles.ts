@@ -64,6 +64,7 @@ export const reportStyles = StyleSheet.create({
     letterSpacing: 0.4,
   },
   headerEmittedAt: { fontSize: 7, color: palette.mute, marginTop: 2 },
+  headerPage: { fontSize: 10, color: palette.text, fontFamily: "Helvetica-Bold", marginTop: 6 },
 
   filtersBox: {
     backgroundColor: palette.surfaceTint,

@@ -46,6 +46,12 @@ export function PdfInstitutionalHeader({
         <Text style={reportStyles.headerReportTitle}>{reportTitle}</Text>
         <Text style={reportStyles.headerEmittedAt}>Emitido em {generatedAt}</Text>
       </View>
+      <Text
+        style={reportStyles.headerPage}
+        render={({ pageNumber, totalPages }) =>
+          `Página ${pageNumber} de ${totalPages}`
+        }
+      />
     </View>
   );
 }
