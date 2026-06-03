@@ -49,12 +49,12 @@ export const reportStyles = StyleSheet.create({
   },
   headerInstitution: {
     fontFamily: "Times-Bold",
-    fontSize: 12,
+    fontSize: 13,
     color: palette.primary,
     letterSpacing: 0.2,
   },
-  headerDept: { fontSize: 7.5, color: palette.mute, marginTop: 1 },
-  headerCnpj: { fontSize: 7, color: palette.subtle, marginTop: 1 },
+  headerDept: { fontSize: 11, color: palette.mute, marginTop: 1 },
+  headerCnpj: { fontSize: 10, color: palette.subtle, marginTop: 1 },
   headerRight: { alignItems: "flex-end" },
   headerReportTitle: {
     fontFamily: "Times-Bold",
@@ -63,8 +63,8 @@ export const reportStyles = StyleSheet.create({
     textTransform: "uppercase",
     letterSpacing: 0.4,
   },
-  headerEmittedAt: { fontSize: 7, color: palette.mute, marginTop: 2 },
-  headerPage: { fontSize: 7, color: palette.mute, marginTop: 2 },
+  headerEmittedAt: { fontSize: 10, color: palette.mute, marginTop: 2 },
+  headerPage: { fontSize: 10, color: palette.mute, marginTop: 2 },
 
   filtersBox: {
     backgroundColor: palette.surfaceTint,
