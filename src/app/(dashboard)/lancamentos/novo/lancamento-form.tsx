@@ -77,19 +77,19 @@ export function LancamentoForm({
     initial ? String(initial.valorRecolher) : ""
   );
   const [valorRecolhido, setValorRecolhido] = useState<string>(
-    initial ? String(initial.valorRecolhido) : ""
+    initial ? formatCurrency(Number(initial.valorRecolhido)) : ""
   );
   const [quantidadeServidores, setQuantidadeServidores] = useState<string>(
     initial?.quantidadeServidores != null ? String(initial.quantidadeServidores) : ""
   );
   const [folhaBase, setFolhaBase] = useState<string>(
-    initial?.folhaBase != null ? String(initial.folhaBase) : ""
+    initial?.folhaBase != null ? formatCurrency(Number(initial.folhaBase)) : ""
   );
   const [multas, setMultas] = useState<string>(
-    initial?.multas != null ? String(initial.multas) : ""
+    initial?.multas != null ? formatCurrency(Number(initial.multas)) : ""
   );
   const [juros, setJuros] = useState<string>(
-    initial?.juros != null ? String(initial.juros) : ""
+    initial?.juros != null ? formatCurrency(Number(initial.juros)) : ""
   );
   const [parcelado, setParcelado] = useState(initial?.parcelado ?? false);
   const [dataVencimento, setDataVencimento] = useState<string>(
