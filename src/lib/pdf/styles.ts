@@ -63,8 +63,8 @@ export const reportStyles = StyleSheet.create({
     textTransform: "uppercase",
     letterSpacing: 0.4,
   },
-  headerEmittedAt: { fontSize: 10, color: palette.mute, marginTop: 2 },
-  headerPage: { fontSize: 10, color: palette.mute, marginTop: 2 },
+  headerEmittedAt: { fontSize: 9, color: palette.mute, marginTop: 2 },
+  headerPage: { fontSize: 9, color: palette.mute, marginTop: 2 },
 
   filtersBox: {
     backgroundColor: palette.surfaceTint,
@@ -131,7 +131,7 @@ export const reportStyles = StyleSheet.create({
     left: PAGE_PADDING_X,
     right: PAGE_PADDING_X,
     bottom: 18,
-    fontSize: 10,
+    fontSize: 9,
     color: palette.mute,
   },
   footerDivider: {
@@ -139,7 +139,7 @@ export const reportStyles = StyleSheet.create({
     borderTopColor: palette.divider,
     marginBottom: 6,
   },
-  footerText: { fontSize: 10, color: palette.mute, marginBottom: 2, textAlign: "center" },
+  footerText: { fontSize: 9, color: palette.mute, marginBottom: 2, textAlign: "center" },
   footerRow: {
     flexDirection: "row",
     justifyContent: "space-between",
