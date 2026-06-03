@@ -93,7 +93,9 @@ export function LancamentoForm({
   );
   const [parcelado, setParcelado] = useState(initial?.parcelado ?? false);
   const [dataVencimento, setDataVencimento] = useState<string>(
-    initial?.dataVencimento ? initial.dataVencimento.slice(0, 10) : ""
+    initial?.dataVencimento
+      ? initial.dataVencimento.slice(0, 10)
+      : new Date().toISOString().split("T")[0]
   );
   const [observacoes, setObservacoes] = useState<string>(initial?.observacoes ?? "");
 
@@ -280,6 +282,14 @@ export function LancamentoForm({
       <section aria-labelledby="sec-val">
         <SectionTitle id="sec-val">Valores</SectionTitle>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <Field label="Folha base (R$) *">
+            <CurrencyInput
+              value={folhaBase}
+              onChange={(e) => setFolhaBase(e.target.value)}
+              className="h-9 tabular-nums"
+              required
+            />
+          </Field>
           <Field label="Alíquota (%) *">
             <Input
               type="number" step="0.01" min="0" max="100" required
@@ -287,14 +297,6 @@ export function LancamentoForm({
               onChange={(e) => setAliquota(e.target.value)}
               placeholder="14"
               className="h-9 tabular-nums"
-            />
-          </Field>
-          <Field label="A recolher (R$) *">
-            <CurrencyInput
-              value={valorRecolher}
-              onChange={(e) => setValorRecolher(e.target.value)}
-              className="h-9 tabular-nums"
-              required
             />
           </Field>
           <Field label="Recolhido (R$) *">
@@ -305,7 +307,7 @@ export function LancamentoForm({
               required
             />
           </Field>
-          <Field label="Data de repasse">
+          <Field label="Data do repasse">
             <Input
               type="date"
               value={dataVencimento}
@@ -319,13 +321,6 @@ export function LancamentoForm({
               value={quantidadeServidores}
               onChange={(e) => setQuantidadeServidores(e.target.value)}
               placeholder="450"
-              className="h-9 tabular-nums"
-            />
-          </Field>
-          <Field label="Folha base (R$)">
-            <CurrencyInput
-              value={folhaBase}
-              onChange={(e) => setFolhaBase(e.target.value)}
               className="h-9 tabular-nums"
             />
           </Field>
@@ -344,16 +339,6 @@ export function LancamentoForm({
             />
           </Field>
         </div>
-
-        <label className="mt-3 inline-flex cursor-pointer items-center gap-2 text-sm text-foreground">
-          <input
-            type="checkbox"
-            checked={parcelado}
-            onChange={(e) => setParcelado(e.target.checked)}
-            className="h-4 w-4 accent-primary"
-          />
-          <span>Débito parcelado / negociado com o RPPS</span>
-        </label>
       </section>
 
       {/* ── PREVIEW DE CÁLCULOS + OBSERVAÇÕES ─────────────────────── */}
@@ -395,21 +380,6 @@ export function LancamentoForm({
             </CalcPill>
           </div>
 
-          {/* Observações */}
-          <div>
-            <Label htmlFor="obs" className="mb-1.5 block text-xs font-medium">
-              Observações
-            </Label>
-            <textarea
-              id="obs"
-              value={observacoes}
-              onChange={(e) => setObservacoes(e.target.value)}
-              rows={2}
-              maxLength={2000}
-              className="flex w-full resize-none rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-              placeholder="Notas internas (opcional)"
-            />
-          </div>
         </div>
       </section>
 
