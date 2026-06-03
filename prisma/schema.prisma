@@ -4,15 +4,22 @@ generator client {
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
 }
 
 model Orgao {
   id           Int                    @id @default(autoincrement())
   nome         String
   sigla        String                 @unique
+  cnpj         String?
+  cep          String?
+  endereco     String?
+  numero       String?
+  complemento  String?
+  bairro       String?
+  cidade       String?
+  estado       String?
   cor          String?                // HEX color #RRGGBB usado em gráficos
   status       OrgaoStatus            @default(ATIVO)
   createdAt    DateTime               @default(now())
@@ -43,32 +50,38 @@ model Competencia {
 }
 
 model FolhaPrevidenciaria {
-  id                   Int              @id @default(autoincrement())
-  orgaoId              Int
-  orgao                Orgao            @relation(fields: [orgaoId], references: [id])
-  tipo                 TipoContribuicao
-  exercicioId          Int
-  exercicio            Exercicio        @relation(fields: [exercicioId], references: [id])
-  competenciaId        Int
-  competencia          Competencia      @relation(fields: [competenciaId], references: [id])
-  aliquota             Decimal
-  valorRecolher        Decimal
-  valorRecolhido       Decimal
-  quantidadeServidores Int?
-  folhaBase            Decimal?
-  multas               Decimal?
-  juros                Decimal?
-  parcelado            Boolean          @default(false)
-  deficit              Decimal
-  inadimplencia        Decimal
-  status               LancamentoStatus
-  responsavelId        Int?
-  responsavel          User?            @relation(fields: [responsavelId], references: [id])
-  dataVencimento       DateTime?
-  observacoes          String?
-  acordos              Acordo[]         @relation("AcordoLancamentos")
-  createdAt            DateTime         @default(now())
-  updatedAt            DateTime         @updatedAt
+  id                      Int              @id @default(autoincrement())
+  orgaoId                 Int
+  orgao                   Orgao            @relation(fields: [orgaoId], references: [id])
+  tipo                    TipoContribuicao
+  exercicioId             Int
+  exercicio               Exercicio        @relation(fields: [exercicioId], references: [id])
+  competenciaId           Int
+  competencia             Competencia      @relation(fields: [competenciaId], references: [id])
+  aliquota                Decimal
+  valorRecolher           Decimal
+  valorRecolherCalculado  Decimal          @default(0) // Folha Base × Alíquota ÷ 100
+  valorRecolhido          Decimal
+  quantidadeServidores    Int?
+  folhaBase               Decimal?
+  multas                  Decimal?        @default(0)
+  juros                   Decimal?        @default(0)
+  parcelado               Boolean         @default(false)
+  deficit                 Decimal
+  superavit               Decimal         @default(0)        // Valor Recolhido > Valor a Recolher
+  inadimplencia           Decimal
+  percentualPago          Decimal         @default(0)        // % de quitação
+  valorTotalDevido        Decimal         @default(0)        // Deficit + Multas + Juros
+  encargosTotal           Decimal         @default(0)        // Multas + Juros
+  valorLiquidoArrecadado  Decimal         @default(0)        // Recolhido - Multas - Juros
+  status                  LancamentoStatus
+  responsavelId           Int?
+  responsavel             User?           @relation(fields: [responsavelId], references: [id])
+  dataVencimento          DateTime?
+  observacoes             String?
+  acordos                 Acordo[]        @relation("AcordoLancamentos")
+  createdAt               DateTime        @default(now())
+  updatedAt               DateTime        @updatedAt
 
   @@unique([orgaoId, tipo, exercicioId, competenciaId])
   @@index([exercicioId, competenciaId])
@@ -116,6 +129,10 @@ model InstitutoRpps {
   logoPath                String?
   logoData                Bytes?   // logo armazenado diretamente no banco (Postgres bytea)
   logoMime                String?  // ex.: image/jpeg, image/png
+  banco                   String?  // Nome ou código do banco (ex: 001 - Banco do Brasil)
+  agencia                 String?  // Número da agência
+  conta                   String?  // Número da conta
+  tipoConta               String?  // Tipo da conta (Corrente, Poupança, etc)
   updatedAt               DateTime @updatedAt
 
   @@map("instituto_rpps")
@@ -141,6 +158,8 @@ enum LancamentoStatus {
   PARCIAL
   INADIMPLENTE
   PARCELADO
+  SEM_MOVIMENTO
+  RECOLHIMENTO_A_MAIOR
 }
 
 enum Role {

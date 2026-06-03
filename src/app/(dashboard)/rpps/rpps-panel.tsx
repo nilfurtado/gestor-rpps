@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Save, RefreshCw, Building2, User2, Phone, Image as ImageIcon } from "lucide-react";
+import { Save, RefreshCw, Building2, User2, Phone, Image as ImageIcon, CreditCard } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,6 +28,10 @@ interface RppsData {
   nomeDepartamento: string | null;
   responsavelDepartamento: string | null;
   logoPath: string | null;
+  banco: string | null;
+  agencia: string | null;
+  conta: string | null;
+  tipoConta: string | null;
 }
 
 interface Props {
@@ -69,6 +73,10 @@ export function RppsPanel({ dados }: Props) {
   const [nomeDepartamento,        setNomeDepartamento]        = useState(dados?.nomeDepartamento ?? "");
   const [responsavelDepartamento, setResponsavelDepartamento] = useState(dados?.responsavelDepartamento ?? "");
   const [logoPath,                setLogoPath]                = useState<string | null>(dados?.logoPath ?? null);
+  const [banco,                   setBanco]                   = useState(dados?.banco ?? "");
+  const [agencia,                 setAgencia]                 = useState(dados?.agencia ?? "");
+  const [conta,                   setConta]                   = useState(dados?.conta ?? "");
+  const [tipoConta,               setTipoConta]               = useState(dados?.tipoConta ?? "");
 
   function handleSalvar() {
     start(async () => {
@@ -81,6 +89,10 @@ export function RppsPanel({ dados }: Props) {
         email:                   email            || undefined,
         nomeDepartamento:        nomeDepartamento || undefined,
         responsavelDepartamento: responsavelDepartamento || undefined,
+        banco:                   banco            || undefined,
+        agencia:                 agencia          || undefined,
+        conta:                   conta            || undefined,
+        tipoConta:               tipoConta        || undefined,
       };
 
       const res = await fetch("/api/rpps", {
@@ -221,6 +233,55 @@ export function RppsPanel({ dados }: Props) {
               />
             </Field>
           </div>
+        </CardContent>
+      </Card>
+
+      {/* ── Dados para Recolhimento ──────────────────────────────── */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <CreditCard className="h-4 w-4 text-primary" aria-hidden />
+            Dados da Conta para Recolhimento
+          </CardTitle>
+          <CardDescription>Informações bancárias para recebimento de contribuições previdenciárias.</CardDescription>
+        </CardHeader>
+        <CardContent className="grid gap-4 sm:grid-cols-2">
+          <Field id="banco" label="Banco">
+            <Input
+              id="banco"
+              value={banco}
+              onChange={(e) => setBanco(e.target.value)}
+              placeholder="Ex: 001 - Banco do Brasil"
+              maxLength={100}
+            />
+          </Field>
+          <Field id="tipoConta" label="Tipo de Conta">
+            <Input
+              id="tipoConta"
+              value={tipoConta}
+              onChange={(e) => setTipoConta(e.target.value)}
+              placeholder="Ex: Corrente, Poupança"
+              maxLength={50}
+            />
+          </Field>
+          <Field id="agencia" label="Agência">
+            <Input
+              id="agencia"
+              value={agencia}
+              onChange={(e) => setAgencia(e.target.value)}
+              placeholder="Ex: 1234-5"
+              maxLength={20}
+            />
+          </Field>
+          <Field id="conta" label="Número da Conta">
+            <Input
+              id="conta"
+              value={conta}
+              onChange={(e) => setConta(e.target.value)}
+              placeholder="Ex: 123456-7"
+              maxLength={30}
+            />
+          </Field>
         </CardContent>
       </Card>
 
