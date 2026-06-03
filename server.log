@@ -324,3 +324,20 @@ https://react.dev/link/hydration-mismatch
  GET /orgaos/novo 200 in 39ms (next.js: 3ms, proxy.ts: 13ms, application-code: 24ms)
  GET /lancamentos 200 in 41ms (next.js: 3ms, proxy.ts: 8ms, application-code: 29ms)
  GET /lancamentos/novo 200 in 56ms (next.js: 5ms, proxy.ts: 13ms, application-code: 38ms)
+✓ Compiled in 62ms
+ GET /lancamentos/novo 200 in 663ms (next.js: 309ms, proxy.ts: 202ms, application-code: 151ms)
+✓ Compiled in 81ms
+ GET /lancamentos/novo 200 in 364ms (next.js: 126ms, proxy.ts: 107ms, application-code: 131ms)
+✓ Compiled in 1936ms
+ GET /lancamentos/novo 200 in 418ms (next.js: 134ms, proxy.ts: 121ms, application-code: 164ms)
+ GET /lancamentos/novo 200 in 119ms (next.js: 4ms, proxy.ts: 33ms, application-code: 81ms)
+✓ Compiled in 80ms
+ GET /lancamentos/novo 200 in 399ms (next.js: 134ms, proxy.ts: 128ms, application-code: 137ms)
+✓ Compiled in 92ms
+ GET /lancamentos/novo 200 in 369ms (next.js: 130ms, proxy.ts: 117ms, application-code: 122ms)
+✓ Compiled in 58ms
+ GET /lancamentos/novo 200 in 407ms (next.js: 138ms, proxy.ts: 119ms, application-code: 150ms)
+✓ Compiled in 536ms
+ GET /lancamentos/novo 200 in 402ms (next.js: 147ms, proxy.ts: 119ms, application-code: 136ms)
+✓ Compiled in 103ms
+ GET /lancamentos/novo 200 in 381ms (next.js: 129ms, proxy.ts: 143ms, application-code: 109ms)

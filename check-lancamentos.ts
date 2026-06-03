@@ -1,29 +1,31 @@
-import { prisma } from "./src/lib/db";
+import { prisma } from "@/lib/db";
 
 async function main() {
-  const lancamentos = await prisma.folhaPrevidenciaria.findMany({
-    take: 10,
+  const lancamentos = await prisma.lancamento.findMany({
     include: {
-      orgao: { select: { nome: true, sigla: true } },
+      orgao: { select: { sigla: true } },
       exercicio: { select: { ano: true } },
       competencia: { select: { mes: true } },
     },
-    orderBy: { createdAt: 'desc' }
+    orderBy: { createdAt: "desc" },
+    take: 10,
   });
-  
-  console.log(`\n📊 Total de lançamentos no banco: ${await prisma.folhaPrevidenciaria.count()}`);
-  console.log(`\n📋 Últimos 10 lançamentos:\n`);
-  
-  if (lancamentos.length === 0) {
-    console.log("✗ Nenhum lançamento encontrado");
-  } else {
-    lancamentos.forEach((l, i) => {
-      console.log(`${i + 1}. ${l.orgao?.sigla} - ${l.competencia?.mes}/${l.exercicio?.ano}`);
-      console.log(`   Status: ${l.status} | Valor: ${l.valorArrecadado}`);
-    });
-  }
+
+  console.log(`\n📊 LANÇAMENTOS (últimos 10):\n`);
+  lancamentos.forEach((l) => {
+    console.log(`
+  ${l.orgao.sigla} • ${l.competencia.mes} ${l.exercicio.ano} • ${l.tipo}
+  Recolher: ${l.valorRecolher} | Recolhido: ${l.valorRecolhido}
+  Multas: ${l.multas} | Juros: ${l.juros}
+  Status: ${l.status} | Parcelado: ${l.parcelado}
+  ─────────────────────────────────────────`);
+  });
+
+  console.log(`\nTotal: ${await prisma.lancamento.count()} lançamentos no banco`);
+  process.exit(0);
 }
 
-main()
-  .catch(console.error)
-  .finally(() => prisma.$disconnect());
+main().catch((err) => {
+  console.error(err);
+  process.exit(1);
+});

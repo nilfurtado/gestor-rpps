@@ -38,23 +38,24 @@ export function calcularLancamento(input: CalcInput): CalcResult {
   const inadimplencia =
     valorRecolher > 0 ? Number(((deficit / valorRecolher) * 100).toFixed(2)) : 0;
 
-  // Cálculo de percentual pago
+  // Cálculo de percentual pago (com arredondamento)
   const percentualPago =
     valorRecolher > 0 ? Number(((valorRecolhido / valorRecolher) * 100).toFixed(2)) : 0;
 
-  // Cálculo de superávit
-  const superavit = Math.max(0, valorRecolhido - valorRecolher);
+  // Cálculo de superávit (com arredondamento)
+  const superavitCalc = Math.max(0, valorRecolhido - valorRecolher);
+  const superavit = Number(superavitCalc.toFixed(2));
 
-  // Encargos totais
+  // Encargos totais (com arredondamento)
   const encargosTotal = Number((multas + juros).toFixed(2));
 
-  // Valor total devido
+  // Valor total devido (com arredondamento)
   const valorTotalDevido = Number((deficit + multas + juros).toFixed(2));
 
-  // Valor líquido arrecadado
+  // Valor líquido arrecadado (com arredondamento)
   const valorLiquidoArrecadado = Number((valorRecolhido - multas - juros).toFixed(2));
 
-  // Determinação do status
+  // Determinação do status (usando superavit arredondado)
   let status: LancamentoStatus;
   if (input.parcelado) {
     status = "PARCELADO";
@@ -74,7 +75,7 @@ export function calcularLancamento(input: CalcInput): CalcResult {
     deficit: Number(deficit.toFixed(2)),
     inadimplencia,
     percentualPago,
-    superavit: Number(superavit.toFixed(2)),
+    superavit,
     encargosTotal,
     valorTotalDevido,
     valorLiquidoArrecadado,
