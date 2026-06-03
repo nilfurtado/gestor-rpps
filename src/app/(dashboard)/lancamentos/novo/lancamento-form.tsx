@@ -358,7 +358,7 @@ export function LancamentoForm({
       {/* ── PREVIEW DE LANÇAMENTOS ─────────────────────── */}
       <section aria-labelledby="sec-prev">
         <SectionTitle id="sec-prev">Preview</SectionTitle>
-        <div className="flex flex-wrap gap-1.5 overflow-x-auto pb-2">
+        <div className="flex flex-nowrap gap-1 overflow-x-auto pb-2 -mx-4 px-4">
           {/* Ente */}
           <CalcPill label="Ente" tone="default">
             <span className="text-xs sm:text-sm">{orgaos.find((o) => o.id === Number(orgaoId))?.sigla ?? "-"}</span>
@@ -461,11 +461,11 @@ function CalcPill({
     warning: "text-amber-600 dark:text-amber-400",
   };
   return (
-    <div className="flex-shrink-0 rounded-md border border-border bg-muted/30 px-2 py-1.5">
-      <div className="text-[8px] sm:text-[9px] font-semibold uppercase tracking-widest text-muted-foreground whitespace-nowrap">
+    <div className="flex-shrink-0 rounded-sm border border-border/50 bg-muted/20 px-1.5 py-1 min-w-max">
+      <div className="text-[7px] sm:text-[8px] font-semibold uppercase tracking-wider text-muted-foreground/80 whitespace-nowrap leading-tight">
         {label}
       </div>
-      <div className={`mt-0.5 truncate text-xs sm:text-sm font-semibold tabular-nums ${toneClasses[tone]}`}>
+      <div className={`text-xs sm:text-sm font-semibold tabular-nums ${toneClasses[tone]}`}>
         {children}
       </div>
     </div>
