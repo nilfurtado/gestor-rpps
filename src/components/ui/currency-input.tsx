@@ -2,12 +2,12 @@ import React, { useRef } from "react";
 import { Input, type InputProps } from "./input";
 
 function formatValue(digits: string): string {
-  if (digits === "" || digits === "0") {
-    return "0,00";
+  if (digits === "") {
+    return "";
   } else if (digits.length === 1) {
-    return "0,0" + digits;
+    return digits;
   } else if (digits.length === 2) {
-    return "0," + digits;
+    return digits;
   } else {
     const integer = digits.slice(0, -2);
     const decimal = digits.slice(-2);
@@ -46,7 +46,17 @@ export function CurrencyInput(props: InputProps) {
 
   const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
     let digits = e.target.value.replace(/\D/g, "");
-    e.target.value = formatValue(digits);
+
+    if (digits === "") {
+      e.target.value = "0,00";
+    } else if (digits.length === 1) {
+      e.target.value = "0,0" + digits;
+    } else if (digits.length === 2) {
+      e.target.value = "0," + digits;
+    } else {
+      e.target.value = formatValue(digits);
+    }
+
     props.onBlur?.(e);
   };
 
