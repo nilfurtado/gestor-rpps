@@ -45,13 +45,13 @@ export function PdfInstitutionalHeader({
       <View style={reportStyles.headerRight}>
         <Text style={reportStyles.headerReportTitle}>{reportTitle}</Text>
         <Text style={reportStyles.headerEmittedAt}>Emitido em {generatedAt}</Text>
+        <Text
+          style={reportStyles.headerPage}
+          render={({ pageNumber, totalPages }) =>
+            `Página ${pageNumber} de ${totalPages}`
+          }
+        />
       </View>
-      <Text
-        style={reportStyles.headerPage}
-        render={({ pageNumber, totalPages }) =>
-          `Página ${pageNumber} de ${totalPages}`
-        }
-      />
     </View>
   );
 }
