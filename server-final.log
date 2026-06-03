@@ -1,0 +1,23 @@
+
+> gestor-app@0.1.0 dev
+> next dev --hostname 0.0.0.0 --port 3001 --port 3002
+
+Ôû▓ Next.js 16.2.6 (Turbopack)
+- Local:         http://localhost:3002
+- Network:       http://0.0.0.0:3002
+- Environments: .env
+Ô£ô Ready in 694ms
+ÔÜá Invalid next.config.ts options detected: 
+ÔÜá     Unrecognized key(s) in object: 'turbo'
+ÔÜá See more info here: https://nextjs.org/docs/messages/invalid-next-config
+ÔÜá Warning: Next.js inferred your workspace root, but it may not be correct.
+ We detected multiple lockfiles and selected the directory of C:\Users\SUPORTE INFOR\Documents\claude\PROJETOS\package-lock.json as the root directory.
+ To silence this warning, set `turbopack.root` in your Next.js config, or consider removing one of the lockfiles if it's not needed.
+   See https://nextjs.org/docs/app/api-reference/config/next-config-js/turbopack#root-directory for more information.
+ Detected additional lockfiles: 
+   * C:\Users\SUPORTE INFOR\Documents\claude\PROJETOS\gestor\package-lock.json
+
+- Experiments (use with caution):
+  ┬À optimizePackageImports
+
+ GET / 307 in 1070ms (next.js: 797ms, proxy.ts: 26ms, application-code: 247ms)
