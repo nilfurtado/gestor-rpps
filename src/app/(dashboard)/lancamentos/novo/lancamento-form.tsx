@@ -339,6 +339,16 @@ export function LancamentoForm({
             />
           </Field>
         </div>
+
+        <label className="mt-3 inline-flex cursor-pointer items-center gap-2 text-sm text-foreground">
+          <input
+            type="checkbox"
+            checked={parcelado}
+            onChange={(e) => setParcelado(e.target.checked)}
+            className="h-4 w-4 accent-primary"
+          />
+          <span>Débito parcelado / negociado com o RPPS</span>
+        </label>
       </section>
 
       {/* ── PREVIEW DE CÁLCULOS + OBSERVAÇÕES ─────────────────────── */}
