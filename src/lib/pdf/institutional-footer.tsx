@@ -21,7 +21,6 @@ function joinContact(rpps: RppsFooterInfo | null): string {
   const parts: string[] = [];
   if (rpps.enderecoCompleto?.trim()) parts.push(rpps.enderecoCompleto.trim());
   if (rpps.telefone?.trim()) parts.push(`Tel.: ${rpps.telefone.trim()}`);
-  if (rpps.email?.trim()) parts.push(rpps.email.trim());
   return parts.join("  ·  ");
 }
 
@@ -31,6 +30,7 @@ export function PdfInstitutionalFooter({
   generatedAt,
 }: Props) {
   const contactLine = joinContact(rpps);
+  const email = rpps?.email?.trim() || "";
 
   return (
     <View style={reportStyles.footer} fixed>
@@ -38,6 +38,11 @@ export function PdfInstitutionalFooter({
       {contactLine.length > 0 && (
         <Text style={[reportStyles.footerText, { textAlign: "center" }]}>
           {contactLine}
+        </Text>
+      )}
+      {email && (
+        <Text style={[reportStyles.footerText, { textAlign: "center" }]}>
+          Email: {email}
         </Text>
       )}
       <Text style={[reportStyles.footerText, { textAlign: "center" }]}>
