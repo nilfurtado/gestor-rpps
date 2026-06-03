@@ -6,6 +6,7 @@ export interface RppsFooterInfo {
   enderecoCompleto: string | null;
   telefone: string | null;
   email: string | null;
+  portal: string | null;
   responsavelDepartamento: string | null;
   nomeResponsavel: string | null;
 }
@@ -31,6 +32,13 @@ export function PdfInstitutionalFooter({
 }: Props) {
   const contactLine = joinContact(rpps);
   const email = rpps?.email?.trim() || "";
+  const portal = rpps?.portal?.trim() || "";
+  const emailPortalLine = [
+    email ? `Email: ${email}` : "",
+    portal ? `Portal: ${portal}` : "",
+  ]
+    .filter(Boolean)
+    .join("     ");
 
   return (
     <View style={reportStyles.footer} fixed>
@@ -40,9 +48,9 @@ export function PdfInstitutionalFooter({
           {contactLine}
         </Text>
       )}
-      {email && (
+      {emailPortalLine && (
         <Text style={[reportStyles.footerText, { textAlign: "center" }]}>
-          Email: {email}
+          {emailPortalLine}
         </Text>
       )}
       <Text style={[reportStyles.footerText, { textAlign: "center" }]}>
