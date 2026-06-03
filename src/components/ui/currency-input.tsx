@@ -1,35 +1,29 @@
 import React from "react";
 import { Input, type InputProps } from "./input";
 
-function formatCurrencyDisplay(value: string): string {
-  // Remove tudo que não é número
-  let digits = value.replace(/\D/g, "");
-
-  if (digits === "" || digits === "0") {
-    return "0,00";
-  } else if (digits.length === 1) {
-    return "0,0" + digits;
-  } else if (digits.length === 2) {
-    return "0," + digits;
-  } else {
-    const integer = digits.slice(0, -2);
-    const decimal = digits.slice(-2);
-    return `${integer.replace(/\B(?=(\d{3})+(?!\d))/g, ".")},${decimal}`;
-  }
-}
-
 export function CurrencyInput(props: InputProps) {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // Durante digitação: formata em tempo real
-    const formatted = formatCurrencyDisplay(e.target.value);
-    e.target.value = formatted;
+    // Durante digitação: apenas aceita números, sem formatação
+    let value = e.target.value.replace(/\D/g, "");
+    e.target.value = value;
     props.onChange?.(e);
   };
 
   const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
-    // Ao sair do campo: garante formatação correta
-    const formatted = formatCurrencyDisplay(e.target.value);
-    e.target.value = formatted;
+    // Ao sair do campo: formata com separadores e decimais
+    let value = e.target.value.replace(/\D/g, "");
+
+    if (value === "" || value === "0") {
+      e.target.value = "0,00";
+    } else if (value.length === 1) {
+      e.target.value = "0,0" + value;
+    } else if (value.length === 2) {
+      e.target.value = "0," + value;
+    } else {
+      const integer = value.slice(0, -2);
+      const decimal = value.slice(-2);
+      e.target.value = `${integer.replace(/\B(?=(\d{3})+(?!\d))/g, ".")},${decimal}`;
+    }
     props.onBlur?.(e);
   };
 
