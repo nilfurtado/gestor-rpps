@@ -140,7 +140,6 @@ export function OrgaoForm({ initial }: Props) {
             onChange={(e) => setSigla(e.target.value.toUpperCase())}
             placeholder="PMTA"
             maxLength={20}
-            disabled={isEdit}
             className="h-8 text-sm"
           />
         </div>
