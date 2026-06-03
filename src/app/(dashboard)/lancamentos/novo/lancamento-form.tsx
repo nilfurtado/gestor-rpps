@@ -99,15 +99,19 @@ export function LancamentoForm({
   );
   const [observacoes, setObservacoes] = useState<string>(initial?.observacoes ?? "");
 
-  // Cálculo automático de Valor a Recolher quando Folha Base e Alíquota são preenchidas
+  // Cálculo automático de Valor a Recolher = Folha Base × Alíquota ÷ 100
   const valorRecolherCalculado = useMemo(() => {
     const folha = currencyToNumber(folhaBase);
     const aliq = Number(aliquota) || 0;
+
+    // Se ambos estão preenchidos, calcula
     if (folha > 0 && aliq > 0) {
       return Number(((folha * aliq) / 100).toFixed(2));
     }
-    return currencyToNumber(valorRecolher);
-  }, [folhaBase, aliquota, valorRecolher]);
+
+    // Senão, retorna 0
+    return 0;
+  }, [folhaBase, aliquota]);
 
   const preview = useMemo(() => {
     return calcularLancamento({
