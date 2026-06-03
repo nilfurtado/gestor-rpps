@@ -104,9 +104,10 @@ export function LancamentoForm({
     const folha = currencyToNumber(folhaBase);
     const aliq = Number(aliquota) || 0;
 
-    // Se ambos estão preenchidos, calcula
-    if (folha > 0 && aliq > 0) {
-      return Number(((folha * aliq) / 100).toFixed(2));
+    // Se ambos estão preenchidos, calcula com arredondamento para 2 decimais
+    if (folha && aliq > 0) {
+      const result = (folha * aliq) / 100;
+      return Number(result.toFixed(2));
     }
 
     // Senão, retorna 0
