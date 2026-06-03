@@ -138,13 +138,15 @@ export interface DashboardData {
     inadimplencia: number;
     deficit: number;
   }[];
-  proximosVencimentos: {
+  acordosSummario: {
     id: number;
     orgaoSigla: string;
-    tipo: string;
-    competencia: string;
-    valor: number;
-    vencimento: string;
+    orgaoNome: string;
+    parcelasPagas: number;
+    numeroParcelas: number;
+    valorConsolidado: number;
+    valorPago: number;
+    status: string;
   }[];
   pareto: ParetoData[];
   alertasCriticos: CriticalAlert[];
@@ -199,7 +201,7 @@ export async function getDashboardData(exercicioAno?: number): Promise<Dashboard
       inadimplenciaPorOrgao: [],
       deficitAcumulado: [],
       topInadimplentes: [],
-      proximosVencimentos: [],
+      acordosSummario: [],
       pareto: [],
       alertasCriticos: [],
       evolucaoAnual: [],
@@ -294,25 +296,26 @@ export async function getDashboardData(exercicioAno?: number): Promise<Dashboard
     .sort((a, b) => b.deficit - a.deficit)
     .slice(0, 5);
 
-  // próximos vencimentos (futuro com status não pago)
-  const now = new Date();
-  const proximosVencimentos = lancamentos
-    .filter(
-      (l) =>
-        l.dataVencimento &&
-        l.dataVencimento >= now &&
-        (l.status === "INADIMPLENTE" || l.status === "PARCIAL")
-    )
-    .sort((a, b) => (a.dataVencimento!.getTime() - b.dataVencimento!.getTime()))
-    .slice(0, 5)
-    .map((l) => ({
-      id: l.id,
-      orgaoSigla: l.orgao.sigla,
-      tipo: l.tipo === "PATRONAL" ? "Patronal" : "Segurado",
-      competencia: l.competencia.mes,
-      valor: Number(l.deficit),
-      vencimento: l.dataVencimento!.toISOString(),
-    }));
+  // resumo de acordos
+  const acordos = await prisma.acordo.findMany({
+    where: { status: { not: "RESCINDIDO" } },
+    include: {
+      orgao: { select: { sigla: true, nome: true } },
+    },
+    orderBy: [{ status: "asc" }, { id: "desc" }],
+    take: 10,
+  });
+
+  const acordosSummario = acordos.map((a) => ({
+    id: a.id,
+    orgaoSigla: a.orgao.sigla,
+    orgaoNome: a.orgao.nome,
+    parcelasPagas: a.parcelasPagas,
+    numeroParcelas: a.numeroParcelas,
+    valorConsolidado: Number(a.valorConsolidado),
+    valorPago: Number(a.valorPago),
+    status: a.status,
+  }));
 
   const pareto = calcularPareto(byOrgao);
   const alertasCriticos = calcularAlertasCriticos(lancamentos, byOrgao);
@@ -331,7 +334,7 @@ export async function getDashboardData(exercicioAno?: number): Promise<Dashboard
     inadimplenciaPorOrgao,
     deficitAcumulado,
     topInadimplentes,
-    proximosVencimentos,
+    acordosSummario,
     pareto,
     alertasCriticos,
     evolucaoAnual,

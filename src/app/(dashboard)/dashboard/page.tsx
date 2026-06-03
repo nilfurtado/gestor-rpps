@@ -2,6 +2,7 @@ import {
   AlertOctagon,
   AlertTriangle,
   CalendarClock,
+  Handshake,
   PiggyBank,
   Percent,
   TrendingDown,
@@ -194,41 +195,61 @@ export default async function DashboardPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Próximos vencimentos</CardTitle>
-            <CardDescription>Lançamentos com débito e data de vencimento futura</CardDescription>
+            <CardTitle>Acordos e parcelamentos</CardTitle>
+            <CardDescription>Status de acordos firmados por ente devedor</CardDescription>
           </CardHeader>
           <CardContent className="px-0 pb-0">
-            {d.proximosVencimentos.length === 0 ? (
+            {d.acordosSummario.length === 0 ? (
               <EmptyState
-                icon={CalendarClock}
-                title="Nenhum vencimento próximo"
-                description="Adicione data de vencimento aos lançamentos para acompanhar prazos."
+                icon={Handshake}
+                title="Nenhum acordo cadastrado"
+                description="Crie um termo de parcelamento para acompanhar os compromissos de pagamento."
                 className="rounded-none border-0"
               />
             ) : (
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Órgão</TableHead>
-                    <TableHead>Competência</TableHead>
-                    <TableHead>Vencimento</TableHead>
-                    <TableHead className="text-right">Débito</TableHead>
+                    <TableHead>Ente</TableHead>
+                    <TableHead className="text-center">Parcelas pagas</TableHead>
+                    <TableHead className="text-right">% débito</TableHead>
+                    <TableHead>Quitado</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {d.proximosVencimentos.map((v) => (
-                    <TableRow key={v.id}>
-                      <TableCell>
-                        <div className="font-semibold">{v.orgaoSigla}</div>
-                        <div className="text-xs text-muted-foreground">{v.tipo}</div>
-                      </TableCell>
-                      <TableCell>{v.competencia}</TableCell>
-                      <TableCell className="tabular-nums">{formatDate(v.vencimento)}</TableCell>
-                      <TableCell className="text-right tabular-nums">
-                        {formatBRL(v.valor)}
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                  {d.acordosSummario.map((a) => {
+                    const pct = a.valorConsolidado > 0
+                      ? Math.round((a.valorPago / a.valorConsolidado) * 100)
+                      : 0;
+                    const isQuitado = a.status === "QUITADO";
+                    return (
+                      <TableRow key={a.id}>
+                        <TableCell>
+                          <div className="font-semibold">{a.orgaoSigla}</div>
+                          <div className="text-xs text-muted-foreground">{a.orgaoNome}</div>
+                        </TableCell>
+                        <TableCell className="text-center tabular-nums">
+                          {a.parcelasPagas} / {a.numeroParcelas}
+                        </TableCell>
+                        <TableCell className="text-right tabular-nums">
+                          {isQuitado ? "0%" : `${100 - pct}%`}
+                        </TableCell>
+                        <TableCell>
+                          <span className={`inline-block px-2 py-1 rounded text-xs font-semibold ${
+                            isQuitado
+                              ? "bg-green-100 text-green-800"
+                              : a.status === "VIGENTE"
+                              ? "bg-blue-100 text-blue-800"
+                              : a.status === "SUSPENSO"
+                              ? "bg-yellow-100 text-yellow-800"
+                              : "bg-gray-100 text-gray-800"
+                          }`}>
+                            {isQuitado ? "Sim" : "Não"}
+                          </span>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
                 </TableBody>
               </Table>
             )}
