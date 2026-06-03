@@ -382,6 +382,36 @@ export function LancamentoForm({
             </CalcPill>
           </div>
 
+          {/* Grid de valores BRUTOS (sem arredondamento) */}
+          <div className="rounded-md border border-amber-200 bg-amber-50/50 p-2 dark:border-amber-900 dark:bg-amber-950/20">
+            <div className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-amber-700 dark:text-amber-300">
+              📊 Valores Brutos (sem arredondamento)
+            </div>
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
+              <CalcPill label="Déficit Bruto" tone="default">
+                <span className="font-mono text-sm">{preview.deficitBruto.toString().slice(0, 12)}</span>
+              </CalcPill>
+              <CalcPill label="% Inadimp. Bruta" tone="default">
+                <span className="font-mono text-sm">{preview.inadimplenciaBruta.toString().slice(0, 12)}</span>
+              </CalcPill>
+              <CalcPill label="% Pago Bruto" tone="default">
+                <span className="font-mono text-sm">{preview.percentualPagoBruto.toString().slice(0, 12)}</span>
+              </CalcPill>
+              <CalcPill label="Superávit Bruto" tone="default">
+                <span className="font-mono text-sm">{preview.superavitBruto.toString().slice(0, 12)}</span>
+              </CalcPill>
+              <CalcPill label="Encargos Bruto" tone="default">
+                <span className="font-mono text-sm">{preview.encargosTotalBruto.toString().slice(0, 12)}</span>
+              </CalcPill>
+              <CalcPill label="Total Devido Bruto" tone="default">
+                <span className="font-mono text-sm">{preview.valorTotalDevidoBruto.toString().slice(0, 12)}</span>
+              </CalcPill>
+              <CalcPill label="Líquido Bruto" tone="default">
+                <span className="font-mono text-sm">{preview.valorLiquidoArrecadadoBruto.toString().slice(0, 12)}</span>
+              </CalcPill>
+            </div>
+          </div>
+
           {/* Observações */}
           <div>
             <Label htmlFor="obs" className="mb-1.5 block text-xs font-medium">
