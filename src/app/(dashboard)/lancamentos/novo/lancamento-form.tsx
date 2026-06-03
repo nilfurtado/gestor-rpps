@@ -361,7 +361,11 @@ export function LancamentoForm({
         <div className="flex flex-nowrap gap-1 overflow-x-auto pb-2 -mx-4 px-4">
           {/* Ente */}
           <CalcPill label="Ente" tone="default">
-            <span className="text-xs sm:text-sm">{orgaos.find((o) => o.id === Number(orgaoId))?.sigla ?? "-"}</span>
+            <span className="text-xs sm:text-sm">
+              {orgaos.find((o) => o.id === Number(orgaoId))
+                ? `${orgaos.find((o) => o.id === Number(orgaoId))?.sigla} ${orgaos.find((o) => o.id === Number(orgaoId))?.nome}`
+                : "-"}
+            </span>
           </CalcPill>
 
           {/* Competência */}
