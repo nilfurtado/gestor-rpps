@@ -168,7 +168,7 @@ export function LancamentoForm({
           exercicioId: Number(exercicioId),
           competenciaId: Number(competenciaId),
           aliquota: Number(aliquota || 0),
-          valorRecolher: currencyToNumber(valorRecolher),
+          valorRecolher: valorRecolherCalculado,
           valorRecolhido: currencyToNumber(valorRecolhido),
           quantidadeServidores: quantidadeServidores ? Number(quantidadeServidores) : null,
           folhaBase: folhaBase ? currencyToNumber(folhaBase) : null,
