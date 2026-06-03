@@ -3,25 +3,26 @@ import { Input, type InputProps } from "./input";
 
 export function CurrencyInput(props: InputProps) {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Durante digitação: apenas aceita números, sem formatação automática
     let value = e.target.value.replace(/\D/g, "");
-
-    if (value.length === 0) {
-      e.target.value = "";
-    } else if (value.length <= 2) {
-      e.target.value = "0," + value.padStart(2, "0");
-    } else {
-      const integer = value.slice(0, -2);
-      const decimal = value.slice(-2);
-      e.target.value = `${integer.replace(/\B(?=(\d{3})+(?!\d))/g, ".")},${decimal}`;
-    }
-
+    e.target.value = value;
     props.onChange?.(e);
   };
 
   const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
-    const value = e.target.value.replace(/\D/g, "");
+    // Ao sair do campo: formata com separadores e decimais
+    let value = e.target.value.replace(/\D/g, "");
+
     if (value === "" || value === "0") {
       e.target.value = "0,00";
+    } else if (value.length === 1) {
+      e.target.value = "0,0" + value;
+    } else if (value.length === 2) {
+      e.target.value = "0," + value;
+    } else {
+      const integer = value.slice(0, -2);
+      const decimal = value.slice(-2);
+      e.target.value = `${integer.replace(/\B(?=(\d{3})+(?!\d))/g, ".")},${decimal}`;
     }
     props.onBlur?.(e);
   };
