@@ -2,6 +2,121 @@ import { prisma } from "@/lib/db";
 
 export const DEFAULT_ORGAO_COLOR = "#0F5132";
 
+function calcularPareto(
+  byOrgao: Map<string, { rec: number; def: number; nome: string; cor: string }>
+): ParetoData[] {
+  const totalDeficit = Array.from(byOrgao.values()).reduce((sum, v) => sum + v.def, 0);
+
+  const paretoData = Array.from(byOrgao.entries())
+    .map(([sigla, v]) => ({
+      sigla,
+      cor: v.cor,
+      nome: v.nome,
+      deficit: v.def,
+      percentualDeficitTotal: totalDeficit > 0 ? (v.def / totalDeficit) * 100 : 0,
+      percentualAcumulado: 0,
+    }))
+    .sort((a, b) => b.deficit - a.deficit);
+
+  let acumulado = 0;
+  paretoData.forEach((item) => {
+    acumulado += item.percentualDeficitTotal;
+    item.percentualAcumulado = acumulado;
+  });
+
+  return paretoData;
+}
+
+function calcularAlertasCriticos(
+  lancamentos: any[],
+  byOrgao: Map<string, { rec: number; def: number; nome: string; cor: string }>
+): CriticalAlert[] {
+  const alertas: CriticalAlert[] = [];
+  const now = new Date();
+
+  // 1. Inadimplência >30%
+  Array.from(byOrgao.entries()).forEach(([sigla, v]) => {
+    const inadimplencia = v.rec > 0 ? (v.def / v.rec) * 100 : 0;
+    if (inadimplencia > 30) {
+      alertas.push({
+        id: `inadimplencia_${sigla}`,
+        tipo: "INADIMPLENCIA_CRITICA",
+        orgaoSigla: sigla,
+        orgaoNome: v.nome,
+        severidade: "critical",
+        mensagem: `Inadimplência crítica: ${inadimplencia.toFixed(1)}%`,
+        valor: v.def,
+      });
+    }
+  });
+
+  // 2. Atraso >180 dias
+  const diasAtrasoMap = new Map<string, { dias: number; deficit: number; nome: string }>();
+  lancamentos.forEach((l) => {
+    if (l.dataVencimento && l.deficit > 0) {
+      const diasAtraso = Math.floor(
+        (now.getTime() - new Date(l.dataVencimento).getTime()) / (1000 * 60 * 60 * 24)
+      );
+      if (diasAtraso > 180) {
+        const key = l.orgao.sigla;
+        const cur = diasAtrasoMap.get(key) ?? { dias: 0, deficit: 0, nome: l.orgao.nome };
+        if (diasAtraso > cur.dias) {
+          cur.dias = diasAtraso;
+          cur.deficit = l.deficit;
+          diasAtrasoMap.set(key, cur);
+        }
+      }
+    }
+  });
+
+  diasAtrasoMap.forEach((v, sigla) => {
+    alertas.push({
+      id: `atraso_${sigla}`,
+      tipo: "ATRASO_EXTREMO",
+      orgaoSigla: sigla,
+      orgaoNome: v.nome,
+      severidade: "critical",
+      mensagem: `Atraso extremo: ${v.dias} dias`,
+      valor: v.deficit,
+    });
+  });
+
+  return alertas.sort((a, b) => {
+    const severidadeOrder = { critical: 0, warning: 1, info: 2 };
+    return severidadeOrder[a.severidade] - severidadeOrder[b.severidade];
+  });
+}
+
+async function calcularEvolucaoAnual(): Promise<AnnualEvolutionData[]> {
+  const anoAtual = new Date().getFullYear();
+  const anos = [anoAtual - 2, anoAtual - 1, anoAtual];
+
+  const exercicios = await prisma.exercicio.findMany({
+    where: { ano: { in: anos } },
+    include: {
+      lancamentos: {
+        include: { competencia: { select: { id: true, ordem: true, mes: true } } },
+      },
+    },
+  });
+
+  const competencias = await prisma.competencia.findMany({ orderBy: { ordem: "asc" } });
+
+  return competencias.map((c) => {
+    const data: any = { mes: c.mes, ordem: c.ordem };
+
+    for (const exercicio of exercicios) {
+      const lancamentos = exercicio.lancamentos.filter(
+        (l) => l.competenciaId === c.id
+      );
+      const arrecadado = lancamentos.reduce((sum: number, l: any) => sum + Number(l.valorRecolhido), 0);
+      data[exercicio.ano] = arrecadado;
+    }
+
+    return data;
+  });
+}
+
 export interface DashboardKpis {
   totalArrecadado: number;
   totalEmAtraso: number;
@@ -31,6 +146,34 @@ export interface DashboardData {
     valor: number;
     vencimento: string;
   }[];
+  pareto: ParetoData[];
+  alertasCriticos: CriticalAlert[];
+  evolucaoAnual: AnnualEvolutionData[];
+}
+
+export interface ParetoData {
+  sigla: string;
+  cor: string;
+  nome: string;
+  deficit: number;
+  percentualDeficitTotal: number;
+  percentualAcumulado: number;
+}
+
+export interface CriticalAlert {
+  id: string;
+  tipo: "INADIMPLENCIA_CRITICA" | "ORGAO_NOVO_ATRASO" | "ATRASO_EXTREMO" | "SUPERAVIT";
+  orgaoSigla: string;
+  orgaoNome: string;
+  severidade: "critical" | "warning" | "info";
+  mensagem: string;
+  valor?: number;
+}
+
+export interface AnnualEvolutionData {
+  mes: string;
+  ordem: number;
+  [ano: number]: number;
 }
 
 export async function getDashboardData(exercicioAno?: number): Promise<DashboardData> {
@@ -57,6 +200,9 @@ export async function getDashboardData(exercicioAno?: number): Promise<Dashboard
       deficitAcumulado: [],
       topInadimplentes: [],
       proximosVencimentos: [],
+      pareto: [],
+      alertasCriticos: [],
+      evolucaoAnual: [],
     };
   }
 
@@ -168,6 +314,10 @@ export async function getDashboardData(exercicioAno?: number): Promise<Dashboard
       vencimento: l.dataVencimento!.toISOString(),
     }));
 
+  const pareto = calcularPareto(byOrgao);
+  const alertasCriticos = calcularAlertasCriticos(lancamentos, byOrgao);
+  const evolucaoAnual = await calcularEvolucaoAnual();
+
   return {
     kpis: {
       totalArrecadado,
@@ -182,5 +332,8 @@ export async function getDashboardData(exercicioAno?: number): Promise<Dashboard
     deficitAcumulado,
     topInadimplentes,
     proximosVencimentos,
+    pareto,
+    alertasCriticos,
+    evolucaoAnual,
   };
 }

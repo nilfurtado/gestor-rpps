@@ -17,6 +17,9 @@ import {
   InadimplenciaOrgaoChart,
   DeficitAcumuladoChart,
 } from "@/components/dashboard/charts";
+import { ParetoChart } from "@/components/dashboard/pareto-chart";
+import { AnnualEvolutionChart } from "@/components/dashboard/annual-evolution";
+import { AlertsCard } from "@/components/dashboard/alerts-card";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { EmptyState } from "@/components/empty-state";
 import {
@@ -231,6 +234,41 @@ export default async function DashboardPage() {
             )}
           </CardContent>
         </Card>
+      </section>
+
+      <section className="mt-6">
+        <h2 className="text-lg font-semibold mb-4">Indicadores avançados</h2>
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+          <Card>
+            <CardHeader>
+              <CardTitle>Distribuição de déficit (Pareto)</CardTitle>
+              <CardDescription>80/20 - Quais órgãos causam 80% do problema</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {d.pareto.length > 0 ? (
+                <ParetoChart data={d.pareto} />
+              ) : (
+                <EmptyState icon={TrendingDown} title="Sem dados de déficit" />
+              )}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Evolução anual</CardTitle>
+              <CardDescription>Comparação de arrecadação dos últimos 3 anos</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {d.evolucaoAnual.length > 0 ? (
+                <AnnualEvolutionChart data={d.evolucaoAnual} />
+              ) : (
+                <EmptyState icon={TrendingUp} title="Sem histórico disponível" />
+              )}
+            </CardContent>
+          </Card>
+
+          <AlertsCard data={d.alertasCriticos} />
+        </div>
       </section>
     </>
   );
