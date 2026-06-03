@@ -355,45 +355,44 @@ export function LancamentoForm({
         </label>
       </section>
 
-      {/* ── PREVIEW DE CÁLCULOS + OBSERVAÇÕES ─────────────────────── */}
+      {/* ── PREVIEW DE LANÇAMENTOS ─────────────────────── */}
       <section aria-labelledby="sec-prev">
-        <SectionTitle id="sec-prev">Cálculos e observações</SectionTitle>
-        <div className="space-y-3">
-          {/* Grid de indicadores principais */}
-          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
-            <CalcPill label="Valor a Recolher" tone="default">
-              {formatBRL(valorRecolherCalculado)}
-            </CalcPill>
-            <CalcPill label="Status" tone="default">
-              <StatusBadge status={preview.status} />
-            </CalcPill>
-            <CalcPill label="% Pago" tone={preview.percentualPago >= 100 ? "success" : "default"}>
-              {formatPercent(preview.percentualPago)}
-            </CalcPill>
-            <CalcPill label="% Inadimplência" tone={preview.inadimplencia > 0 ? "danger" : "default"}>
-              {formatPercent(preview.inadimplencia)}
-            </CalcPill>
-            <CalcPill label="Superávit" tone={preview.superavit > 0 ? "success" : "default"}>
-              {formatBRL(preview.superavit)}
-            </CalcPill>
-          </div>
+        <SectionTitle id="sec-prev">Preview</SectionTitle>
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
+          {/* Ente */}
+          <CalcPill label="Ente" tone="default">
+            <span className="text-sm">{orgaos.find((o) => o.id === Number(orgaoId))?.sigla ?? "-"}</span>
+          </CalcPill>
 
-          {/* Grid de valores detalhados */}
-          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
-            <CalcPill label="Déficit" tone={preview.deficit > 0 ? "danger" : "default"}>
-              {formatBRL(preview.deficit)}
-            </CalcPill>
-            <CalcPill label="Encargos Totais" tone={preview.encargosTotal > 0 ? "warning" : "default"}>
-              {formatBRL(preview.encargosTotal)}
-            </CalcPill>
-            <CalcPill label="Valor Total Devido" tone={preview.valorTotalDevido > 0 ? "danger" : "default"}>
-              {formatBRL(preview.valorTotalDevido)}
-            </CalcPill>
-            <CalcPill label="Valor Líquido Arrecadado" tone="default">
-              {formatBRL(preview.valorLiquidoArrecadado)}
-            </CalcPill>
-          </div>
+          {/* Competência */}
+          <CalcPill label="Competência" tone="default">
+            <span className="text-sm">{competencias.find((c) => c.id === Number(competenciaId))?.mes ?? "-"}</span>
+          </CalcPill>
 
+          {/* A Recolher */}
+          <CalcPill label="A Recolher" tone="default">
+            {formatBRL(valorRecolherCalculado)}
+          </CalcPill>
+
+          {/* Recolhido */}
+          <CalcPill label="Recolhido" tone={currencyToNumber(valorRecolhido) > 0 ? "success" : "default"}>
+            {formatBRL(currencyToNumber(valorRecolhido))}
+          </CalcPill>
+
+          {/* Déficit */}
+          <CalcPill label="Déficit" tone={preview.deficit > 0 ? "danger" : "default"}>
+            {formatBRL(preview.deficit)}
+          </CalcPill>
+
+          {/* Inadimplência */}
+          <CalcPill label="Inadimplência" tone={preview.inadimplencia > 0 ? "danger" : "default"}>
+            {formatPercent(preview.inadimplencia)}
+          </CalcPill>
+
+          {/* Status */}
+          <CalcPill label="Status" tone="default">
+            <StatusBadge status={preview.status} />
+          </CalcPill>
         </div>
       </section>
 
