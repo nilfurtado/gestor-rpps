@@ -366,7 +366,11 @@ export function LancamentoForm({
 
           {/* Competência */}
           <CalcPill label="Competência" tone="default">
-            <span className="text-xs sm:text-sm">{competencias.find((c) => c.id === Number(competenciaId))?.mes ?? "-"}</span>
+            <span className="text-xs sm:text-sm">
+              {competencias.find((c) => c.id === Number(competenciaId))?.mes
+                ? `${competencias.find((c) => c.id === Number(competenciaId))?.mes}/${exercicios.find((e) => e.id === Number(exercicioId))?.ano ?? ""}`
+                : "-"}
+            </span>
           </CalcPill>
 
           {/* A Recolher */}
