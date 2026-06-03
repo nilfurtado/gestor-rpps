@@ -97,15 +97,25 @@ export function LancamentoForm({
   );
   const [observacoes, setObservacoes] = useState<string>(initial?.observacoes ?? "");
 
+  // Cálculo automático de Valor a Recolher quando Folha Base e Alíquota são preenchidas
+  const valorRecolherCalculado = useMemo(() => {
+    const folha = currencyToNumber(folhaBase);
+    const aliq = Number(aliquota) || 0;
+    if (folha > 0 && aliq > 0) {
+      return Number(((folha * aliq) / 100).toFixed(2));
+    }
+    return currencyToNumber(valorRecolher);
+  }, [folhaBase, aliquota, valorRecolher]);
+
   const preview = useMemo(() => {
     return calcularLancamento({
-      valorRecolher: currencyToNumber(valorRecolher),
+      valorRecolher: valorRecolherCalculado,
       valorRecolhido: currencyToNumber(valorRecolhido),
       multas: currencyToNumber(multas),
       juros: currencyToNumber(juros),
       parcelado,
     });
-  }, [valorRecolher, valorRecolhido, multas, juros, parcelado]);
+  }, [valorRecolherCalculado, valorRecolhido, multas, juros, parcelado]);
 
   const duplicateConflict = useMemo(() => {
     if (isEdit) return null;
@@ -352,6 +362,9 @@ export function LancamentoForm({
         <div className="space-y-3">
           {/* Grid de indicadores principais */}
           <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
+            <CalcPill label="Valor a Recolher" tone="default">
+              {formatBRL(valorRecolherCalculado)}
+            </CalcPill>
             <CalcPill label="Status" tone="default">
               <StatusBadge status={preview.status} />
             </CalcPill>
