@@ -31,31 +31,24 @@ export function PdfInstitutionalFooter({
   generatedAt,
 }: Props) {
   const contactLine = joinContact(rpps);
-  const responsavel =
-    rpps?.responsavelDepartamento?.trim() ||
-    rpps?.nomeResponsavel?.trim() ||
-    "";
 
   return (
     <View style={reportStyles.footer} fixed>
       <View style={reportStyles.footerDivider} />
       {contactLine.length > 0 && (
-        <Text style={reportStyles.footerText}>{contactLine}</Text>
-      )}
-      {responsavel.length > 0 && (
-        <Text style={reportStyles.footerText}>Responsável: {responsavel}</Text>
-      )}
-      <View style={reportStyles.footerRow}>
-        <Text style={reportStyles.footerText}>
-          Emitido por {emittedBy} em {generatedAt}
+        <Text style={[reportStyles.footerText, { textAlign: "center" }]}>
+          {contactLine}
         </Text>
-        <Text
-          style={reportStyles.footerText}
-          render={({ pageNumber, totalPages }) =>
-            `Página ${pageNumber} de ${totalPages}`
-          }
-        />
-      </View>
+      )}
+      <Text style={[reportStyles.footerText, { textAlign: "center" }]}>
+        Emitido por {emittedBy} em {generatedAt}
+      </Text>
+      <Text
+        style={[reportStyles.footerText, { textAlign: "center" }]}
+        render={({ pageNumber, totalPages }) =>
+          `Página ${pageNumber} de ${totalPages}`
+        }
+      />
     </View>
   );
 }
