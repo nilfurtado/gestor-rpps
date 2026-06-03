@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import React, { useState, useTransition, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
@@ -42,12 +42,18 @@ interface OrgaoDialogProps {
 export function OrgaoDialog({ trigger, orgao }: OrgaoDialogProps) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const [sigla, setSigla] = useState(orgao?.sigla ?? "");
   const [nome, setNome] = useState(orgao?.nome ?? "");
   const [cor, setCor] = useState(orgao?.cor ?? DEFAULT_COR);
   const [status, setStatus] = useState<"ATIVO" | "INATIVO">(orgao?.status ?? "ATIVO");
   const [pending, start] = useTransition();
   const editing = !!orgao;
+
+  // Hydration fix: Dialog deve apenas renderizar após mount no cliente
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   function reset() {
     if (!orgao) {
@@ -100,6 +106,8 @@ export function OrgaoDialog({ trigger, orgao }: OrgaoDialogProps) {
   }
 
   const hexValido = HEX_REGEX.test(cor);
+
+  if (!mounted) return <>{trigger}</>;
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>

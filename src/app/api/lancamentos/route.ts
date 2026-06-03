@@ -73,6 +73,23 @@ export async function POST(req: Request) {
     );
   }
 
+  const competencia = await prisma.competencia.findUnique({
+    where: { id: parsed.data.competenciaId },
+  });
+  if (!competencia) {
+    return NextResponse.json({ error: "Competência inexistente." }, { status: 400 });
+  }
+
+  const currentMonth = new Date().getMonth() + 1;
+  const isRetroativo = exercicio.ano < new Date().getFullYear() ||
+    (exercicio.ano === new Date().getFullYear() && competencia.ordem < currentMonth);
+  if (isRetroativo && competencia.ordem < 1) {
+    return NextResponse.json(
+      { error: "Não é permitido lançar em período muito retroativo (> 12 meses)." },
+      { status: 400 }
+    );
+  }
+
   const dup = await prisma.folhaPrevidenciaria.findUnique({
     where: {
       orgaoId_tipo_exercicioId_competenciaId: {

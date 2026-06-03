@@ -3,7 +3,7 @@ import { prisma } from "@/lib/db";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/page-header";
 import { OrgaosTable } from "./orgaos-table";
-import { OrgaoDialog } from "./orgao-dialog";
+import Link from "next/link";
 
 export const metadata = { title: "Órgãos — Santana Previdência" };
 export const dynamic = "force-dynamic";
@@ -20,14 +20,12 @@ export default async function OrgaosPage() {
         title="Órgãos"
         description="Cadastro dos entes municipais vinculados ao RPPS."
         actions={
-          <OrgaoDialog
-            trigger={
-              <Button>
-                <Plus className="h-4 w-4" />
-                Novo órgão
-              </Button>
-            }
-          />
+          <Link href="/orgaos/novo">
+            <Button>
+              <Plus className="h-4 w-4" />
+              Novo órgão
+            </Button>
+          </Link>
         }
       />
 
