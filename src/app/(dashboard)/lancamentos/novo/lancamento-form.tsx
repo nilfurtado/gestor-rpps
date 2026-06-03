@@ -358,35 +358,35 @@ export function LancamentoForm({
       {/* ── PREVIEW DE LANÇAMENTOS ─────────────────────── */}
       <section aria-labelledby="sec-prev">
         <SectionTitle id="sec-prev">Preview</SectionTitle>
-        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="flex flex-wrap gap-1.5 overflow-x-auto pb-2">
           {/* Ente */}
           <CalcPill label="Ente" tone="default">
-            <span className="text-sm">{orgaos.find((o) => o.id === Number(orgaoId))?.sigla ?? "-"}</span>
+            <span className="text-xs sm:text-sm">{orgaos.find((o) => o.id === Number(orgaoId))?.sigla ?? "-"}</span>
           </CalcPill>
 
           {/* Competência */}
           <CalcPill label="Competência" tone="default">
-            <span className="text-sm">{competencias.find((c) => c.id === Number(competenciaId))?.mes ?? "-"}</span>
+            <span className="text-xs sm:text-sm">{competencias.find((c) => c.id === Number(competenciaId))?.mes ?? "-"}</span>
           </CalcPill>
 
           {/* A Recolher */}
           <CalcPill label="A Recolher" tone="default">
-            {formatBRL(valorRecolherCalculado)}
+            <span className="text-xs sm:text-sm">{formatBRL(valorRecolherCalculado)}</span>
           </CalcPill>
 
           {/* Recolhido */}
           <CalcPill label="Recolhido" tone={currencyToNumber(valorRecolhido) > 0 ? "success" : "default"}>
-            {formatBRL(currencyToNumber(valorRecolhido))}
+            <span className="text-xs sm:text-sm">{formatBRL(currencyToNumber(valorRecolhido))}</span>
           </CalcPill>
 
           {/* Déficit */}
           <CalcPill label="Déficit" tone={preview.deficit > 0 ? "danger" : "default"}>
-            {formatBRL(preview.deficit)}
+            <span className="text-xs sm:text-sm">{formatBRL(preview.deficit)}</span>
           </CalcPill>
 
           {/* Inadimplência */}
           <CalcPill label="Inadimplência" tone={preview.inadimplencia > 0 ? "danger" : "default"}>
-            {formatPercent(preview.inadimplencia)}
+            <span className="text-xs sm:text-sm">{formatPercent(preview.inadimplencia)}</span>
           </CalcPill>
 
           {/* Status */}
@@ -461,11 +461,11 @@ function CalcPill({
     warning: "text-amber-600 dark:text-amber-400",
   };
   return (
-    <div className="rounded-md border border-border bg-muted/30 px-3 py-2">
-      <div className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+    <div className="flex-shrink-0 rounded-md border border-border bg-muted/30 px-2 py-1.5">
+      <div className="text-[8px] sm:text-[9px] font-semibold uppercase tracking-widest text-muted-foreground whitespace-nowrap">
         {label}
       </div>
-      <div className={`mt-0.5 truncate text-base font-semibold tabular-nums ${toneClasses[tone]}`}>
+      <div className={`mt-0.5 truncate text-xs sm:text-sm font-semibold tabular-nums ${toneClasses[tone]}`}>
         {children}
       </div>
     </div>
