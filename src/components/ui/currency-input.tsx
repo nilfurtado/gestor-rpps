@@ -21,7 +21,7 @@ export function CurrencyInput(props: InputProps) {
   const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
     const value = e.target.value.replace(/\D/g, "");
     if (value === "" || value === "0") {
-      e.target.value = "0,00";
+      e.target.value = "";
     }
     props.onBlur?.(e);
   };
