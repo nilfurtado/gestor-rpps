@@ -11,6 +11,54 @@ export const orgaoSchema = z.object({
     .min(3, "Informe o nome do órgão")
     .max(150, "Nome muito longo")
     .transform((v) => v.trim()),
+  cnpj: z
+    .string()
+    .max(20, "CNPJ muito longo")
+    .optional()
+    .nullable()
+    .transform((v) => (v && v.trim() ? v.trim() : null)),
+  cep: z
+    .string()
+    .max(20, "CEP muito longo")
+    .optional()
+    .nullable()
+    .transform((v) => (v && v.trim() ? v.trim() : null)),
+  endereco: z
+    .string()
+    .max(200, "Endereço muito longo")
+    .optional()
+    .nullable()
+    .transform((v) => (v && v.trim() ? v.trim() : null)),
+  numero: z
+    .string()
+    .max(50, "Número muito longo")
+    .optional()
+    .nullable()
+    .transform((v) => (v && v.trim() ? v.trim() : null)),
+  complemento: z
+    .string()
+    .max(100, "Complemento muito longo")
+    .optional()
+    .nullable()
+    .transform((v) => (v && v.trim() ? v.trim() : null)),
+  bairro: z
+    .string()
+    .max(100, "Bairro muito longo")
+    .optional()
+    .nullable()
+    .transform((v) => (v && v.trim() ? v.trim() : null)),
+  cidade: z
+    .string()
+    .max(100, "Cidade muito longa")
+    .optional()
+    .nullable()
+    .transform((v) => (v && v.trim() ? v.trim() : null)),
+  estado: z
+    .string()
+    .max(2, "Estado deve ter 2 caracteres")
+    .optional()
+    .nullable()
+    .transform((v) => (v && v.trim() ? v.trim().toUpperCase() : null)),
   cor: z
     .string()
     .regex(/^#[0-9A-Fa-f]{6}$/, "Cor deve estar em formato HEX (ex: #2563EB)")

@@ -16,7 +16,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { EmptyState } from "@/components/empty-state";
-import { OrgaoDialog } from "./orgao-dialog";
 
 export interface OrgaoRow {
   id: number;
@@ -130,14 +129,14 @@ export function OrgaosTable({ orgaos }: { orgaos: OrgaoRow[] }) {
               </TableCell>
               <TableCell className="text-right">
                 <div className="flex justify-end gap-1">
-                  <OrgaoDialog
-                    orgao={o}
-                    trigger={
-                      <Button variant="ghost" size="icon" aria-label="Editar">
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                    }
-                  />
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => router.push(`/orgaos/${o.id}/editar`)}
+                    aria-label="Editar"
+                  >
+                    <Pencil className="h-4 w-4" />
+                  </Button>
                   <Button
                     variant="ghost"
                     size="icon"
