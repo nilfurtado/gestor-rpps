@@ -44,6 +44,8 @@ interface LancamentoRow {
   parcelado: boolean;
   dataVencimento: string | null;
   acordo: { id: number; numero: string } | null;
+  multas?: number;
+  juros?: number;
 }
 
 interface Props {
@@ -249,10 +251,10 @@ export function LancamentosClient({ lancamentos, orgaos, exercicios, competencia
                           tipo: l.tipo,
                           valorRecolher: l.valorRecolher,
                           valorRecolhido: l.valorRecolhido,
-                          deficit: l.deficit,
-                          inadimplencia: l.inadimplencia,
                           status: l.status,
                           parcelado: l.parcelado,
+                          multas: l.multas,
+                          juros: l.juros,
                         }}
                       />
                       <Button

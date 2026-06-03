@@ -48,6 +48,8 @@ export default async function LancamentosPage() {
     acordo: l.acordos[0]
       ? { id: l.acordos[0].id, numero: l.acordos[0].numero }
       : null,
+    multas: l.multas ? Number(l.multas) : undefined,
+    juros: l.juros ? Number(l.juros) : undefined,
   }));
 
   return (

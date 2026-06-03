@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { StatusBadge } from "@/components/lancamentos/status-badge";
 import { formatBRL, formatPercent } from "@/lib/format";
+import { calcularLancamento } from "@/lib/calc/lancamento";
 
 interface LancamentoPreviewProps {
   lancamento: {
@@ -23,8 +24,8 @@ interface LancamentoPreviewProps {
     tipo: string;
     valorRecolher: number;
     valorRecolhido: number;
-    deficit: number;
-    inadimplencia: number;
+    multas?: number;
+    juros?: number;
     status: string;
     parcelado: boolean;
   };
@@ -32,6 +33,16 @@ interface LancamentoPreviewProps {
 
 export function LancamentoPreviewDialog({ lancamento: l }: LancamentoPreviewProps) {
   const [open, setOpen] = useState(false);
+
+  const preview = useMemo(() => {
+    return calcularLancamento({
+      valorRecolher: l.valorRecolher,
+      valorRecolhido: l.valorRecolhido,
+      multas: l.multas ?? 0,
+      juros: l.juros ?? 0,
+      parcelado: l.parcelado,
+    });
+  }, [l]);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -72,11 +83,6 @@ export function LancamentoPreviewDialog({ lancamento: l }: LancamentoPreviewProp
               </div>
             </PreviewItem>
 
-            {/* Tipo */}
-            <PreviewItem label="Tipo">
-              <div className="font-semibold">{l.tipo === "PATRONAL" ? "Patronal" : "Segurado"}</div>
-            </PreviewItem>
-
             {/* A Recolher */}
             <PreviewItem label="A Recolher">
               <div className="font-semibold tabular-nums">{formatBRL(l.valorRecolher)}</div>
@@ -97,10 +103,10 @@ export function LancamentoPreviewDialog({ lancamento: l }: LancamentoPreviewProp
             <PreviewItem label="Déficit">
               <div
                 className={`font-semibold tabular-nums ${
-                  l.deficit > 0 ? "text-destructive" : ""
+                  preview.deficit > 0 ? "text-destructive" : ""
                 }`}
               >
-                {formatBRL(l.deficit)}
+                {formatBRL(preview.deficit)}
               </div>
             </PreviewItem>
 
@@ -108,16 +114,16 @@ export function LancamentoPreviewDialog({ lancamento: l }: LancamentoPreviewProp
             <PreviewItem label="Inadimplência">
               <div
                 className={`font-semibold tabular-nums ${
-                  l.inadimplencia > 0 ? "text-destructive" : ""
+                  preview.inadimplencia > 0 ? "text-destructive" : ""
                 }`}
               >
-                {formatPercent(l.inadimplencia)}
+                {formatPercent(preview.inadimplencia)}
               </div>
             </PreviewItem>
 
             {/* Status */}
             <PreviewItem label="Status">
-              <StatusBadge status={l.status as any} />
+              <StatusBadge status={preview.status as any} />
             </PreviewItem>
           </div>
         </div>
