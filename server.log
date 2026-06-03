@@ -322,3 +322,5 @@ https://react.dev/link/hydration-mismatch
  GET /lancamentos 200 in 53ms (next.js: 3ms, proxy.ts: 19ms, application-code: 31ms)
  GET /orgaos 200 in 39ms (next.js: 3ms, proxy.ts: 14ms, application-code: 23ms)
  GET /orgaos/novo 200 in 39ms (next.js: 3ms, proxy.ts: 13ms, application-code: 24ms)
+ GET /lancamentos 200 in 41ms (next.js: 3ms, proxy.ts: 8ms, application-code: 29ms)
+ GET /lancamentos/novo 200 in 56ms (next.js: 5ms, proxy.ts: 13ms, application-code: 38ms)

@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { CurrencyInput, currencyToNumber, formatCurrency } from "@/components/ui/currency-input";
 import {
   Select,
   SelectContent,
@@ -98,11 +99,13 @@ export function LancamentoForm({
 
   const preview = useMemo(() => {
     return calcularLancamento({
-      valorRecolher: Number(valorRecolher) || 0,
-      valorRecolhido: Number(valorRecolhido) || 0,
+      valorRecolher: currencyToNumber(valorRecolher),
+      valorRecolhido: currencyToNumber(valorRecolhido),
+      multas: currencyToNumber(multas),
+      juros: currencyToNumber(juros),
       parcelado,
     });
-  }, [valorRecolher, valorRecolhido, parcelado]);
+  }, [valorRecolher, valorRecolhido, multas, juros, parcelado]);
 
   const duplicateConflict = useMemo(() => {
     if (isEdit) return null;
@@ -148,12 +151,12 @@ export function LancamentoForm({
           exercicioId: Number(exercicioId),
           competenciaId: Number(competenciaId),
           aliquota: Number(aliquota || 0),
-          valorRecolher: Number(valorRecolher || 0),
-          valorRecolhido: Number(valorRecolhido || 0),
+          valorRecolher: currencyToNumber(valorRecolher),
+          valorRecolhido: currencyToNumber(valorRecolhido),
           quantidadeServidores: quantidadeServidores ? Number(quantidadeServidores) : null,
-          folhaBase: folhaBase ? Number(folhaBase) : null,
-          multas: multas ? Number(multas) : null,
-          juros: juros ? Number(juros) : null,
+          folhaBase: folhaBase ? currencyToNumber(folhaBase) : null,
+          multas: multas ? currencyToNumber(multas) : null,
+          juros: juros ? currencyToNumber(juros) : null,
           parcelado,
           dataVencimento: dataVencimento || null,
           observacoes: observacoes || null,
@@ -277,21 +280,19 @@ export function LancamentoForm({
             />
           </Field>
           <Field label="A recolher (R$) *">
-            <Input
-              type="number" step="0.01" min="0" required
+            <CurrencyInput
               value={valorRecolher}
               onChange={(e) => setValorRecolher(e.target.value)}
-              placeholder="0,00"
               className="h-9 tabular-nums"
+              required
             />
           </Field>
           <Field label="Recolhido (R$) *">
-            <Input
-              type="number" step="0.01" min="0" required
+            <CurrencyInput
               value={valorRecolhido}
               onChange={(e) => setValorRecolhido(e.target.value)}
-              placeholder="0,00"
               className="h-9 tabular-nums"
+              required
             />
           </Field>
           <Field label="Data de repasse">
@@ -312,29 +313,23 @@ export function LancamentoForm({
             />
           </Field>
           <Field label="Folha base (R$)">
-            <Input
-              type="number" step="0.01" min="0"
+            <CurrencyInput
               value={folhaBase}
               onChange={(e) => setFolhaBase(e.target.value)}
-              placeholder="0,00"
               className="h-9 tabular-nums"
             />
           </Field>
           <Field label="Multas (R$)">
-            <Input
-              type="number" step="0.01" min="0"
+            <CurrencyInput
               value={multas}
               onChange={(e) => setMultas(e.target.value)}
-              placeholder="0,00"
               className="h-9 tabular-nums"
             />
           </Field>
           <Field label="Juros (R$)">
-            <Input
-              type="number" step="0.01" min="0"
+            <CurrencyInput
               value={juros}
               onChange={(e) => setJuros(e.target.value)}
-              placeholder="0,00"
               className="h-9 tabular-nums"
             />
           </Field>
@@ -353,17 +348,41 @@ export function LancamentoForm({
 
       {/* ── PREVIEW DE CÁLCULOS + OBSERVAÇÕES ─────────────────────── */}
       <section aria-labelledby="sec-prev">
-        <SectionTitle id="sec-prev">Preview e observações</SectionTitle>
-        <div className="grid grid-cols-1 gap-3 lg:grid-cols-[1fr_1fr_1fr_2fr]">
-          <CalcPill label="Déficit" tone={preview.deficit > 0 ? "danger" : "default"}>
-            {formatBRL(preview.deficit)}
-          </CalcPill>
-          <CalcPill label="% Inadimplência" tone="default">
-            {formatPercent(preview.inadimplencia)}
-          </CalcPill>
-          <CalcPill label="Status" tone="default">
-            <StatusBadge status={preview.status} />
-          </CalcPill>
+        <SectionTitle id="sec-prev">Cálculos e observações</SectionTitle>
+        <div className="space-y-3">
+          {/* Grid de indicadores principais */}
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
+            <CalcPill label="Status" tone="default">
+              <StatusBadge status={preview.status} />
+            </CalcPill>
+            <CalcPill label="% Pago" tone={preview.percentualPago >= 100 ? "success" : "default"}>
+              {formatPercent(preview.percentualPago)}
+            </CalcPill>
+            <CalcPill label="% Inadimplência" tone={preview.inadimplencia > 0 ? "danger" : "default"}>
+              {formatPercent(preview.inadimplencia)}
+            </CalcPill>
+            <CalcPill label="Superávit" tone={preview.superavit > 0 ? "success" : "default"}>
+              {formatBRL(preview.superavit)}
+            </CalcPill>
+          </div>
+
+          {/* Grid de valores detalhados */}
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
+            <CalcPill label="Déficit" tone={preview.deficit > 0 ? "danger" : "default"}>
+              {formatBRL(preview.deficit)}
+            </CalcPill>
+            <CalcPill label="Encargos Totais" tone={preview.encargosTotal > 0 ? "warning" : "default"}>
+              {formatBRL(preview.encargosTotal)}
+            </CalcPill>
+            <CalcPill label="Valor Total Devido" tone={preview.valorTotalDevido > 0 ? "danger" : "default"}>
+              {formatBRL(preview.valorTotalDevido)}
+            </CalcPill>
+            <CalcPill label="Valor Líquido Arrecadado" tone="default">
+              {formatBRL(preview.valorLiquidoArrecadado)}
+            </CalcPill>
+          </div>
+
+          {/* Observações */}
           <div>
             <Label htmlFor="obs" className="mb-1.5 block text-xs font-medium">
               Observações
@@ -436,20 +455,21 @@ function CalcPill({
   children,
 }: {
   label: string;
-  tone: "default" | "danger";
+  tone: "default" | "danger" | "success" | "warning";
   children: React.ReactNode;
 }) {
+  const toneClasses = {
+    default: "text-foreground",
+    danger: "text-destructive",
+    success: "text-green-600 dark:text-green-400",
+    warning: "text-amber-600 dark:text-amber-400",
+  };
   return (
     <div className="rounded-md border border-border bg-muted/30 px-3 py-2">
       <div className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
         {label}
       </div>
-      <div
-        className={
-          "mt-0.5 truncate text-base font-semibold tabular-nums " +
-          (tone === "danger" ? "text-destructive" : "text-foreground")
-        }
-      >
+      <div className={`mt-0.5 truncate text-base font-semibold tabular-nums ${toneClasses[tone]}`}>
         {children}
       </div>
     </div>
