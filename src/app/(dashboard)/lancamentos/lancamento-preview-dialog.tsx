@@ -123,7 +123,7 @@ export function LancamentoPreviewDialog({ lancamento: l }: LancamentoPreviewProp
 
             {/* Status */}
             <PreviewItem label="Status">
-              <StatusBadge status={preview.status as any} />
+              <StatusBadge status={l.status as any} />
             </PreviewItem>
           </div>
         </div>
