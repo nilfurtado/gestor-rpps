@@ -27,6 +27,7 @@ import {
 import { EmptyState } from "@/components/empty-state";
 import { StatusBadge } from "@/components/lancamentos/status-badge";
 import { formatBRL, formatPercent } from "@/lib/format";
+import { LancamentoPreviewDialog } from "./lancamento-preview-dialog";
 
 interface LancamentoRow {
   id: number;
@@ -239,6 +240,21 @@ export function LancamentosClient({ lancamentos, orgaos, exercicios, competencia
                   </TableCell>
                   <TableCell className="px-3 py-2.5 text-right">
                     <div className="flex items-center justify-end gap-0.5">
+                      <LancamentoPreviewDialog
+                        lancamento={{
+                          id: l.id,
+                          orgao: l.orgao,
+                          competencia: l.competencia,
+                          exercicio: l.exercicio,
+                          tipo: l.tipo,
+                          valorRecolher: l.valorRecolher,
+                          valorRecolhido: l.valorRecolhido,
+                          deficit: l.deficit,
+                          inadimplencia: l.inadimplencia,
+                          status: l.status,
+                          parcelado: l.parcelado,
+                        }}
+                      />
                       <Button
                         variant="ghost"
                         size="icon"
