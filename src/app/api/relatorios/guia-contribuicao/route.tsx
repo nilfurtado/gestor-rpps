@@ -111,6 +111,19 @@ export async function GET(req: Request) {
     const competenciaStr = `${competenciaMes}/${exercicioAno}`;
     const emittedBy = session.user.email || "Sistema SANPREV";
 
+    // Renderizar como componente único (uma guia por vez)
+    // Se for AMBAS, precisa de duas chamadas à API
+    const tipoParaRender: "PATRONAL" | "SEGURADO" =
+      tipo === "AMBAS" ? "PATRONAL" : tipo;
+
+    // Calcular total para QR code
+    const totalPagamento =
+      (tipo === "AMBAS"
+        ? currencyToNumber(patronalContribuicao) + currencyToNumber(seguradoContribuicao)
+        : tipo === "PATRONAL"
+          ? currencyToNumber(patronalContribuicao)
+          : currencyToNumber(seguradoContribuicao)) || 0;
+
     // Gerar QR code
     const qrCodeImage = await generateQRCodeImage({
       orgaoCnpj: orgao.cnpj || "",
@@ -121,11 +134,6 @@ export async function GET(req: Request) {
       ),
       totalPagamento,
     });
-
-    // Renderizar como componente único (uma guia por vez)
-    // Se for AMBAS, precisa de duas chamadas à API
-    const tipoParaRender: "PATRONAL" | "SEGURADO" =
-      tipo === "AMBAS" ? "PATRONAL" : tipo;
 
     const guiaData: GuiaContribuicaoData = {
       orgaoNome: orgao.nome,
