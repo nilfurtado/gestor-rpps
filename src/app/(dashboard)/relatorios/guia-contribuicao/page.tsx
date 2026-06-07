@@ -12,6 +12,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Loader2, FileText } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { CurrencyInput } from "@/components/ui/currency-input";
 
 export default function GuiaContribuicaoPage() {
   const [pending, start] = useTransition();
@@ -21,6 +23,11 @@ export default function GuiaContribuicaoPage() {
   const [tipo, setTipo] = useState<"PATRONAL" | "SEGURADO" | "AMBOS">(
     "PATRONAL"
   );
+
+  // Novos campos manuais
+  const [dataVencimento, setDataVencimento] = useState("");
+  const [baseCálculo, setBaseCálculo] = useState("");
+  const [contribuicaoSegurado, setContribuicaoSegurado] = useState("");
 
   const [orgaos, setOrgaos] = useState<any[]>([]);
   const [exercicios, setExercicios] = useState<any[]>([]);
@@ -56,8 +63,15 @@ export default function GuiaContribuicaoPage() {
   }, []);
 
   const handleGerar = () => {
-    if (!orgaoId || !exercicioId || !competenciaId) {
-      toast.error("Preencha todos os filtros");
+    if (
+      !orgaoId ||
+      !exercicioId ||
+      !competenciaId ||
+      !dataVencimento ||
+      !baseCálculo ||
+      !contribuicaoSegurado
+    ) {
+      toast.error("Preencha todos os campos");
       return;
     }
 
@@ -68,6 +82,9 @@ export default function GuiaContribuicaoPage() {
           exercicioId,
           competenciaId,
           tipo,
+          dataVencimento,
+          baseCálculo,
+          contribuicaoSegurado,
         });
 
         const response = await fetch(
@@ -190,6 +207,42 @@ export default function GuiaContribuicaoPage() {
                 <SelectItem value="AMBOS">Ambos</SelectItem>
               </SelectContent>
             </Select>
+          </div>
+
+          {/* Data de Vencimento */}
+          <div className="space-y-2">
+            <Label htmlFor="dataVencimento">Data de Vencimento *</Label>
+            <Input
+              id="dataVencimento"
+              type="date"
+              value={dataVencimento}
+              onChange={(e) => setDataVencimento(e.target.value)}
+              className="h-9 text-sm"
+            />
+          </div>
+
+          {/* Base de Cálculo */}
+          <div className="space-y-2">
+            <Label htmlFor="baseCálculo">Base de Cálculo (R$) *</Label>
+            <CurrencyInput
+              id="baseCálculo"
+              value={baseCálculo}
+              onChange={(e) => setBaseCálculo(e.target.value)}
+              placeholder="0,00"
+              className="h-9 text-sm"
+            />
+          </div>
+
+          {/* Contribuição Segurado */}
+          <div className="space-y-2">
+            <Label htmlFor="contribuicaoSegurado">Contribuição Segurado (R$) *</Label>
+            <CurrencyInput
+              id="contribuicaoSegurado"
+              value={contribuicaoSegurado}
+              onChange={(e) => setContribuicaoSegurado(e.target.value)}
+              placeholder="0,00"
+              className="h-9 text-sm"
+            />
           </div>
         </div>
 

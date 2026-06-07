@@ -21,8 +21,19 @@ export async function GET(req: Request) {
     const exercicioId = searchParams.get("exercicioId");
     const competenciaId = searchParams.get("competenciaId");
     const tipo = searchParams.get("tipo") as "PATRONAL" | "SEGURADO" | "AMBOS";
+    const dataVencimento = searchParams.get("dataVencimento");
+    const baseCálculo = searchParams.get("baseCálculo");
+    const contribuicaoSegurado = searchParams.get("contribuicaoSegurado");
 
-    if (!orgaoId || !exercicioId || !competenciaId || !tipo) {
+    if (
+      !orgaoId ||
+      !exercicioId ||
+      !competenciaId ||
+      !tipo ||
+      !dataVencimento ||
+      !baseCálculo ||
+      !contribuicaoSegurado
+    ) {
       return NextResponse.json(
         { error: "Parâmetros faltando" },
         { status: 400 }
@@ -73,22 +84,14 @@ export async function GET(req: Request) {
       }
     }
 
-    // Calcular contribuição segurado (50% da patronal aprox.)
-    const contribuicaoSegurado = Number(lancamento.valorRecolher) * 0.5;
-
-    // Montar data da guia
+    // Usar valores passados manualmente
     const competenciaMes = lancamento.competencia.mes;
     const exercicioAno = lancamento.exercicio.ano;
     const competenciaStr = `${competenciaMes}/${exercicioAno}`;
 
-    // Data de vencimento: 8º dia do mês seguinte
-    const mesAtual = lancamento.competencia.ordem;
-    const anoVencimento =
-      mesAtual === 12 ? exercicioAno + 1 : exercicioAno;
-    const mesVencimento = mesAtual === 12 ? 1 : mesAtual + 1;
-    const dataVencimento = new Date(anoVencimento, mesVencimento - 1, 8);
+    const vencimentoDate = new Date(dataVencimento);
 
-    // Montar dados
+    // Montar dados com valores do formulário
     const guiaData: GuiaContribuicaoData = {
       orgaoNome: lancamento.orgao.nome,
       orgaoCnpj: lancamento.orgao.cnpj || "",
@@ -99,10 +102,10 @@ export async function GET(req: Request) {
       orgaoEstado: lancamento.orgao.estado || "",
       orgaoCep: lancamento.orgao.cep || "",
       competencia: competenciaStr,
-      dataVencimento,
-      baseCálculo: Number(lancamento.folhaBase),
+      dataVencimento: vencimentoDate,
+      baseCálculo: Number(baseCálculo),
       contribuicaoPatronal: Number(lancamento.valorRecolher),
-      contribuicaoSegurado,
+      contribuicaoSegurado: Number(contribuicaoSegurado),
       tipo,
     };
 
