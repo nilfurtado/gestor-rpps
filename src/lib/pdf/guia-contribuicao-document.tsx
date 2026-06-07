@@ -147,12 +147,15 @@ export function GuiaContribuicaoDocument({
               </View>
             </View>
           )}
-        </View>
 
-        {/* Totalizador */}
-        <View style={totalizerBox}>
-          <Text style={totalizerLabel}>VALOR PARA PAGAMENTO</Text>
-          <Text style={totalizerValue}>{formatBRL(totalPagamento)}</Text>
+          <View style={{ ...infoRow, backgroundColor: "#f0f4f8", padding: 10, borderRadius: 4, marginTop: 12 }}>
+            <View style={infoCol}>
+              <Text style={labelStyle}>Valor para Pagamento</Text>
+              <Text style={{ ...valueStyleBold, fontSize: 16, color: "#1a3a52" }}>
+                {formatBRL(totalPagamento)}
+              </Text>
+            </View>
+          </View>
         </View>
 
         {/* Dados para Depósito */}
