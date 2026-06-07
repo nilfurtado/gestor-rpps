@@ -1,11 +1,13 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useState, useTransition, useCallback } from "react";
 import { Filter, RotateCcw } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
+import { useRealtimeUpdates } from "@/lib/hooks/useRealtimeUpdates";
 import {
   Select,
   SelectContent,
@@ -41,6 +43,21 @@ export function ReportFilters({ defs, orgaos, exercicios, competencias }: Props)
   const [orgaoId, setOrgaoId] = useState(sp.get("orgaoId") ?? ALL);
   const [tipo, setTipo] = useState(sp.get("tipo") ?? ALL);
   const [status, setStatus] = useState(sp.get("status") ?? ALL);
+
+  // Monitorar atualizações em tempo real
+  useRealtimeUpdates(
+    useCallback((update) => {
+      if (update.type === "lancamento" || update.type === "acordo") {
+        toast.info("Dados atualizados", {
+          description: "Recarregue a página para ver as alterações.",
+          action: {
+            label: "Recarregar",
+            onClick: () => window.location.reload(),
+          },
+        });
+      }
+    }, [])
+  );
 
   function apply() {
     const params = new URLSearchParams();

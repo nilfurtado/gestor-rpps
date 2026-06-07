@@ -1,11 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { Download, FileSpreadsheet, FileText, Printer } from "lucide-react";
 import { toast } from "sonner";
 import type { RelatorioTipo } from "@/lib/reports";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { useRealtimeUpdates } from "@/lib/hooks/useRealtimeUpdates";
+import { RealtimeBadge } from "@/components/reports/realtime-badge";
 import {
   Table,
   TableBody,
@@ -28,6 +30,21 @@ interface Props {
 
 export function ReportView({ tipo, report, query }: Props) {
   const [busy, setBusy] = useState<"pdf" | "xlsx" | null>(null);
+
+  // Monitorar atualizações em tempo real
+  useRealtimeUpdates(
+    useCallback((update) => {
+      if (update.type === "lancamento" || update.type === "acordo") {
+        toast.info("Dados atualizados", {
+          description: "Recarregue a página para ver as alterações.",
+          action: {
+            label: "Recarregar",
+            onClick: () => window.location.reload(),
+          },
+        });
+      }
+    }, [])
+  );
 
   async function download(format: "pdf" | "xlsx") {
     setBusy(format);
@@ -56,8 +73,9 @@ export function ReportView({ tipo, report, query }: Props) {
   return (
     <div className="space-y-4">
       <Card>
-        <CardContent className="flex flex-wrap items-center justify-between gap-3 p-4">
+        <CardContent className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex flex-wrap items-center gap-2">
+            <RealtimeBadge />
             {Object.entries(report.filtros).length === 0 ? (
               <Badge variant="outline">Sem filtros aplicados</Badge>
             ) : (

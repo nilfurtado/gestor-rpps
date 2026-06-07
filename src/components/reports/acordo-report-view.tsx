@@ -1,12 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { Download, FileText, Printer } from "lucide-react";
 import { toast } from "sonner";
 import type { StatusAcordo, TipoDebitoAcordo } from "@prisma/client";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { useRealtimeUpdates } from "@/lib/hooks/useRealtimeUpdates";
+import { RealtimeBadge } from "@/components/reports/realtime-badge";
 import { EmptyState } from "@/components/empty-state";
 import {
   Table,
@@ -37,6 +39,21 @@ const TIPO_DEBITO_LABEL: Record<TipoDebitoAcordo, string> = {
 
 export function AcordoReportView({ tipo, report, query }: Props) {
   const [busy, setBusy] = useState<"pdf" | null>(null);
+
+  // Monitorar atualizações em tempo real
+  useRealtimeUpdates(
+    useCallback((update) => {
+      if (update.type === "acordo" || update.type === "lancamento") {
+        toast.info("Dados atualizados", {
+          description: "Recarregue a página para ver as alterações.",
+          action: {
+            label: "Recarregar",
+            onClick: () => window.location.reload(),
+          },
+        });
+      }
+    }, [])
+  );
 
   const recordCount = countRecords(report);
 
@@ -72,8 +89,9 @@ export function AcordoReportView({ tipo, report, query }: Props) {
   return (
     <div className="space-y-4">
       <Card>
-        <CardContent className="flex flex-wrap items-center justify-between gap-3 p-4">
+        <CardContent className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex flex-wrap items-center gap-2">
+            <RealtimeBadge />
             {Object.entries(report.filtros).length === 0 ? (
               <Badge variant="outline">Sem filtros aplicados</Badge>
             ) : (

@@ -1,12 +1,14 @@
 "use client";
 
-import { useState, useTransition, useEffect } from "react";
+import { useState, useTransition, useEffect, useCallback } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { CurrencyInput } from "@/components/ui/currency-input";
 import { Loader2, FileText } from "lucide-react";
+import { useRealtimeUpdates } from "@/lib/hooks/useRealtimeUpdates";
+import { RealtimeBadge } from "@/components/reports/realtime-badge";
 import {
   Select,
   SelectContent,
@@ -38,6 +40,17 @@ export default function GuiaContribuicaoPage() {
   const [exercicios, setExercicios] = useState<any[]>([]);
   const [competencias, setCompetencias] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Monitorar atualizações em tempo real
+  useRealtimeUpdates(
+    useCallback((update) => {
+      if (update.type === "lancamento" || update.type === "acordo") {
+        toast.info("Dados atualizados", {
+          description: "Os dados podem ter sido alterados.",
+        });
+      }
+    }, [])
+  );
 
   // Carregar dados iniciais
   useEffect(() => {
@@ -150,7 +163,10 @@ export default function GuiaContribuicaoPage() {
           <>
             {/* SEÇÃO 1: Dados Gerais */}
             <div className="space-y-4">
-              <h3 className="font-semibold border-b pb-2">Dados Gerais</h3>
+              <div className="flex items-center justify-between">
+                <h3 className="font-semibold border-b pb-2">Dados Gerais</h3>
+                <RealtimeBadge />
+              </div>
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                 {/* Órgão */}
                 <div className="space-y-2">
