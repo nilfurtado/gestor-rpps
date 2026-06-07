@@ -9,6 +9,7 @@ import {
   CheckCircle2,
   Clock,
   Coins,
+  FileText,
   Handshake,
   Layers,
   ReceiptText,
@@ -60,6 +61,12 @@ const ARRECADACAO: ReportItem[] = [
     title: "Inadimplência",
     description: "Ranking e consolidado de inadimplência RPPS.",
     Icon: AlertOctagon,
+  },
+  {
+    href: "/relatorios/guia-contribuicao",
+    title: "Guia de Contribuição",
+    description: "Guia de recolhimento de contribuição previdenciária por competência.",
+    Icon: FileText,
   },
 ];
 
