@@ -3,7 +3,7 @@ import { pdf, Document, Page } from "@react-pdf/renderer";
 import React from "react";
 import { prisma } from "@/lib/db";
 import { auth } from "@/lib/auth";
-import { currencyToNumber } from "@/components/ui/currency-input";
+import { currencyToNumber } from "@/lib/format-currency";
 import {
   GuiaContribuicaoDocument,
   type GuiaContribuicaoData,

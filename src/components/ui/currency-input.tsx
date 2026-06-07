@@ -1,19 +1,6 @@
 import React, { useRef } from "react";
 import { Input, type InputProps } from "./input";
-
-function formatValue(digits: string): string {
-  if (digits === "") {
-    return "";
-  } else if (digits.length === 1) {
-    return digits;
-  } else if (digits.length === 2) {
-    return digits;
-  } else {
-    const integer = digits.slice(0, -2);
-    const decimal = digits.slice(-2);
-    return `${integer.replace(/\B(?=(\d{3})+(?!\d))/g, ".")},${decimal}`;
-  }
-}
+import { formatValue } from "@/lib/format-currency";
 
 export function CurrencyInput(props: InputProps) {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -74,12 +61,5 @@ export function CurrencyInput(props: InputProps) {
   );
 }
 
-export function currencyToNumber(value: string): number {
-  if (!value) return 0;
-  const normalized = value.replace(/\./g, "").replace(",", ".");
-  return Number(normalized) || 0;
-}
-
-export function formatCurrency(value: number): string {
-  return value.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-}
+// Re-export para manter compatibilidade
+export { currencyToNumber, formatCurrency } from "@/lib/format-currency";
