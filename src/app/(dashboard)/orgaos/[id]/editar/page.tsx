@@ -34,6 +34,7 @@ export default async function EditarOrgaoPage({ params }: PageProps) {
             id: orgao.id,
             sigla: orgao.sigla,
             nome: orgao.nome,
+            razaoSocial: orgao.razaoSocial,
             cnpj: orgao.cnpj,
             cep: orgao.cep,
             endereco: orgao.endereco,
