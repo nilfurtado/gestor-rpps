@@ -4,7 +4,7 @@ import React from "react";
 import { prisma } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { currencyToNumber } from "@/lib/format-currency";
-import { generateQRCodeImage } from "@/lib/barcode-generator";
+import { generateBarcodeImage } from "@/lib/barcode-generator";
 import {
   GuiaContribuicaoDocument,
   type GuiaContribuicaoData,
@@ -124,8 +124,8 @@ export async function GET(req: Request) {
           ? currencyToNumber(patronalContribuicao)
           : currencyToNumber(seguradoContribuicao)) || 0;
 
-    // Gerar QR code
-    const qrCodeImage = await generateQRCodeImage({
+    // Gerar código de barras bancário
+    const barcodeImage = await generateBarcodeImage({
       orgaoCnpj: orgao.cnpj || "",
       dataVencimento: new Date(
         tipoParaRender === "PATRONAL"
@@ -170,7 +170,7 @@ export async function GET(req: Request) {
         rpps={rppsInfo}
         logoBase64={logoBase64}
         emittedBy={emittedBy}
-        qrCodeImage={qrCodeImage}
+        qrCodeImage={barcodeImage}
       />
     );
 
