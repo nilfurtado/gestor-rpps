@@ -14,7 +14,6 @@ import {
 export type RppsGuiaInfo = RppsHeaderInfo & RppsFooterInfo;
 
 export interface GuiaContribuicaoData {
-  // Órgão
   orgaoNome: string;
   orgaoCnpj: string;
   orgaoEndereco: string;
@@ -23,9 +22,7 @@ export interface GuiaContribuicaoData {
   orgaoCidade: string;
   orgaoEstado: string;
   orgaoCep: string;
-
-  // Contribuição
-  competencia: string; // "Maio/2026"
+  competencia: string;
   dataVencimento: Date;
   baseCálculo: number;
   contribuicaoPatronal: number;
@@ -69,7 +66,8 @@ export function GuiaContribuicaoDocument({
 
   return (
     <Document title="Guia de Contribuição Previdenciária" author={docTitle}>
-      <Page size="A4" orientation="portrait" style={reportStyles.page} wrap>
+      <Page size="A4" orientation="portrait" style={reportStyles.page}>
+        {/* Header */}
         <PdfInstitutionalHeader
           rpps={rpps}
           logoBase64={logoBase64}
@@ -77,132 +75,111 @@ export function GuiaContribuicaoDocument({
           generatedAt={generatedAt.toLocaleString("pt-BR")}
         />
 
-        {/* Informações da Guia */}
-        <View style={{ paddingLeft: 12, paddingRight: 12, marginBottom: 16, borderBottom: "1px solid #e5e7eb", paddingBottom: 8 }}>
-          <Text style={{ fontSize: 11, color: "#333", marginBottom: 4 }}>
+        {/* Título + Info Guia (Compacto) */}
+        <View style={{ paddingLeft: 12, paddingRight: 12, marginBottom: 8, borderBottomWidth: 1, borderBottomColor: "#ddd", paddingBottom: 6 }}>
+          <Text style={{ fontSize: 10, color: "#333", marginBottom: 2 }}>
             {data.orgaoNome}
           </Text>
-          <Text style={{ fontSize: 9, color: "#666" }}>
+          <Text style={{ fontSize: 8, color: "#666" }}>
             Competência: {data.competencia} | Tipo: {data.tipo === "AMBOS" ? "Patronal e Segurado" : data.tipo}
           </Text>
         </View>
 
-        {/* Ente Público Pagador */}
-        <View style={sectionStyle}>
-          <Text style={sectionTitle}>ENTE PÚBLICO PAGADOR</Text>
-          <View style={infoRow}>
-            <View style={infoCol}>
-              <Text style={labelStyle}>Razão Social</Text>
-              <Text style={valueStyle}>{data.orgaoNome}</Text>
-            </View>
+        {/* 2 Colunas: Ente + Dados */}
+        <View style={{ flexDirection: "row", gap: 12, paddingLeft: 12, paddingRight: 12, marginBottom: 8 }}>
+          {/* Coluna 1: Ente Pagador */}
+          <View style={{ flex: 1 }}>
+            <Text style={{ fontSize: 9, fontWeight: "bold", color: "#1a3a52", marginBottom: 4, borderBottomWidth: 1, borderBottomColor: "#ddd", paddingBottom: 2 }}>
+              ENTE PAGADOR
+            </Text>
+            <Text style={{ fontSize: 8, color: "#666", marginBottom: 1 }}>
+              <Text style={{ fontWeight: "bold" }}>Razão Social:</Text> {data.orgaoNome}
+            </Text>
+            <Text style={{ fontSize: 8, color: "#666", marginBottom: 1 }}>
+              <Text style={{ fontWeight: "bold" }}>CNPJ:</Text> {data.orgaoCnpj}
+            </Text>
+            <Text style={{ fontSize: 8, color: "#666" }}>
+              <Text style={{ fontWeight: "bold" }}>Endereço:</Text> {enderecoCompleto}
+            </Text>
           </View>
-          <View style={infoRow}>
-            <View style={infoCol}>
-              <Text style={labelStyle}>CNPJ</Text>
-              <Text style={valueStyle}>{data.orgaoCnpj}</Text>
+
+          {/* Coluna 2: Contribuição */}
+          <View style={{ flex: 1 }}>
+            <Text style={{ fontSize: 9, fontWeight: "bold", color: "#1a3a52", marginBottom: 4, borderBottomWidth: 1, borderBottomColor: "#ddd", paddingBottom: 2 }}>
+              CONTRIBUIÇÃO
+            </Text>
+            <View style={{ flexDirection: "row", gap: 8, marginBottom: 4 }}>
+              <View style={{ flex: 1 }}>
+                <Text style={{ fontSize: 8, color: "#666", marginBottom: 1 }}>
+                  <Text style={{ fontWeight: "bold" }}>Vencimento:</Text>
+                </Text>
+                <Text style={{ fontSize: 8, color: "#333" }}>{formatDate(data.dataVencimento)}</Text>
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={{ fontSize: 8, color: "#666", marginBottom: 1 }}>
+                  <Text style={{ fontWeight: "bold" }}>Base Cálculo:</Text>
+                </Text>
+                <Text style={{ fontSize: 8, color: "#333", fontWeight: "bold" }}>{formatBRL(data.baseCálculo)}</Text>
+              </View>
             </View>
-          </View>
-          <View style={infoRow}>
-            <View style={infoCol}>
-              <Text style={labelStyle}>Endereço</Text>
-              <Text style={valueStyle}>{enderecoCompleto}</Text>
-            </View>
+            {data.tipo === "AMBOS" ? (
+              <>
+                <Text style={{ fontSize: 8, color: "#666", marginBottom: 1 }}>
+                  <Text style={{ fontWeight: "bold" }}>Patronal:</Text> {formatBRL(data.contribuicaoPatronal)}
+                </Text>
+                <Text style={{ fontSize: 8, color: "#666", marginBottom: 2 }}>
+                  <Text style={{ fontWeight: "bold" }}>Segurado:</Text> {formatBRL(data.contribuicaoSegurado)}
+                </Text>
+              </>
+            ) : (
+              <Text style={{ fontSize: 8, color: "#666", marginBottom: 2 }}>
+                <Text style={{ fontWeight: "bold" }}>
+                  {data.tipo === "PATRONAL" ? "Patronal:" : "Segurado:"}
+                </Text>{" "}
+                {formatBRL(data.tipo === "PATRONAL" ? data.contribuicaoPatronal : data.contribuicaoSegurado)}
+              </Text>
+            )}
           </View>
         </View>
 
-        {/* Dados da Contribuição */}
-        <View style={sectionStyle}>
-          <Text style={sectionTitle}>DADOS DA CONTRIBUIÇÃO</Text>
+        {/* Valor para Pagamento (Destaque) */}
+        <View style={{ backgroundColor: "#f0f4f8", marginLeft: 12, marginRight: 12, marginBottom: 8, padding: 8, borderRadius: 3, borderLeftWidth: 4, borderLeftColor: "#1a3a52" }}>
+          <Text style={{ fontSize: 8, color: "#666", marginBottom: 2 }}>Valor para Pagamento</Text>
+          <Text style={{ fontSize: 14, fontWeight: "bold", color: "#1a3a52" }}>
+            {formatBRL(totalPagamento)}
+          </Text>
+        </View>
 
-          {/* Linha 1: Competência + Data de Vencimento */}
-          <View style={twoColRow}>
-            <View style={twoColItem}>
-              <Text style={labelStyle}>Competência</Text>
-              <Text style={valueStyle}>{data.competencia}</Text>
+        {/* Depósito + QR Code (lado a lado) */}
+        <View style={{ flexDirection: "row", gap: 12, paddingLeft: 12, paddingRight: 12, marginBottom: 8 }}>
+          {/* Depósito */}
+          <View style={{ flex: 2 }}>
+            <Text style={{ fontSize: 9, fontWeight: "bold", color: "#1a3a52", marginBottom: 4, borderBottomWidth: 1, borderBottomColor: "#ddd", paddingBottom: 2 }}>
+              DEPÓSITO/TRANSFERÊNCIA
+            </Text>
+            <View style={{ flexDirection: "row", gap: 8, marginBottom: 3 }}>
+              <View style={{ flex: 1 }}>
+                <Text style={{ fontSize: 7, color: "#666", fontWeight: "bold" }}>Banco</Text>
+                <Text style={{ fontSize: 8, color: "#333" }}>{rpps?.banco || "—"}</Text>
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={{ fontSize: 7, color: "#666", fontWeight: "bold" }}>Agência</Text>
+                <Text style={{ fontSize: 8, color: "#333" }}>{rpps?.agencia || "—"}</Text>
+              </View>
             </View>
-            <View style={twoColItem}>
-              <Text style={labelStyle}>Data de Vencimento</Text>
-              <Text style={valueStyle}>
-                {formatDate(data.dataVencimento)}
-              </Text>
-            </View>
+            <Text style={{ fontSize: 7, color: "#666", fontWeight: "bold", marginBottom: 1 }}>Conta</Text>
+            <Text style={{ fontSize: 8, color: "#333" }}>{rpps?.conta || "—"}</Text>
           </View>
 
-          {/* Linha 2: Base de Cálculo + (espaço vazio) */}
-          <View style={twoColRow}>
-            <View style={twoColItem}>
-              <Text style={labelStyle}>Base de Cálculo</Text>
-              <Text style={valueStyleBold}>
-                {formatBRL(data.baseCálculo)}
-              </Text>
-            </View>
-            <View style={twoColItem} />
-          </View>
-
-          {/* Linha 3: Contribuições lado a lado */}
-          {data.tipo === "AMBOS" ? (
-            <View style={twoColRow}>
-              <View style={twoColItem}>
-                <Text style={labelStyle}>Contribuição Patronal</Text>
-                <Text style={valueStyleBold}>
-                  {formatBRL(data.contribuicaoPatronal)}
-                </Text>
-              </View>
-              <View style={twoColItem}>
-                <Text style={labelStyle}>Contribuição Segurado</Text>
-                <Text style={valueStyleBold}>
-                  {formatBRL(data.contribuicaoSegurado)}
-                </Text>
-              </View>
-            </View>
-          ) : (
-            <View style={twoColRow}>
-              <View style={twoColItem}>
-                <Text style={labelStyle}>
-                  {data.tipo === "PATRONAL" ? "Contribuição Patronal" : "Contribuição Segurado"}
-                </Text>
-                <Text style={valueStyleBold}>
-                  {formatBRL(data.tipo === "PATRONAL" ? data.contribuicaoPatronal : data.contribuicaoSegurado)}
-                </Text>
-              </View>
-              <View style={twoColItem} />
-            </View>
-          )}
-
-          {/* Linha 4: Valor para Pagamento em destaque */}
-          <View style={{ ...infoRow, backgroundColor: "#f0f4f8", padding: 10, borderRadius: 4, marginTop: 12 }}>
-            <View style={infoCol}>
-              <Text style={labelStyle}>Valor para Pagamento</Text>
-              <Text style={{ ...valueStyleBold, fontSize: 16, color: "#1a3a52" }}>
-                {formatBRL(totalPagamento)}
-              </Text>
-            </View>
+          {/* QR Code Placeholder */}
+          <View style={{ flex: 1, backgroundColor: "#f5f5f5", padding: 6, borderWidth: 1, borderColor: "#ddd", borderRadius: 3, alignItems: "center", justifyContent: "center" }}>
+            <Text style={{ fontSize: 7, color: "#999", textAlign: "center" }}>
+              [QR CODE]{"\n"}Escaneie{"\n"}para pagar
+            </Text>
           </View>
         </View>
 
-        {/* Dados para Depósito */}
-        <View style={sectionStyle}>
-          <Text style={sectionTitle}>DADOS PARA DEPÓSITO/TRANSFERÊNCIA</Text>
-
-          <View style={twoColRow}>
-            <View style={twoColItem}>
-              <Text style={labelStyle}>Banco</Text>
-              <Text style={valueStyle}>{rpps?.banco || "—"}</Text>
-            </View>
-            <View style={twoColItem}>
-              <Text style={labelStyle}>Agência</Text>
-              <Text style={valueStyle}>{rpps?.agencia || "—"}</Text>
-            </View>
-          </View>
-
-          <View style={infoRow}>
-            <View style={infoCol}>
-              <Text style={labelStyle}>Conta Corrente</Text>
-              <Text style={valueStyle}>{rpps?.conta || "—"}</Text>
-            </View>
-          </View>
-        </View>
-
+        {/* Footer */}
         <PdfInstitutionalFooter
           rpps={rpps}
           emittedBy={emittedBy}
@@ -213,84 +190,3 @@ export function GuiaContribuicaoDocument({
   );
 }
 
-// ───────────────────────────────────────────────────────────────
-// Styles
-// ───────────────────────────────────────────────────────────────
-
-const sectionStyle = {
-  marginBottom: 16,
-  paddingLeft: 12,
-  paddingRight: 12,
-};
-
-const sectionTitle = {
-  fontSize: 10,
-  fontWeight: "bold" as const,
-  marginBottom: 8,
-  paddingBottom: 6,
-  borderBottomWidth: 1,
-  borderBottomColor: palette.border,
-  color: palette.primary,
-};
-
-const infoRow = {
-  marginBottom: 8,
-  flexDirection: "row" as const,
-  gap: 12,
-};
-
-const infoCol = {
-  flex: 1,
-};
-
-const labelStyle = {
-  fontSize: 8,
-  color: palette.muted,
-  marginBottom: 2,
-  fontWeight: "bold" as const,
-};
-
-const valueStyle = {
-  fontSize: 9,
-  color: palette.text,
-  lineHeight: 1.2,
-};
-
-const valueStyleBold = {
-  fontSize: 10,
-  color: palette.text,
-  fontWeight: "bold" as const,
-  lineHeight: 1.2,
-};
-
-const twoColRow = {
-  flexDirection: "row" as const,
-  gap: 12,
-  marginBottom: 8,
-};
-
-const twoColItem = {
-  flex: 1,
-};
-
-const totalizerBox = {
-  marginVertical: 14,
-  paddingHorizontal: 12,
-  paddingVertical: 12,
-  backgroundColor: palette.primary,
-  borderRadius: 4,
-  alignItems: "center" as const,
-};
-
-const totalizerLabel = {
-  fontSize: 9,
-  color: "#fff",
-  marginBottom: 6,
-  fontWeight: "bold" as const,
-};
-
-const totalizerValue = {
-  fontSize: 20,
-  color: "#fff",
-  fontWeight: "bold" as const,
-};
