@@ -6,6 +6,7 @@ import { lancamentoSchema } from "@/lib/schemas";
 import { calcularLancamento } from "@/lib/calc/lancamento";
 import { recordAudit } from "@/lib/audit";
 import { canManageLancamentos, forbidden } from "@/lib/permissions";
+import { broadcastUpdate } from "@/app/api/relatorios/updates/route";
 
 export async function GET(req: Request) {
   const session = await auth();
@@ -133,6 +134,13 @@ export async function POST(req: Request) {
     entityId: created.id,
     action: "CREATE",
     after: created,
+  });
+
+  // Broadcast update to SSE clients
+  broadcastUpdate({
+    type: "lancamento",
+    action: "created",
+    timestamp: new Date().toISOString(),
   });
 
   return NextResponse.json(created, { status: 201 });
