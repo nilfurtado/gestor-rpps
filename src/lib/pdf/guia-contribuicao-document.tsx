@@ -118,7 +118,7 @@ export function GuiaContribuicaoDocument({
             </View>
           </View>
 
-          {/* Linha 2: Base de Cálculo + (vazio ou contribuição) */}
+          {/* Linha 2: Base de Cálculo + (espaço vazio) */}
           <View style={twoColRow}>
             <View style={twoColItem}>
               <Text style={labelStyle}>Base de Cálculo</Text>
@@ -126,11 +126,7 @@ export function GuiaContribuicaoDocument({
                 {formatBRL(data.baseCálculo)}
               </Text>
             </View>
-            {data.tipo === "AMBOS" && (
-              <View style={twoColItem}>
-                <Text style={labelStyle}}>​</Text>
-              </View>
-            )}
+            <View style={twoColItem} />
           </View>
 
           {/* Linha 3: Contribuições lado a lado */}
