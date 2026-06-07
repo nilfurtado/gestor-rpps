@@ -161,43 +161,51 @@ export function GuiaContribuicaoDocument({
           </Text>
         </View>
 
-        {/* Depósito + Código de Barras */}
+        {/* Depósito + QR Code (lado a lado) */}
         <View style={{ paddingLeft: 12, paddingRight: 12, marginBottom: 8 }}>
-          {/* Depósito */}
-          <View style={{ marginBottom: 8 }}>
-            <Text style={{ fontSize: 9, fontWeight: "bold", color: "#1a3a52", marginBottom: 4, borderBottomWidth: 1, borderBottomColor: "#ddd", paddingBottom: 2 }}>
-              DEPÓSITO/TRANSFERÊNCIA
-            </Text>
-            <View style={{ flexDirection: "row", gap: 8, marginBottom: 3 }}>
-              <View style={{ flex: 1 }}>
-                <Text style={{ fontSize: 7, color: "#666", fontWeight: "bold" }}>Banco</Text>
-                <Text style={{ fontSize: 8, color: "#333" }}>{rpps?.banco || "—"}</Text>
-              </View>
-              <View style={{ flex: 1 }}>
-                <Text style={{ fontSize: 7, color: "#666", fontWeight: "bold" }}>Agência</Text>
-                <Text style={{ fontSize: 8, color: "#333" }}>{rpps?.agencia || "—"}</Text>
-              </View>
-              <View style={{ flex: 1 }}>
-                <Text style={{ fontSize: 7, color: "#666", fontWeight: "bold" }}>Conta</Text>
-                <Text style={{ fontSize: 8, color: "#333" }}>{rpps?.conta || "—"}</Text>
+          {/* Título */}
+          <Text style={{ fontSize: 9, fontWeight: "bold", color: "#1a3a52", marginBottom: 4, borderBottomWidth: 1, borderBottomColor: "#ddd", paddingBottom: 2 }}>
+            DEPÓSITO/TRANSFERÊNCIA
+          </Text>
+
+          {/* Depósito (esquerda) + QR Code (direita) */}
+          <View style={{ flexDirection: "row", gap: 16, marginBottom: 8 }}>
+            {/* Dados Bancários */}
+            <View style={{ flex: 1 }}>
+              <View style={{ flexDirection: "row", gap: 12 }}>
+                <View style={{ flex: 1 }}>
+                  <Text style={{ fontSize: 7, color: "#666", fontWeight: "bold", marginBottom: 2 }}>Banco</Text>
+                  <Text style={{ fontSize: 8, color: "#333" }}>{rpps?.banco || "—"}</Text>
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={{ fontSize: 7, color: "#666", fontWeight: "bold", marginBottom: 2 }}>Agência</Text>
+                  <Text style={{ fontSize: 8, color: "#333" }}>{rpps?.agencia || "—"}</Text>
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={{ fontSize: 7, color: "#666", fontWeight: "bold", marginBottom: 2 }}>Conta</Text>
+                  <Text style={{ fontSize: 8, color: "#333" }}>{rpps?.conta || "—"}</Text>
+                </View>
               </View>
             </View>
+
+            {/* QR Code (direita) */}
+            {qrCodeImage && (
+              <View style={{ width: 120, height: 120, borderWidth: 1, borderColor: "#ddd", padding: 4, backgroundColor: "#fafafa", borderRadius: 2 }}>
+                <Image src={qrCodeImage} style={{ width: "100%", height: "100%" }} />
+              </View>
+            )}
           </View>
 
-          {/* Código de Barras Bancário */}
-          <View style={{ backgroundColor: "#fff", padding: 8, borderWidth: 1, borderColor: "#ddd", borderRadius: 3 }}>
-            <Text style={{ fontSize: 7, color: "#666", fontWeight: "bold", marginBottom: 4 }}>CÓDIGO DE BARRAS PARA PAGAMENTO</Text>
-            {qrCodeImage ? (
-              <Image src={qrCodeImage} style={{ width: 300, height: 60, alignSelf: "center" }} />
-            ) : (
-              <Text style={{ fontSize: 8, fontFamily: "Courier", letterSpacing: 0.5, textAlign: "center", color: "#333", fontWeight: "bold" }}>
-                {generateBarcodeNumber({
-                  orgaoCnpj: data.orgaoCnpj,
-                  dataVencimento: data.dataVencimento,
-                  totalPagamento,
-                })}
-              </Text>
-            )}
+          {/* Código de Barras (linha cheia) */}
+          <View style={{ backgroundColor: "#fff", padding: 6, borderWidth: 1, borderColor: "#ddd", borderRadius: 2 }}>
+            <Text style={{ fontSize: 7, color: "#666", fontWeight: "bold", marginBottom: 3 }}>CÓDIGO DE BARRAS PARA PAGAMENTO</Text>
+            <Text style={{ fontSize: 9, fontFamily: "Courier", letterSpacing: 1, textAlign: "center", color: "#333", fontWeight: "bold" }}>
+              {generateBarcodeNumber({
+                orgaoCnpj: data.orgaoCnpj,
+                dataVencimento: data.dataVencimento,
+                totalPagamento,
+              })}
+            </Text>
           </View>
         </View>
 
