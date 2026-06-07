@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -12,7 +12,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Loader2, FileText } from "lucide-react";
-import { prisma } from "@/lib/db";
 
 export default function GuiaContribuicaoPage() {
   const [pending, start] = useTransition();
@@ -26,22 +25,35 @@ export default function GuiaContribuicaoPage() {
   const [orgaos, setOrgaos] = useState<any[]>([]);
   const [exercicios, setExercicios] = useState<any[]>([]);
   const [competencias, setCompetencias] = useState<any[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   // Carregar dados iniciais
-  if (orgaos.length === 0) {
-    setLoading(true);
-    Promise.all([
-      fetch("/api/orgaos?limit=100").then((r) => r.json()),
-      fetch("/api/exercicios").then((r) => r.json()),
-      fetch("/api/competencias").then((r) => r.json()),
-    ]).then(([orgaosData, exerciciosData, competenciasData]) => {
-      setOrgaos(orgaosData || []);
-      setExercicios(exerciciosData || []);
-      setCompetencias(competenciasData || []);
-      setLoading(false);
-    });
-  }
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const [orgaosRes, exerciciosRes, competenciasRes] = await Promise.all([
+          fetch("/api/orgaos?limit=100"),
+          fetch("/api/exercicios"),
+          fetch("/api/competencias"),
+        ]);
+
+        const orgaosData = await orgaosRes.json();
+        const exerciciosData = await exerciciosRes.json();
+        const competenciasData = await competenciasRes.json();
+
+        setOrgaos(orgaosData || []);
+        setExercicios(exerciciosData || []);
+        setCompetencias(competenciasData || []);
+      } catch (err) {
+        console.error("Erro ao carregar dados:", err);
+        toast.error("Erro ao carregar dados dos filtros");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
+  }, []);
 
   const handleGerar = () => {
     if (!orgaoId || !exercicioId || !competenciaId) {
@@ -99,6 +111,15 @@ export default function GuiaContribuicaoPage() {
       </div>
 
       <div className="rounded-lg border border-border bg-card p-6 space-y-6">
+        {loading ? (
+          <div className="flex items-center justify-center h-48">
+            <div className="flex flex-col items-center gap-2">
+              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+              <p className="text-sm text-muted-foreground">Carregando filtros...</p>
+            </div>
+          </div>
+        ) : (
+          <>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           {/* Órgão */}
           <div className="space-y-2">
@@ -172,25 +193,27 @@ export default function GuiaContribuicaoPage() {
           </div>
         </div>
 
-        <div className="flex gap-3">
-          <Button
-            onClick={handleGerar}
-            disabled={pending || !orgaoId || !exercicioId || !competenciaId}
-            className="gap-2"
-          >
-            {pending ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Gerando...
-              </>
-            ) : (
-              <>
-                <FileText className="h-4 w-4" />
-                Gerar Guia PDF
-              </>
-            )}
-          </Button>
-        </div>
+            <div className="flex gap-3">
+              <Button
+                onClick={handleGerar}
+                disabled={pending || !orgaoId || !exercicioId || !competenciaId}
+                className="gap-2"
+              >
+                {pending ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Gerando...
+                  </>
+                ) : (
+                  <>
+                    <FileText className="h-4 w-4" />
+                    Gerar Guia PDF
+                  </>
+                )}
+              </Button>
+            </div>
+          </>
+        )}
       </div>
 
       {/* Info */}
