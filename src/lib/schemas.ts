@@ -77,11 +77,12 @@ export const lancamentoSchema = z.object({
   competenciaId: z.coerce.number().int().positive(),
   aliquota: z.coerce.number().min(0).max(100),
   valorRecolher: z.coerce.number().min(0),
-  valorRecolhido: z.coerce.number().min(0),
+  valorRecolhido: z.coerce.number().min(0).optional().nullable().default(0),
   quantidadeServidores: z.coerce.number().int().min(0).optional().nullable(),
   folhaBase: z.coerce.number().min(0).optional().nullable(),
   multas: z.coerce.number().min(0).optional().nullable(),
   juros: z.coerce.number().min(0).optional().nullable(),
+  acrescimo: z.coerce.number().min(0).optional().nullable().default(0),
   parcelado: z.coerce.boolean().optional().default(false),
   dataVencimento: z
     .string()

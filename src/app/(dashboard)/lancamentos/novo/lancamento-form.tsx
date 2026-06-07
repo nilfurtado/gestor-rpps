@@ -32,6 +32,7 @@ export interface LancamentoInitial {
   folhaBase: number | null;
   multas: number | null;
   juros: number | null;
+  acrescimo: number | null;
   parcelado: boolean;
   dataVencimento: string | null;
   observacoes: string | null;
@@ -91,6 +92,9 @@ export function LancamentoForm({
   const [juros, setJuros] = useState<string>(
     initial?.juros != null ? formatCurrency(Number(initial.juros)) : ""
   );
+  const [acrescimo, setAcrescimo] = useState<string>(
+    initial?.acrescimo != null ? formatCurrency(Number(initial.acrescimo)) : ""
+  );
   const [parcelado, setParcelado] = useState(initial?.parcelado ?? false);
   const [dataVencimento, setDataVencimento] = useState<string>(
     initial?.dataVencimento
@@ -120,9 +124,10 @@ export function LancamentoForm({
       valorRecolhido: currencyToNumber(valorRecolhido),
       multas: currencyToNumber(multas),
       juros: currencyToNumber(juros),
+      acrescimo: currencyToNumber(acrescimo),
       parcelado,
     });
-  }, [valorRecolherCalculado, valorRecolhido, multas, juros, parcelado]);
+  }, [valorRecolherCalculado, valorRecolhido, multas, juros, acrescimo, parcelado]);
 
   const duplicateConflict = useMemo(() => {
     if (isEdit) return null;
@@ -174,6 +179,7 @@ export function LancamentoForm({
           folhaBase: folhaBase ? currencyToNumber(folhaBase) : null,
           multas: multas ? currencyToNumber(multas) : null,
           juros: juros ? currencyToNumber(juros) : null,
+          acrescimo: acrescimo ? currencyToNumber(acrescimo) : null,
           parcelado,
           dataVencimento: dataVencimento || null,
           observacoes: observacoes || null,
@@ -340,6 +346,13 @@ export function LancamentoForm({
             <CurrencyInput
               value={juros}
               onChange={(e) => setJuros(e.target.value)}
+              className="h-9 tabular-nums"
+            />
+          </Field>
+          <Field label="Acréscimo (R$)">
+            <CurrencyInput
+              value={acrescimo}
+              onChange={(e) => setAcrescimo(e.target.value)}
               className="h-9 tabular-nums"
             />
           </Field>

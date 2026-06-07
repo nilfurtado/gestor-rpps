@@ -7,6 +7,7 @@ interface CalcInput {
   valorRecolhido: DecimalLike;
   multas?: DecimalLike;
   juros?: DecimalLike;
+  acrescimo?: DecimalLike;
   parcelado?: boolean;
 }
 
@@ -39,6 +40,7 @@ export function calcularLancamento(input: CalcInput): CalcResult {
   const valorRecolhido = toNumber(input.valorRecolhido);
   const multas = toNumber(input.multas ?? 0);
   const juros = toNumber(input.juros ?? 0);
+  const acrescimo = toNumber(input.acrescimo ?? 0);
 
   // ─── CÁLCULOS COM ARREDONDAMENTO (toFixed 2) ───
 
@@ -63,7 +65,7 @@ export function calcularLancamento(input: CalcInput): CalcResult {
   const encargosTotal = Number(encargosTotalBruto.toFixed(2));
 
   // Valor Total Devido
-  const valorTotalDevidoBruto = deficitBruto + multas + juros;
+  const valorTotalDevidoBruto = deficitBruto + multas + juros + acrescimo;
   const valorTotalDevido = Number(valorTotalDevidoBruto.toFixed(2));
 
   // Valor Líquido Arrecadado

@@ -66,6 +66,7 @@ model FolhaPrevidenciaria {
   folhaBase               Decimal?
   multas                  Decimal?        @default(0)
   juros                   Decimal?        @default(0)
+  acrescimo               Decimal?        @default(0)
   parcelado               Boolean         @default(false)
   deficit                 Decimal
   superavit               Decimal         @default(0)        // Valor Recolhido > Valor a Recolher
