@@ -77,6 +77,16 @@ export function GuiaContribuicaoDocument({
           generatedAt={generatedAt.toLocaleString("pt-BR")}
         />
 
+        {/* Informações da Guia */}
+        <View style={{ paddingLeft: 12, paddingRight: 12, marginBottom: 16, borderBottom: "1px solid #e5e7eb", paddingBottom: 8 }}>
+          <Text style={{ fontSize: 11, color: "#333", marginBottom: 4 }}>
+            {data.orgaoNome}
+          </Text>
+          <Text style={{ fontSize: 9, color: "#666" }}>
+            Competência: {data.competencia} | Tipo: {data.tipo === "AMBOS" ? "Patronal e Segurado" : data.tipo}
+          </Text>
+        </View>
+
         {/* Ente Público Pagador */}
         <View style={sectionStyle}>
           <Text style={sectionTitle}>ENTE PÚBLICO PAGADOR</Text>
