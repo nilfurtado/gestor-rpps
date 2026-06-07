@@ -1,5 +1,5 @@
 import React from "react";
-import { Document, Page, Text, View } from "@react-pdf/renderer";
+import { Document, Page, Text, View, Image } from "@react-pdf/renderer";
 import { formatBRL, formatDate } from "@/lib/format";
 import { generateBarcodeNumber } from "@/lib/barcode-generator";
 import { reportStyles, palette } from "./styles";
@@ -36,6 +36,7 @@ interface Props {
   rpps: RppsGuiaInfo | null;
   logoBase64: string | null;
   emittedBy: string;
+  qrCodeImage?: string;
 }
 
 export function GuiaContribuicaoDocument({
@@ -43,6 +44,7 @@ export function GuiaContribuicaoDocument({
   rpps,
   logoBase64,
   emittedBy,
+  qrCodeImage,
 }: Props) {
   const generatedAt = new Date();
   const docTitle = rpps?.nomeInstituto || "SANPREV";
@@ -183,9 +185,13 @@ export function GuiaContribuicaoDocument({
 
             {/* QR Code */}
             <View style={{ flex: 1, backgroundColor: "#f5f5f5", padding: 6, borderWidth: 1, borderColor: "#ddd", borderRadius: 3, alignItems: "center", justifyContent: "center" }}>
-              <Text style={{ fontSize: 7, color: "#999", textAlign: "center" }}>
-                [QR CODE]{"\n"}Escaneie{"\n"}para pagar
-              </Text>
+              {qrCodeImage ? (
+                <Image src={qrCodeImage} style={{ width: 80, height: 80 }} />
+              ) : (
+                <Text style={{ fontSize: 7, color: "#999", textAlign: "center" }}>
+                  [QR CODE]{"\n"}Escaneie{"\n"}para pagar
+                </Text>
+              )}
             </View>
           </View>
 

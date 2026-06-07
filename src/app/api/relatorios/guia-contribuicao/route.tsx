@@ -4,6 +4,7 @@ import React from "react";
 import { prisma } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { currencyToNumber } from "@/lib/format-currency";
+import { generateQRCodeImage } from "@/lib/barcode-generator";
 import {
   GuiaContribuicaoDocument,
   type GuiaContribuicaoData,
@@ -110,6 +111,17 @@ export async function GET(req: Request) {
     const competenciaStr = `${competenciaMes}/${exercicioAno}`;
     const emittedBy = session.user.email || "Sistema SANPREV";
 
+    // Gerar QR code
+    const qrCodeImage = await generateQRCodeImage({
+      orgaoCnpj: orgao.cnpj || "",
+      dataVencimento: new Date(
+        tipoParaRender === "PATRONAL"
+          ? patronalDataVencimento!
+          : seguradoDataVencimento!
+      ),
+      totalPagamento,
+    });
+
     // Renderizar como componente único (uma guia por vez)
     // Se for AMBAS, precisa de duas chamadas à API
     const tipoParaRender: "PATRONAL" | "SEGURADO" =
@@ -150,6 +162,7 @@ export async function GET(req: Request) {
         rpps={rppsInfo}
         logoBase64={logoBase64}
         emittedBy={emittedBy}
+        qrCodeImage={qrCodeImage}
       />
     );
 
