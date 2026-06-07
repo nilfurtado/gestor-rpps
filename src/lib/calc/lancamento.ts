@@ -44,20 +44,23 @@ export function calcularLancamento(input: CalcInput): CalcResult {
 
   // ─── CÁLCULOS COM ARREDONDAMENTO (toFixed 2) ───
 
+  // Valor Recolhido Efetivo = Valor Recolhido + Acréscimo
+  const valorRecolhidoEfetivo = valorRecolhido + acrescimo;
+
   // Déficit
-  const deficit = Math.max(0, valorRecolher - valorRecolhido);
-  const deficitBruto = Math.max(0, valorRecolher - valorRecolhido);
+  const deficit = Math.max(0, valorRecolher - valorRecolhidoEfetivo);
+  const deficitBruto = Math.max(0, valorRecolher - valorRecolhidoEfetivo);
 
   // Inadimplência
   const inadimplenciaBruta = valorRecolher > 0 ? (deficitBruto / valorRecolher) * 100 : 0;
   const inadimplencia = Number(inadimplenciaBruta.toFixed(2));
 
   // % Pago
-  const percentualPagoBruto = valorRecolher > 0 ? (valorRecolhido / valorRecolher) * 100 : 0;
+  const percentualPagoBruto = valorRecolher > 0 ? (valorRecolhidoEfetivo / valorRecolher) * 100 : 0;
   const percentualPago = Number(percentualPagoBruto.toFixed(2));
 
   // Superávit
-  const superavitBruto = Math.max(0, valorRecolhido - valorRecolher);
+  const superavitBruto = Math.max(0, valorRecolhidoEfetivo - valorRecolher);
   const superavit = Number(superavitBruto.toFixed(2));
 
   // Encargos Totais
@@ -65,14 +68,14 @@ export function calcularLancamento(input: CalcInput): CalcResult {
   const encargosTotal = Number(encargosTotalBruto.toFixed(2));
 
   // Valor Total Devido
-  const valorTotalDevidoBruto = deficitBruto + multas + juros + acrescimo;
+  const valorTotalDevidoBruto = deficitBruto + multas + juros;
   const valorTotalDevido = Number(valorTotalDevidoBruto.toFixed(2));
 
   // Valor Líquido Arrecadado
   const valorLiquidoArrecadadoBruto = valorRecolhido - multas - juros;
   const valorLiquidoArrecadado = Number(valorLiquidoArrecadadoBruto.toFixed(2));
 
-  // Determinação do status (usando superavit arredondado)
+  // Determinação do status (usando superavit arredondado e valor recolhido efetivo)
   let status: LancamentoStatus;
   if (input.parcelado) {
     status = "PARCELADO";
@@ -80,9 +83,9 @@ export function calcularLancamento(input: CalcInput): CalcResult {
     status = "INADIMPLENTE";
   } else if (superavit > 0) {
     status = "PAGO";
-  } else if (valorRecolhido === 0) {
+  } else if (valorRecolhidoEfetivo === 0) {
     status = "INADIMPLENTE";
-  } else if (valorRecolhido >= valorRecolher) {
+  } else if (valorRecolhidoEfetivo >= valorRecolher) {
     status = "PAGO";
   } else {
     status = "PARCIAL";
