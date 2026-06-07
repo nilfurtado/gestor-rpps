@@ -1,3 +1,5 @@
+import QRCode from "qrcode";
+
 // Gerar número do código de barras para exibição
 export function generateBarcodeNumber(data: {
   orgaoCnpj: string;
@@ -18,14 +20,24 @@ export function generateBarcodeNumber(data: {
   return `${cnpj}${vencimento}${valor}`;
 }
 
-// Gerar código de barras visual (formato bancário)
-// Usa texto monoespaçado renderizado direto no PDF
+// Gerar QR code como imagem PNG base64
 export async function generateBarcodeImage(data: {
   orgaoCnpj: string;
   dataVencimento: Date;
   totalPagamento: number;
 }): Promise<string> {
-  // Retorna vazio para usar fallback de texto no documento
-  // O número será exibido como texto monoespaçado no PDF
-  return "";
+  try {
+    const barcodeNumber = generateBarcodeNumber(data);
+    const qrImage = await QRCode.toDataURL(barcodeNumber, {
+      errorCorrectionLevel: "H",
+      type: "image/png",
+      quality: 0.95,
+      margin: 1,
+      width: 150,
+    });
+    return qrImage;
+  } catch (error) {
+    console.error("Erro ao gerar QR code:", error);
+    return "";
+  }
 }
