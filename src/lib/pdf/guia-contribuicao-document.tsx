@@ -83,13 +83,13 @@ export function GuiaContribuicaoDocument({
         {/* Linha divisória */}
         <View style={{ height: 1, backgroundColor: "#ddd", marginBottom: 8 }} />
 
-        {/* Título + Info Guia (Compacto) */}
+        {/* Info Guia com Labels em Negrito */}
         <View style={{ paddingLeft: 12, paddingRight: 12, marginBottom: 8, borderBottomWidth: 1, borderBottomColor: "#ddd", paddingBottom: 6 }}>
-          <Text style={{ fontSize: 10, color: "#333", marginBottom: 2 }}>
-            {data.orgaoNome}
+          <Text style={{ fontSize: 9, color: "#333", marginBottom: 3 }}>
+            <Text style={{ fontWeight: "bold" }}>ENTE MUNICIPAL:</Text> {data.orgaoNome}
           </Text>
-          <Text style={{ fontSize: 8, color: "#666" }}>
-            Competência: {data.competencia} | Tipo: {data.tipo === "AMBOS" ? "Patronal e Segurado" : data.tipo}
+          <Text style={{ fontSize: 9, color: "#333" }}>
+            <Text style={{ fontWeight: "bold" }}>COMPETÊNCIA:</Text> {data.competencia} | <Text style={{ fontWeight: "bold" }}>TIPO:</Text> {data.tipo === "AMBOS" ? "Patronal e Segurado" : data.tipo}
           </Text>
         </View>
 
