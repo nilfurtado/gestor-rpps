@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useRef } from "react";
 import { Input, type InputProps } from "./input";
 import { formatValue } from "@/lib/format-currency";
