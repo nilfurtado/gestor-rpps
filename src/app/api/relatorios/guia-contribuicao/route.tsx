@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { renderToBuffer } from "@react-pdf/renderer";
+import { pdf } from "@react-pdf/renderer";
+import React from "react";
 import { prisma } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import {
@@ -120,7 +121,7 @@ export async function GET(req: Request) {
       : null;
 
     // Renderizar PDF
-    const document = (
+    const instance = pdf(
       <GuiaContribuicaoDocument
         data={guiaData}
         rpps={rppsInfo}
@@ -129,7 +130,8 @@ export async function GET(req: Request) {
       />
     );
 
-    const buffer = await renderToBuffer(document);
+    const blob = await instance.toBlob();
+    const buffer = Buffer.from(await blob.arrayBuffer());
 
     return new NextResponse(buffer, {
       headers: {
