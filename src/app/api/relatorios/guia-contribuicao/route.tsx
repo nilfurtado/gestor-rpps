@@ -23,6 +23,7 @@ export async function GET(req: Request) {
     const tipo = searchParams.get("tipo") as "PATRONAL" | "SEGURADO" | "AMBOS";
     const dataVencimento = searchParams.get("dataVencimento");
     const baseCálculo = searchParams.get("baseCálculo");
+    const contribuicaoPatronal = searchParams.get("contribuicaoPatronal");
     const contribuicaoSegurado = searchParams.get("contribuicaoSegurado");
 
     if (
@@ -32,6 +33,7 @@ export async function GET(req: Request) {
       !tipo ||
       !dataVencimento ||
       !baseCálculo ||
+      !contribuicaoPatronal ||
       !contribuicaoSegurado
     ) {
       return NextResponse.json(
@@ -91,7 +93,7 @@ export async function GET(req: Request) {
 
     const vencimentoDate = new Date(dataVencimento);
 
-    // Montar dados com valores do formulário
+    // Montar dados com valores do formulário (todos manuais)
     const guiaData: GuiaContribuicaoData = {
       orgaoNome: lancamento.orgao.nome,
       orgaoCnpj: lancamento.orgao.cnpj || "",
@@ -104,7 +106,7 @@ export async function GET(req: Request) {
       competencia: competenciaStr,
       dataVencimento: vencimentoDate,
       baseCálculo: Number(baseCálculo),
-      contribuicaoPatronal: Number(lancamento.valorRecolher),
+      contribuicaoPatronal: Number(contribuicaoPatronal),
       contribuicaoSegurado: Number(contribuicaoSegurado),
       tipo,
     };

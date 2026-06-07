@@ -27,6 +27,7 @@ export default function GuiaContribuicaoPage() {
   // Novos campos manuais
   const [dataVencimento, setDataVencimento] = useState("");
   const [baseCálculo, setBaseCálculo] = useState("");
+  const [contribuicaoPatronal, setContribuicaoPatronal] = useState("");
   const [contribuicaoSegurado, setContribuicaoSegurado] = useState("");
 
   const [orgaos, setOrgaos] = useState<any[]>([]);
@@ -69,6 +70,7 @@ export default function GuiaContribuicaoPage() {
       !competenciaId ||
       !dataVencimento ||
       !baseCálculo ||
+      !contribuicaoPatronal ||
       !contribuicaoSegurado
     ) {
       toast.error("Preencha todos os campos");
@@ -84,6 +86,7 @@ export default function GuiaContribuicaoPage() {
           tipo,
           dataVencimento,
           baseCálculo,
+          contribuicaoPatronal,
           contribuicaoSegurado,
         });
 
@@ -228,6 +231,18 @@ export default function GuiaContribuicaoPage() {
               id="baseCálculo"
               value={baseCálculo}
               onChange={(e) => setBaseCálculo(e.target.value)}
+              placeholder="0,00"
+              className="h-9 text-sm"
+            />
+          </div>
+
+          {/* Contribuição Patronal */}
+          <div className="space-y-2">
+            <Label htmlFor="contribuicaoPatronal">Contribuição Patronal (R$) *</Label>
+            <CurrencyInput
+              id="contribuicaoPatronal"
+              value={contribuicaoPatronal}
+              onChange={(e) => setContribuicaoPatronal(e.target.value)}
               placeholder="0,00"
               className="h-9 text-sm"
             />
