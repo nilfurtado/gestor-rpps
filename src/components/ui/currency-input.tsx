@@ -60,6 +60,3 @@ export function CurrencyInput(props: InputProps) {
     />
   );
 }
-
-// Re-export para manter compatibilidade
-export { currencyToNumber, formatCurrency } from "@/lib/format-currency";
