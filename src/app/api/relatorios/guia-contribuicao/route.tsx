@@ -109,74 +109,47 @@ export async function GET(req: Request) {
     const competenciaStr = `${competenciaMes}/${exercicioAno}`;
     const emittedBy = session.user.email || "Sistema SANPREV";
 
-    // Criar documento com uma ou múltiplas páginas
-    const pages: React.ReactElement[] = [];
+    // Renderizar como componente único (uma guia por vez)
+    // Se for AMBAS, precisa de duas chamadas à API
+    const tipoParaRender: "PATRONAL" | "SEGURADO" =
+      tipo === "AMBAS" ? "PATRONAL" : tipo;
 
-    // Adicionar guia PATRONAL se selecionada
-    if (tipo === "PATRONAL" || tipo === "AMBAS") {
-      const patronalData: GuiaContribuicaoData = {
-        orgaoNome: orgao.nome,
-        orgaoCnpj: orgao.cnpj || "",
-        orgaoEndereco: orgao.endereco || "",
-        orgaoNumero: orgao.numero || "",
-        orgaoBairro: orgao.bairro || "",
-        orgaoCidade: orgao.cidade || "",
-        orgaoEstado: orgao.estado || "",
-        orgaoCep: orgao.cep || "",
-        competencia: competenciaStr,
-        dataVencimento: new Date(patronalDataVencimento!),
-        baseCálculo: Number(patronalBaseCálculo),
-        contribuicaoPatronal: Number(patronalContribuicao),
-        contribuicaoSegurado: 0,
-        tipo: "PATRONAL",
-      };
+    const guiaData: GuiaContribuicaoData = {
+      orgaoNome: orgao.nome,
+      orgaoCnpj: orgao.cnpj || "",
+      orgaoEndereco: orgao.endereco || "",
+      orgaoNumero: orgao.numero || "",
+      orgaoBairro: orgao.bairro || "",
+      orgaoCidade: orgao.cidade || "",
+      orgaoEstado: orgao.estado || "",
+      orgaoCep: orgao.cep || "",
+      competencia: competenciaStr,
+      dataVencimento: new Date(
+        tipoParaRender === "PATRONAL"
+          ? patronalDataVencimento!
+          : seguradoDataVencimento!
+      ),
+      baseCálculo: Number(
+        tipoParaRender === "PATRONAL"
+          ? patronalBaseCálculo
+          : seguradoBaseCálculo
+      ),
+      contribuicaoPatronal: tipoParaRender === "PATRONAL"
+        ? Number(patronalContribuicao)
+        : 0,
+      contribuicaoSegurado: tipoParaRender === "SEGURADO"
+        ? Number(seguradoContribuicao)
+        : 0,
+      tipo: tipoParaRender,
+    };
 
-      pages.push(
-        <GuiaContribuicaoDocument
-          key="patronal"
-          data={patronalData}
-          rpps={rppsInfo}
-          logoBase64={logoBase64}
-          emittedBy={emittedBy}
-        />
-      );
-    }
-
-    // Adicionar guia SEGURADO se selecionada
-    if (tipo === "SEGURADO" || tipo === "AMBAS") {
-      const seguradoData: GuiaContribuicaoData = {
-        orgaoNome: orgao.nome,
-        orgaoCnpj: orgao.cnpj || "",
-        orgaoEndereco: orgao.endereco || "",
-        orgaoNumero: orgao.numero || "",
-        orgaoBairro: orgao.bairro || "",
-        orgaoCidade: orgao.cidade || "",
-        orgaoEstado: orgao.estado || "",
-        orgaoCep: orgao.cep || "",
-        competencia: competenciaStr,
-        dataVencimento: new Date(seguradoDataVencimento!),
-        baseCálculo: Number(seguradoBaseCálculo),
-        contribuicaoPatronal: 0,
-        contribuicaoSegurado: Number(seguradoContribuicao),
-        tipo: "SEGURADO",
-      };
-
-      pages.push(
-        <GuiaContribuicaoDocument
-          key="segurado"
-          data={seguradoData}
-          rpps={rppsInfo}
-          logoBase64={logoBase64}
-          emittedBy={emittedBy}
-        />
-      );
-    }
-
-    // Criar documento PDF único com múltiplas páginas
     const instance = pdf(
-      <Document title="Guia de Contribuição">
-        {pages}
-      </Document>
+      <GuiaContribuicaoDocument
+        data={guiaData}
+        rpps={rppsInfo}
+        logoBase64={logoBase64}
+        emittedBy={emittedBy}
+      />
     );
 
     const blob = await instance.toBlob();
@@ -185,7 +158,7 @@ export async function GET(req: Request) {
     return new NextResponse(buffer, {
       headers: {
         "Content-Type": "application/pdf",
-        "Content-Disposition": `attachment; filename="guia-${tipo.toLowerCase()}-${orgao.sigla}-${competenciaStr.replace("/", "-")}.pdf"`,
+        "Content-Disposition": `attachment; filename="guia-${tipoParaRender.toLowerCase()}-${orgao.sigla}-${competenciaStr.replace("/", "-")}.pdf"`,
       },
     });
   } catch (err) {
