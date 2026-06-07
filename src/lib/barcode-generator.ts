@@ -1,4 +1,4 @@
-// Gerar número do código de barras para exibição
+// Gerar número do código de barras para exibição (sem dependências)
 export function generateBarcodeNumber(data: {
   orgaoCnpj: string;
   dataVencimento: Date;
