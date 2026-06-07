@@ -104,6 +104,7 @@ export function GuiaContribuicaoDocument({
         <View style={sectionStyle}>
           <Text style={sectionTitle}>DADOS DA CONTRIBUIÇÃO</Text>
 
+          {/* Linha 1: Competência + Data de Vencimento */}
           <View style={twoColRow}>
             <View style={twoColItem}>
               <Text style={labelStyle}>Competência</Text>
@@ -117,37 +118,52 @@ export function GuiaContribuicaoDocument({
             </View>
           </View>
 
-          <View style={infoRow}>
-            <View style={infoCol}>
+          {/* Linha 2: Base de Cálculo + (vazio ou contribuição) */}
+          <View style={twoColRow}>
+            <View style={twoColItem}>
               <Text style={labelStyle}>Base de Cálculo</Text>
               <Text style={valueStyleBold}>
                 {formatBRL(data.baseCálculo)}
               </Text>
             </View>
+            {data.tipo === "AMBOS" && (
+              <View style={twoColItem}>
+                <Text style={labelStyle}}>​</Text>
+              </View>
+            )}
           </View>
 
-          {(data.tipo === "PATRONAL" || data.tipo === "AMBOS") && (
-            <View style={infoRow}>
-              <View style={infoCol}>
+          {/* Linha 3: Contribuições lado a lado */}
+          {data.tipo === "AMBOS" ? (
+            <View style={twoColRow}>
+              <View style={twoColItem}>
                 <Text style={labelStyle}>Contribuição Patronal</Text>
                 <Text style={valueStyleBold}>
                   {formatBRL(data.contribuicaoPatronal)}
                 </Text>
               </View>
-            </View>
-          )}
-
-          {(data.tipo === "SEGURADO" || data.tipo === "AMBOS") && (
-            <View style={infoRow}>
-              <View style={infoCol}>
+              <View style={twoColItem}>
                 <Text style={labelStyle}>Contribuição Segurado</Text>
                 <Text style={valueStyleBold}>
                   {formatBRL(data.contribuicaoSegurado)}
                 </Text>
               </View>
             </View>
+          ) : (
+            <View style={twoColRow}>
+              <View style={twoColItem}>
+                <Text style={labelStyle}>
+                  {data.tipo === "PATRONAL" ? "Contribuição Patronal" : "Contribuição Segurado"}
+                </Text>
+                <Text style={valueStyleBold}>
+                  {formatBRL(data.tipo === "PATRONAL" ? data.contribuicaoPatronal : data.contribuicaoSegurado)}
+                </Text>
+              </View>
+              <View style={twoColItem} />
+            </View>
           )}
 
+          {/* Linha 4: Valor para Pagamento em destaque */}
           <View style={{ ...infoRow, backgroundColor: "#f0f4f8", padding: 10, borderRadius: 4, marginTop: 12 }}>
             <View style={infoCol}>
               <Text style={labelStyle}>Valor para Pagamento</Text>
