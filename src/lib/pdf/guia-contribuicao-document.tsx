@@ -71,9 +71,17 @@ export function GuiaContribuicaoDocument({
         <PdfInstitutionalHeader
           rpps={rpps}
           logoBase64={logoBase64}
-          reportTitle="GUIA DE RECOLHIMENTO DE CONTRIBUIÇÃO PREVIDENCIÁRIA"
+          reportTitle=""
           generatedAt={generatedAt.toLocaleString("pt-BR")}
         />
+
+        {/* Título Centralizado */}
+        <Text style={{ textAlign: "center", fontSize: 11, fontWeight: "bold", color: "#1a3a52", marginBottom: 6, paddingLeft: 12, paddingRight: 12 }}>
+          GUIA DE RECOLHIMENTO DE CONTRIBUIÇÃO PREVIDENCIÁRIA
+        </Text>
+
+        {/* Linha divisória */}
+        <View style={{ height: 1, backgroundColor: "#ddd", marginBottom: 8 }} />
 
         {/* Título + Info Guia (Compacto) */}
         <View style={{ paddingLeft: 12, paddingRight: 12, marginBottom: 8, borderBottomWidth: 1, borderBottomColor: "#ddd", paddingBottom: 6 }}>
