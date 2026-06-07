@@ -1,5 +1,5 @@
 import React from "react";
-import { Document, Page, Text, View, Image } from "@react-pdf/renderer";
+import { Document, Page, Text, View } from "@react-pdf/renderer";
 import { formatBRL, formatDate } from "@/lib/format";
 import { generateBarcodeNumber } from "@/lib/barcode-generator";
 import { reportStyles, palette } from "./styles";
