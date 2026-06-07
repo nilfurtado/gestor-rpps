@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { pdf } from "@react-pdf/renderer";
+import { pdf, Document, Page } from "@react-pdf/renderer";
 import React from "react";
 import { prisma } from "@/lib/db";
 import { auth } from "@/lib/auth";
@@ -20,24 +20,38 @@ export async function GET(req: Request) {
     const orgaoId = searchParams.get("orgaoId");
     const exercicioId = searchParams.get("exercicioId");
     const competenciaId = searchParams.get("competenciaId");
-    const tipo = searchParams.get("tipo") as "PATRONAL" | "SEGURADO" | "AMBOS";
-    const dataVencimento = searchParams.get("dataVencimento");
-    const baseCálculo = searchParams.get("baseCálculo");
-    const contribuicaoPatronal = searchParams.get("contribuicaoPatronal");
-    const contribuicaoSegurado = searchParams.get("contribuicaoSegurado");
+    const tipo = searchParams.get("tipo") as "PATRONAL" | "SEGURADO" | "AMBAS";
+    const patronalDataVencimento = searchParams.get("patronalDataVencimento");
+    const patronalBaseCálculo = searchParams.get("patronalBaseCálculo");
+    const patronalContribuicao = searchParams.get("patronalContribuicao");
+    const seguradoDataVencimento = searchParams.get("seguradoDataVencimento");
+    const seguradoBaseCálculo = searchParams.get("seguradoBaseCálculo");
+    const seguradoContribuicao = searchParams.get("seguradoContribuicao");
 
-    if (
-      !orgaoId ||
-      !exercicioId ||
-      !competenciaId ||
-      !tipo ||
-      !dataVencimento ||
-      !baseCálculo ||
-      !contribuicaoPatronal ||
-      !contribuicaoSegurado
-    ) {
+    if (!orgaoId || !exercicioId || !competenciaId || !tipo) {
       return NextResponse.json(
         { error: "Parâmetros faltando" },
+        { status: 400 }
+      );
+    }
+
+    // Validar conforme tipo
+    if (
+      (tipo === "PATRONAL" || tipo === "AMBAS") &&
+      (!patronalDataVencimento || !patronalBaseCálculo || !patronalContribuicao)
+    ) {
+      return NextResponse.json(
+        { error: "Dados de Patronal incompletos" },
+        { status: 400 }
+      );
+    }
+
+    if (
+      (tipo === "SEGURADO" || tipo === "AMBAS") &&
+      (!seguradoDataVencimento || !seguradoBaseCálculo || !seguradoContribuicao)
+    ) {
+      return NextResponse.json(
+        { error: "Dados de Segurado incompletos" },
         { status: 400 }
       );
     }
@@ -46,13 +60,12 @@ export async function GET(req: Request) {
     const exId = Number(exercicioId);
     const cmpId = Number(competenciaId);
 
-    // Buscar lançamento
+    // Buscar lançamento (apenas para dados de órgão, exercício, competência)
     const lancamento = await prisma.folhaPrevidenciaria.findFirst({
       where: {
         orgaoId: orgId,
         exercicioId: exId,
         competenciaId: cmpId,
-        tipo,
       },
       include: {
         orgao: true,
@@ -86,31 +99,6 @@ export async function GET(req: Request) {
       }
     }
 
-    // Usar valores passados manualmente
-    const competenciaMes = lancamento.competencia.mes;
-    const exercicioAno = lancamento.exercicio.ano;
-    const competenciaStr = `${competenciaMes}/${exercicioAno}`;
-
-    const vencimentoDate = new Date(dataVencimento);
-
-    // Montar dados com valores do formulário (todos manuais)
-    const guiaData: GuiaContribuicaoData = {
-      orgaoNome: lancamento.orgao.nome,
-      orgaoCnpj: lancamento.orgao.cnpj || "",
-      orgaoEndereco: lancamento.orgao.endereco || "",
-      orgaoNumero: lancamento.orgao.numero || "",
-      orgaoBairro: lancamento.orgao.bairro || "",
-      orgaoCidade: lancamento.orgao.cidade || "",
-      orgaoEstado: lancamento.orgao.estado || "",
-      orgaoCep: lancamento.orgao.cep || "",
-      competencia: competenciaStr,
-      dataVencimento: vencimentoDate,
-      baseCálculo: Number(baseCálculo),
-      contribuicaoPatronal: Number(contribuicaoPatronal),
-      contribuicaoSegurado: Number(contribuicaoSegurado),
-      tipo,
-    };
-
     const rppsInfo: RppsGuiaInfo | null = rpps
       ? {
           nomeInstituto: rpps.nomeInstituto,
@@ -125,14 +113,79 @@ export async function GET(req: Request) {
         }
       : null;
 
-    // Renderizar PDF
+    const competenciaMes = lancamento.competencia.mes;
+    const exercicioAno = lancamento.exercicio.ano;
+    const competenciaStr = `${competenciaMes}/${exercicioAno}`;
+    const emittedBy = session.user.email || "Sistema SANPREV";
+
+    // Criar documento com uma ou múltiplas páginas
+    const pages: React.ReactElement[] = [];
+
+    // Adicionar guia PATRONAL se selecionada
+    if (tipo === "PATRONAL" || tipo === "AMBAS") {
+      const patronalData: GuiaContribuicaoData = {
+        orgaoNome: lancamento.orgao.nome,
+        orgaoCnpj: lancamento.orgao.cnpj || "",
+        orgaoEndereco: lancamento.orgao.endereco || "",
+        orgaoNumero: lancamento.orgao.numero || "",
+        orgaoBairro: lancamento.orgao.bairro || "",
+        orgaoCidade: lancamento.orgao.cidade || "",
+        orgaoEstado: lancamento.orgao.estado || "",
+        orgaoCep: lancamento.orgao.cep || "",
+        competencia: competenciaStr,
+        dataVencimento: new Date(patronalDataVencimento!),
+        baseCálculo: Number(patronalBaseCálculo),
+        contribuicaoPatronal: Number(patronalContribuicao),
+        contribuicaoSegurado: 0,
+        tipo: "PATRONAL",
+      };
+
+      pages.push(
+        <GuiaContribuicaoDocument
+          key="patronal"
+          data={patronalData}
+          rpps={rppsInfo}
+          logoBase64={logoBase64}
+          emittedBy={emittedBy}
+        />
+      );
+    }
+
+    // Adicionar guia SEGURADO se selecionada
+    if (tipo === "SEGURADO" || tipo === "AMBAS") {
+      const seguradoData: GuiaContribuicaoData = {
+        orgaoNome: lancamento.orgao.nome,
+        orgaoCnpj: lancamento.orgao.cnpj || "",
+        orgaoEndereco: lancamento.orgao.endereco || "",
+        orgaoNumero: lancamento.orgao.numero || "",
+        orgaoBairro: lancamento.orgao.bairro || "",
+        orgaoCidade: lancamento.orgao.cidade || "",
+        orgaoEstado: lancamento.orgao.estado || "",
+        orgaoCep: lancamento.orgao.cep || "",
+        competencia: competenciaStr,
+        dataVencimento: new Date(seguradoDataVencimento!),
+        baseCálculo: Number(seguradoBaseCálculo),
+        contribuicaoPatronal: 0,
+        contribuicaoSegurado: Number(seguradoContribuicao),
+        tipo: "SEGURADO",
+      };
+
+      pages.push(
+        <GuiaContribuicaoDocument
+          key="segurado"
+          data={seguradoData}
+          rpps={rppsInfo}
+          logoBase64={logoBase64}
+          emittedBy={emittedBy}
+        />
+      );
+    }
+
+    // Criar documento PDF único com múltiplas páginas
     const instance = pdf(
-      <GuiaContribuicaoDocument
-        data={guiaData}
-        rpps={rppsInfo}
-        logoBase64={logoBase64}
-        emittedBy={session.user.email || "Sistema SANPREV"}
-      />
+      <Document title="Guia de Contribuição">
+        {pages}
+      </Document>
     );
 
     const blob = await instance.toBlob();
@@ -141,7 +194,7 @@ export async function GET(req: Request) {
     return new NextResponse(buffer, {
       headers: {
         "Content-Type": "application/pdf",
-        "Content-Disposition": `attachment; filename="guia-${lancamento.orgao.sigla}-${competenciaStr.replace("/", "-")}.pdf"`,
+        "Content-Disposition": `attachment; filename="guia-${tipo.toLowerCase()}-${lancamento.orgao.sigla}-${competenciaStr.replace("/", "-")}.pdf"`,
       },
     });
   } catch (err) {
