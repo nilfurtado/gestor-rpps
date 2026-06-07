@@ -60,25 +60,16 @@ export async function GET(req: Request) {
     const exId = Number(exercicioId);
     const cmpId = Number(competenciaId);
 
-    // Buscar lançamento (apenas para dados de órgão, exercício, competência)
-    const lancamento = await prisma.folhaPrevidenciaria.findFirst({
-      where: {
-        orgaoId: orgId,
-        exercicioId: exId,
-        competenciaId: cmpId,
-      },
-      include: {
-        orgao: true,
-        exercicio: true,
-        competencia: true,
-      },
-    });
+    // Buscar dados de órgão, exercício e competência
+    const [orgao, exercicio, competencia] = await Promise.all([
+      prisma.orgao.findUnique({ where: { id: orgId } }),
+      prisma.exercicio.findUnique({ where: { id: exId } }),
+      prisma.competencia.findUnique({ where: { id: cmpId } }),
+    ]);
 
-    if (!lancamento) {
+    if (!orgao || !exercicio || !competencia) {
       return NextResponse.json(
-        {
-          error: "Lançamento não encontrado para os parâmetros informados",
-        },
+        { error: "Dados incompletos (órgão, exercício ou competência não encontrados)" },
         { status: 404 }
       );
     }
@@ -113,8 +104,8 @@ export async function GET(req: Request) {
         }
       : null;
 
-    const competenciaMes = lancamento.competencia.mes;
-    const exercicioAno = lancamento.exercicio.ano;
+    const competenciaMes = competencia.mes;
+    const exercicioAno = exercicio.ano;
     const competenciaStr = `${competenciaMes}/${exercicioAno}`;
     const emittedBy = session.user.email || "Sistema SANPREV";
 
@@ -124,14 +115,14 @@ export async function GET(req: Request) {
     // Adicionar guia PATRONAL se selecionada
     if (tipo === "PATRONAL" || tipo === "AMBAS") {
       const patronalData: GuiaContribuicaoData = {
-        orgaoNome: lancamento.orgao.nome,
-        orgaoCnpj: lancamento.orgao.cnpj || "",
-        orgaoEndereco: lancamento.orgao.endereco || "",
-        orgaoNumero: lancamento.orgao.numero || "",
-        orgaoBairro: lancamento.orgao.bairro || "",
-        orgaoCidade: lancamento.orgao.cidade || "",
-        orgaoEstado: lancamento.orgao.estado || "",
-        orgaoCep: lancamento.orgao.cep || "",
+        orgaoNome: orgao.nome,
+        orgaoCnpj: orgao.cnpj || "",
+        orgaoEndereco: orgao.endereco || "",
+        orgaoNumero: orgao.numero || "",
+        orgaoBairro: orgao.bairro || "",
+        orgaoCidade: orgao.cidade || "",
+        orgaoEstado: orgao.estado || "",
+        orgaoCep: orgao.cep || "",
         competencia: competenciaStr,
         dataVencimento: new Date(patronalDataVencimento!),
         baseCálculo: Number(patronalBaseCálculo),
@@ -154,14 +145,14 @@ export async function GET(req: Request) {
     // Adicionar guia SEGURADO se selecionada
     if (tipo === "SEGURADO" || tipo === "AMBAS") {
       const seguradoData: GuiaContribuicaoData = {
-        orgaoNome: lancamento.orgao.nome,
-        orgaoCnpj: lancamento.orgao.cnpj || "",
-        orgaoEndereco: lancamento.orgao.endereco || "",
-        orgaoNumero: lancamento.orgao.numero || "",
-        orgaoBairro: lancamento.orgao.bairro || "",
-        orgaoCidade: lancamento.orgao.cidade || "",
-        orgaoEstado: lancamento.orgao.estado || "",
-        orgaoCep: lancamento.orgao.cep || "",
+        orgaoNome: orgao.nome,
+        orgaoCnpj: orgao.cnpj || "",
+        orgaoEndereco: orgao.endereco || "",
+        orgaoNumero: orgao.numero || "",
+        orgaoBairro: orgao.bairro || "",
+        orgaoCidade: orgao.cidade || "",
+        orgaoEstado: orgao.estado || "",
+        orgaoCep: orgao.cep || "",
         competencia: competenciaStr,
         dataVencimento: new Date(seguradoDataVencimento!),
         baseCálculo: Number(seguradoBaseCálculo),
@@ -194,7 +185,7 @@ export async function GET(req: Request) {
     return new NextResponse(buffer, {
       headers: {
         "Content-Type": "application/pdf",
-        "Content-Disposition": `attachment; filename="guia-${tipo.toLowerCase()}-${lancamento.orgao.sigla}-${competenciaStr.replace("/", "-")}.pdf"`,
+        "Content-Disposition": `attachment; filename="guia-${tipo.toLowerCase()}-${orgao.sigla}-${competenciaStr.replace("/", "-")}.pdf"`,
       },
     });
   } catch (err) {
