@@ -12,6 +12,7 @@ model Orgao {
   id           Int                    @id @default(autoincrement())
   nome         String
   sigla        String                 @unique
+  razaoSocial  String?                // Razão Social (opcional)
   cnpj         String?
   cep          String?
   endereco     String?

@@ -11,6 +11,12 @@ export const orgaoSchema = z.object({
     .min(3, "Informe o nome do órgão")
     .max(150, "Nome muito longo")
     .transform((v) => v.trim()),
+  razaoSocial: z
+    .string()
+    .max(200, "Razão Social muito longa")
+    .optional()
+    .nullable()
+    .transform((v) => (v && v.trim() ? v.trim() : null)),
   cnpj: z
     .string()
     .max(20, "CNPJ muito longo")

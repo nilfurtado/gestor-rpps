@@ -21,6 +21,7 @@ export interface OrgaoInitial {
   id: number;
   sigla: string;
   nome: string;
+  razaoSocial: string | null;
   cnpj: string | null;
   cep: string | null;
   endereco: string | null;
@@ -44,6 +45,7 @@ export function OrgaoForm({ initial }: Props) {
 
   const [sigla, setSigla] = useState(initial?.sigla ?? "");
   const [nome, setNome] = useState(initial?.nome ?? "");
+  const [razaoSocial, setRazaoSocial] = useState(initial?.razaoSocial ?? "");
   const [cnpj, setCnpj] = useState(initial?.cnpj ?? "");
   const [cep, setCep] = useState(initial?.cep ?? "");
   const [endereco, setEndereco] = useState(initial?.endereco ?? "");
@@ -93,6 +95,7 @@ export function OrgaoForm({ initial }: Props) {
         const payload = {
           sigla,
           nome,
+          razaoSocial: razaoSocial || null,
           cnpj: cnpj || null,
           cep: cep || null,
           endereco: endereco || null,
@@ -131,8 +134,8 @@ export function OrgaoForm({ initial }: Props) {
 
   return (
     <form onSubmit={onSubmit} className="space-y-3">
-      {/* Linha 1: Sigla e Nome */}
-      <div className="grid grid-cols-1 gap-2 sm:grid-cols-4">
+      {/* Linha 1: Sigla, Ente Municipal e Razão Social */}
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-6">
         <div className="space-y-1">
           <Label className="text-xs font-medium">Sigla *</Label>
           <Input
@@ -143,12 +146,21 @@ export function OrgaoForm({ initial }: Props) {
             className="h-8 text-sm"
           />
         </div>
-        <div className="space-y-1 sm:col-span-3">
+        <div className="space-y-1 sm:col-span-2">
           <Label className="text-xs font-medium">Ente Municipal *</Label>
           <Input
             value={nome}
             onChange={(e) => setNome(e.target.value)}
             placeholder="Prefeitura Municipal..."
+            className="h-8 text-sm"
+          />
+        </div>
+        <div className="space-y-1 sm:col-span-3">
+          <Label className="text-xs font-medium">Razão Social</Label>
+          <Input
+            value={razaoSocial}
+            onChange={(e) => setRazaoSocial(e.target.value)}
+            placeholder="Denominação oficial da entidade"
             className="h-8 text-sm"
           />
         </div>
