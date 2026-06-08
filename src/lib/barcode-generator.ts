@@ -2,29 +2,40 @@ import QRCode from "qrcode";
 
 // Calcular dígito verificador FEBRABAN (módulo 11)
 function calculateFebrabanCheckDigit(barcode: string): string {
-  const sequence = "2987654321987654321987654321987654321987654321";
-  let sum = 0;
-
   try {
-    for (let i = 0; i < barcode.length && i < sequence.length; i++) {
-      const digit = parseInt(barcode[i], 10);
+    const sequence = "2987654321987654321987654321987654321987654321";
+    let sum = 0;
+
+    // Garantir que barcode tem apenas dígitos
+    const cleanBarcode = barcode.replace(/\D/g, "");
+
+    if (cleanBarcode.length === 0) {
+      return "0";
+    }
+
+    for (let i = 0; i < cleanBarcode.length && i < sequence.length; i++) {
+      const digit = parseInt(cleanBarcode[i], 10);
       const weight = parseInt(sequence[i], 10);
 
-      if (isNaN(digit) || isNaN(weight)) {
-        console.error(`Erro ao calcular DV: posição ${i}, barcode[${i}]=${barcode[i]}, sequence[${i}]=${sequence[i]}`);
-        return "0"; // Fallback
+      if (!isNaN(digit) && !isNaN(weight)) {
+        sum += digit * weight;
       }
-
-      sum += digit * weight;
     }
 
     const remainder = sum % 11;
-    const digit = remainder === 0 ? 0 : remainder === 1 ? 0 : 11 - remainder;
+    let dv = 0;
 
-    return digit.toString();
+    if (remainder === 0) {
+      dv = 0;
+    } else if (remainder === 1) {
+      dv = 0;
+    } else {
+      dv = 11 - remainder;
+    }
+
+    return dv.toString();
   } catch (error) {
-    console.error("Erro ao calcular dígito verificador:", error, { barcode });
-    return "0"; // Fallback seguro
+    return "0";
   }
 }
 
