@@ -368,9 +368,6 @@ export function LancamentoForm({
               disabled
               className="mt-1 h-9 tabular-nums text-base font-semibold"
             />
-            {resultadoAcrescimo && (
-              <p className="mt-2 text-sm">{resultadoAcrescimo.mensagem}</p>
-            )}
           </div>
         </div>
 
