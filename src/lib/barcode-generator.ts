@@ -44,6 +44,8 @@ export function generateBarcodeNumber(data: {
   rppsInfo?: {
     cnpj?: string;
     banco?: string;
+    agencia?: string;
+    conta?: string;
   } | null;
   orgaoId: number;
   dataVencimento: Date;
@@ -80,24 +82,21 @@ export function generateBarcodeNumber(data: {
     .padStart(10, "0")
     .slice(-10);
 
-  // NSR - Número Sequencial (11 dígitos)
-  // Formato: [OrgãoID 5dig][Ano 2dig][Mês 2dig][Ordem 2dig]
-  const orgaoIdStr = String(data.orgaoId || 0).padStart(5, "0");
-  const anoStr = String(data.exercicioAno || 0).slice(-2).padStart(2, "0");
-  // competenciaMes pode vir como string "janeiro" ou número "1"
-  let mesNum = "01";
-  if (typeof data.competenciaMes === "string") {
-    const mesMap: Record<string, string> = {
-      janeiro: "01", fevereiro: "02", março: "03", abril: "04",
-      maio: "05", junho: "06", julho: "07", agosto: "08",
-      setembro: "09", outubro: "10", novembro: "11", dezembro: "12",
-    };
-    mesNum = mesMap[data.competenciaMes.toLowerCase()] || "01";
-  } else {
-    mesNum = String(data.competenciaMes || 1).padStart(2, "0");
-  }
-  const ordemStr = String(data.competenciaOrdem || 1).padStart(2, "0");
-  const nsr = `${orgaoIdStr}${anoStr}${mesNum}${ordemStr}`;
+  // NSR - Para débito automático: [Agência 4][Conta 7][Sequencial 3]
+  // Extrai agência (sem formatação) - remove hífen
+  const agenciaLimpa = (data.rppsInfo?.agencia || "0000").replace(/\D/g, "").padStart(4, "0");
+
+  // Extrai conta (sem formatação e sem DV) - remove hífen e toma apenas os primeiros dígitos
+  const contaLimpa = (data.rppsInfo?.conta || "0000000").replace(/\D/g, "").slice(0, 7).padStart(7, "0");
+
+  // Sequencial baseado em órgão + competência
+  const orgaoIdStr = String(data.orgaoId || 0).padStart(2, "0");
+  const competenciaOrdemStr = String(data.competenciaOrdem || 1).padStart(3, "0");
+
+  // NSR: Agência (4) + Conta (7) + Sequencial (3) = 14 dígitos
+  // Mas FEBRABAN usa 11 dígitos para NSR, então vamos ajustar:
+  // NSR: Agência (4) + Conta (4) + Sequencial (3) = 11 dígitos
+  const nsr = `${agenciaLimpa}${contaLimpa.slice(0, 4)}${competenciaOrdemStr}`;
 
   // Código de origem (2 dígitos) - 00 padrão
   const codigoOrigem = "00";
