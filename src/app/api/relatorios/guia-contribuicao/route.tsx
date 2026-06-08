@@ -84,13 +84,10 @@ export async function GET(req: Request) {
 
     // Buscar logo
     let logoBase64: string | null = null;
-    if (rpps?.logoId) {
-      const logo = await prisma.arquivo.findUnique({
-        where: { id: rpps.logoId },
-      });
-      if (logo?.conteudo) {
-        logoBase64 = logo.conteudo;
-      }
+    if (rpps?.logoData && rpps?.logoMime) {
+      // Converter Bytes para Base64
+      const buffer = Buffer.from(rpps.logoData);
+      logoBase64 = `data:${rpps.logoMime};base64,${buffer.toString("base64")}`;
     }
 
     const rppsInfo: RppsGuiaInfo | null = rpps
