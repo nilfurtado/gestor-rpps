@@ -139,12 +139,7 @@ export async function GET(req: Request) {
           : currencyToNumber(seguradoContribuicao) || 0;
 
       barcodeImages[tipoParaRender] = await generateBarcodeImage({
-        rppsInfo: rppsInfo ? {
-          cnpj: rppsInfo.cnpj,
-          banco: rppsInfo.banco,
-          agencia: rppsInfo.agencia,
-          conta: rppsInfo.conta,
-        } : null,
+        rppsInfo,
         orgaoId: orgId,
         dataVencimento: new Date(
           tipoParaRender === "PATRONAL"
