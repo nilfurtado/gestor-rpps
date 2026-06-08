@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/select";
 import { StatusBadge } from "@/components/lancamentos/status-badge";
 import { calcularLancamento } from "@/lib/calc/lancamento";
+import { calcularAcrescimoAuto } from "@/lib/calc/acrescimo-auto";
 import { formatBRL, formatPercent } from "@/lib/format";
 
 export interface LancamentoInitial {
@@ -119,16 +120,26 @@ export function LancamentoForm({
     return 0;
   }, [folhaBase, aliquota]);
 
+  const resultadoAcrescimo = useMemo(() => {
+    const vRecolhido = currencyToNumber(valorRecolhido);
+    const vMultas = currencyToNumber(multas);
+
+    if (valorRecolherCalculado > 0 && vRecolhido > 0) {
+      return calcularAcrescimoAuto(valorRecolherCalculado, vRecolhido, vMultas);
+    }
+    return null;
+  }, [valorRecolherCalculado, valorRecolhido, multas]);
+
   const preview = useMemo(() => {
     return calcularLancamento({
       valorRecolher: valorRecolherCalculado,
       valorRecolhido: currencyToNumber(valorRecolhido),
       multas: currencyToNumber(multas),
       juros: currencyToNumber(juros),
-      acrescimo: currencyToNumber(acrescimo),
+      acrescimo: resultadoAcrescimo?.acrescimo ?? 0,
       parcelado,
     });
-  }, [valorRecolherCalculado, valorRecolhido, multas, juros, acrescimo, parcelado]);
+  }, [valorRecolherCalculado, valorRecolhido, multas, resultadoAcrescimo, parcelado]);
 
   const duplicateConflict = useMemo(() => {
     if (isEdit) return null;
@@ -180,7 +191,8 @@ export function LancamentoForm({
           folhaBase: folhaBase ? currencyToNumber(folhaBase) : null,
           multas: multas ? currencyToNumber(multas) : null,
           juros: juros ? currencyToNumber(juros) : null,
-          acrescimo: acrescimo ? currencyToNumber(acrescimo) : null,
+          acrescimo: resultadoAcrescimo?.acrescimo ?? null,
+          acrescimo_tipo: resultadoAcrescimo?.tipo ?? 'QUITADO',
           parcelado,
           dataVencimento: dataVencimento || null,
           observacoes: observacoes || null,
@@ -350,13 +362,19 @@ export function LancamentoForm({
               className="h-9 tabular-nums"
             />
           </Field>
-          <Field label="Acréscimo (R$)">
-            <CurrencyInput
-              value={acrescimo}
-              onChange={(e) => setAcrescimo(e.target.value)}
-              className="h-9 tabular-nums"
+          <div className={`rounded-md border p-3 ${resultadoAcrescimo?.cor || 'bg-gray-50'}`}>
+            <Label>Acréscimo (R$)</Label>
+            <Input
+              type="text"
+              value={resultadoAcrescimo?.acrescimo.toFixed(2) ?? '0,00'}
+              readOnly
+              disabled
+              className="mt-1 h-9 tabular-nums"
             />
-          </Field>
+            {resultadoAcrescimo && (
+              <p className="mt-2 text-sm">{resultadoAcrescimo.mensagem}</p>
+            )}
+          </div>
         </div>
 
         <label className="mt-3 inline-flex cursor-pointer items-center gap-2 text-sm text-foreground">

@@ -68,6 +68,7 @@ model FolhaPrevidenciaria {
   multas                  Decimal?        @default(0)
   juros                   Decimal?        @default(0)
   acrescimo               Decimal?        @default(0)
+  acrescimo_tipo          TipoAcrescimo   @default(QUITADO)
   parcelado               Boolean         @default(false)
   deficit                 Decimal
   superavit               Decimal         @default(0)        // Valor Recolhido > Valor a Recolher
@@ -162,6 +163,12 @@ enum LancamentoStatus {
   PARCELADO
   SEM_MOVIMENTO
   RECOLHIMENTO_A_MAIOR
+}
+
+enum TipoAcrescimo {
+  ACRESCIMO
+  DIFERENCA
+  QUITADO
 }
 
 enum Role {
