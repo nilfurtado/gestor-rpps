@@ -360,7 +360,7 @@ export function LancamentoForm({
             />
           </Field>
           <div className={`rounded-md border p-3 ${resultadoAcrescimo?.cor || 'bg-gray-50'}`}>
-            <Label>Acréscimo / Diferença (R$)</Label>
+            <Label>{resultadoAcrescimo?.rótulo || 'Acréscimo'} (R$)</Label>
             <Input
               type="text"
               value={resultadoAcrescimo?.valorExibicao ?? '0,00'}
