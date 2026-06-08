@@ -82,21 +82,22 @@ export function generateBarcodeNumber(data: {
     .padStart(10, "0")
     .slice(-10);
 
-  // NSR - Para débito automático: [Agência 4][Conta 7][Sequencial 3]
-  // Extrai agência (sem formatação) - remove hífen
+  // NSR - Para débito automático: [Agência 4][Conta 4][Sequencial 3]
   const agenciaLimpa = (data.rppsInfo?.agencia || "0000").replace(/\D/g, "").padStart(4, "0");
-
-  // Extrai conta (sem formatação e sem DV) - remove hífen e toma apenas os primeiros dígitos
-  const contaLimpa = (data.rppsInfo?.conta || "0000000").replace(/\D/g, "").slice(0, 7).padStart(7, "0");
-
-  // Sequencial baseado em órgão + competência
-  const orgaoIdStr = String(data.orgaoId || 0).padStart(2, "0");
+  const contaLimpa = (data.rppsInfo?.conta || "0000000").replace(/\D/g, "").slice(0, 4).padStart(4, "0");
   const competenciaOrdemStr = String(data.competenciaOrdem || 1).padStart(3, "0");
 
-  // NSR: Agência (4) + Conta (7) + Sequencial (3) = 14 dígitos
-  // Mas FEBRABAN usa 11 dígitos para NSR, então vamos ajustar:
-  // NSR: Agência (4) + Conta (4) + Sequencial (3) = 11 dígitos
-  const nsr = `${agenciaLimpa}${contaLimpa.slice(0, 4)}${competenciaOrdemStr}`;
+  const nsr = `${agenciaLimpa}${contaLimpa}${competenciaOrdemStr}`;
+
+  console.log("📊 DEBUG DÉBITO AUTOMÁTICO:", {
+    agencia: data.rppsInfo?.agencia,
+    agenciaLimpa,
+    conta: data.rppsInfo?.conta,
+    contaLimpa,
+    competenciaOrdem: data.competenciaOrdem,
+    competenciaOrdemStr,
+    nsr,
+  });
 
   // Código de origem (2 dígitos) - 00 padrão
   const codigoOrigem = "00";
