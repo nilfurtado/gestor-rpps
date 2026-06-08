@@ -124,13 +124,17 @@ export async function GET(req: Request) {
           : currencyToNumber(seguradoContribuicao) || 0;
 
       barcodeImages[tipoParaRender] = await generateBarcodeImage({
-        orgaoCnpj: orgao.cnpj || "",
+        rppsInfo,
+        orgaoId: orgId,
         dataVencimento: new Date(
           tipoParaRender === "PATRONAL"
             ? patronalDataVencimento!
             : seguradoDataVencimento!
         ),
         totalPagamento,
+        exercicioAno: exercicioAno,
+        competenciaMes: competenciaMes,
+        competenciaOrdem: competencia.ordem,
       });
     }
 
