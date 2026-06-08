@@ -84,26 +84,28 @@ export function generateBarcodeNumber(data: {
   // Código de origem (2 dígitos) - 00 padrão
   const codigoOrigem = "00";
 
-  // Montar código sem dígito verificador
+  // Montar código sem dígito verificador (46 dígitos)
   const barcodeSemDV = `${banco}0${formaPagamento}${cnpj}${dataVencimento}${valor}${nsr}`;
 
-  console.log("📊 BARCODE GERADO:", {
-    banco,
-    formaPagamento,
-    cnpj,
-    dataVencimento,
-    valor,
-    nsr,
-    barcodeSemDV,
-    barcodeSemDVLength: barcodeSemDV.length,
-  });
+  // Garantir que tem exatamente 46 dígitos antes de calcular DV
+  if (barcodeSemDV.length !== 46) {
+    console.warn("⚠️ AVISO: Barcode sem DV tem tamanho incorreto", {
+      esperado: 46,
+      atual: barcodeSemDV.length,
+      barcodeSemDV,
+      banco,
+      formaPagamento,
+      cnpj,
+      dataVencimento,
+      valor,
+      nsr,
+    });
+  }
 
   // Calcular dígito verificador
   const dv = calculateFebrabanCheckDigit(barcodeSemDV);
 
-  console.log("📊 DÍGITO VERIFICADOR:", dv);
-
-  // Montar código completo
+  // Montar código completo (47 dígitos)
   const barcodeCompleto = `${banco}${dv}${formaPagamento}${cnpj}${dataVencimento}${valor}${nsr}${codigoOrigem}`;
 
   return barcodeCompleto;
