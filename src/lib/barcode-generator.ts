@@ -5,14 +5,27 @@ function calculateFebrabanCheckDigit(barcode: string): string {
   const sequence = "2987654321987654321987654321987654321987654321";
   let sum = 0;
 
-  for (let i = 0; i < barcode.length; i++) {
-    sum += parseInt(barcode[i]) * parseInt(sequence[i]);
+  try {
+    for (let i = 0; i < barcode.length && i < sequence.length; i++) {
+      const digit = parseInt(barcode[i], 10);
+      const weight = parseInt(sequence[i], 10);
+
+      if (isNaN(digit) || isNaN(weight)) {
+        console.error(`Erro ao calcular DV: posição ${i}, barcode[${i}]=${barcode[i]}, sequence[${i}]=${sequence[i]}`);
+        return "0"; // Fallback
+      }
+
+      sum += digit * weight;
+    }
+
+    const remainder = sum % 11;
+    const digit = remainder === 0 ? 0 : remainder === 1 ? 0 : 11 - remainder;
+
+    return digit.toString();
+  } catch (error) {
+    console.error("Erro ao calcular dígito verificador:", error, { barcode });
+    return "0"; // Fallback seguro
   }
-
-  const remainder = sum % 11;
-  const digit = remainder === 0 ? 0 : remainder === 1 ? 0 : 11 - remainder;
-
-  return digit.toString();
 }
 
 // Gerar número do código de barras FEBRABAN (47 dígitos)
