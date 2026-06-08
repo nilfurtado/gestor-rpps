@@ -359,16 +359,13 @@ export function LancamentoForm({
               className="h-9 tabular-nums"
             />
           </Field>
-          <div className={`rounded-md border p-3 ${resultadoAcrescimo?.cor || 'bg-gray-50'}`}>
-            <Label>{resultadoAcrescimo?.rótulo || 'Acréscimo'} (R$)</Label>
-            <Input
-              type="text"
-              value={resultadoAcrescimo?.valorExibicao ?? '0,00'}
-              readOnly
-              disabled
-              className="mt-1 h-9 tabular-nums text-base font-semibold"
-            />
-          </div>
+          <Field label={`${resultadoAcrescimo?.rótulo || 'Acréscimo'} (R$)`}>
+            <div className={`rounded-md border h-9 flex items-center px-3 ${resultadoAcrescimo?.cor || 'bg-gray-50 border-gray-200'}`}>
+              <span className="tabular-nums">
+                {resultadoAcrescimo?.valorExibicao ?? '0,00'}
+              </span>
+            </div>
+          </Field>
         </div>
 
         <label className="mt-3 inline-flex cursor-pointer items-center gap-2 text-sm text-foreground">
