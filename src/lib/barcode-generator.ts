@@ -87,8 +87,21 @@ export function generateBarcodeNumber(data: {
   // Montar código sem dígito verificador
   const barcodeSemDV = `${banco}0${formaPagamento}${cnpj}${dataVencimento}${valor}${nsr}`;
 
+  console.log("📊 BARCODE GERADO:", {
+    banco,
+    formaPagamento,
+    cnpj,
+    dataVencimento,
+    valor,
+    nsr,
+    barcodeSemDV,
+    barcodeSemDVLength: barcodeSemDV.length,
+  });
+
   // Calcular dígito verificador
   const dv = calculateFebrabanCheckDigit(barcodeSemDV);
+
+  console.log("📊 DÍGITO VERIFICADOR:", dv);
 
   // Montar código completo
   const barcodeCompleto = `${banco}${dv}${formaPagamento}${cnpj}${dataVencimento}${valor}${nsr}${codigoOrigem}`;
