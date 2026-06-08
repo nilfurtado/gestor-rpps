@@ -94,9 +94,6 @@ export function LancamentoForm({
   const [juros, setJuros] = useState<string>(
     initial?.juros != null ? formatCurrency(Number(initial.juros)) : ""
   );
-  const [acrescimo, setAcrescimo] = useState<string>(
-    initial?.acrescimo != null ? formatCurrency(Number(initial.acrescimo)) : ""
-  );
   const [parcelado, setParcelado] = useState(initial?.parcelado ?? false);
   const [dataVencimento, setDataVencimento] = useState<string>(
     initial?.dataVencimento
@@ -363,13 +360,13 @@ export function LancamentoForm({
             />
           </Field>
           <div className={`rounded-md border p-3 ${resultadoAcrescimo?.cor || 'bg-gray-50'}`}>
-            <Label>Acréscimo (R$)</Label>
+            <Label>Acréscimo / Diferença (R$)</Label>
             <Input
               type="text"
-              value={resultadoAcrescimo?.acrescimo.toFixed(2) ?? '0,00'}
+              value={resultadoAcrescimo?.valorExibicao ?? '0,00'}
               readOnly
               disabled
-              className="mt-1 h-9 tabular-nums"
+              className="mt-1 h-9 tabular-nums text-base font-semibold"
             />
             {resultadoAcrescimo && (
               <p className="mt-2 text-sm">{resultadoAcrescimo.mensagem}</p>

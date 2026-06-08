@@ -1,10 +1,12 @@
 export type TipoAcrescimo = 'ACRESCIMO' | 'DIFERENCA' | 'QUITADO';
 
 export interface ResultadoAcrescimo {
-  acrescimo: number;
+  acrescimo: number; // Valor com sinal (para banco)
   tipo: TipoAcrescimo;
   cor: string;
   mensagem: string;
+  rótulo: string; // "Acréscimo" ou "Diferença" ou "Quitado"
+  valorExibicao: string; // Valor formatado com rótulo
 }
 
 export function calcularAcrescimoAuto(
@@ -18,25 +20,36 @@ export function calcularAcrescimoAuto(
   let tipo: TipoAcrescimo;
   let cor: string;
   let mensagem: string;
+  let rótulo: string;
+  let valorExibicao: string;
 
   if (Math.abs(acrescimo) < 0.01) {
     tipo = 'QUITADO';
     cor = 'bg-green-50 border-green-200';
     mensagem = '✅ Valor exato';
+    rótulo = 'Quitado';
+    valorExibicao = '0,00';
   } else if (acrescimo > 0) {
     tipo = 'ACRESCIMO';
     cor = 'bg-blue-50 border-blue-200';
     mensagem = `⭐ Recolheu R$ ${acrescimo.toFixed(2)} a mais`;
+    rótulo = 'Acréscimo';
+    valorExibicao = `+R$ ${acrescimo.toFixed(2).replace('.', ',')}`;
   } else {
     tipo = 'DIFERENCA';
     cor = 'bg-red-50 border-red-200';
-    mensagem = `❌ Faltam R$ ${Math.abs(acrescimo).toFixed(2)}`;
+    const diferenca = Math.abs(acrescimo);
+    mensagem = `❌ Faltam R$ ${diferenca.toFixed(2)}`;
+    rótulo = 'Diferença';
+    valorExibicao = `-R$ ${diferenca.toFixed(2).replace('.', ',')}`;
   }
 
   return {
-    acrescimo: Number(acrescimo.toFixed(2)),
+    acrescimo: Number(acrescimo.toFixed(2)), // Valor com sinal (para banco)
     tipo,
     cor,
     mensagem,
+    rótulo,
+    valorExibicao,
   };
 }
