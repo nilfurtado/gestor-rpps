@@ -9,6 +9,9 @@ export interface RppsFooterInfo {
   portal: string | null;
   responsavelDepartamento: string | null;
   nomeResponsavel: string | null;
+  banco?: string | null;
+  agencia?: string | null;
+  conta?: string | null;
 }
 
 interface Props {
