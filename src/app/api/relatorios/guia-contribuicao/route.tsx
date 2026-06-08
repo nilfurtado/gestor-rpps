@@ -25,10 +25,12 @@ export async function GET(req: Request) {
     const competenciaId = searchParams.get("competenciaId");
     const tipo = searchParams.get("tipo") as "PATRONAL" | "SEGURADO" | "AMBAS";
     const patronalDataVencimento = searchParams.get("patronalDataVencimento");
-    const patronalBaseCálculo = searchParams.get("patronalBaseCálculo");
+    // Aceita ambas formas: com e sem caracteres especiais
+    const patronalBaseCálculo = searchParams.get("patronalBaseCálculo") || searchParams.get("patronalBaseCalculo");
     const patronalContribuicao = searchParams.get("patronalContribuicao");
     const seguradoDataVencimento = searchParams.get("seguradoDataVencimento");
-    const seguradoBaseCálculo = searchParams.get("seguradoBaseCálculo");
+    // Aceita ambas formas: com e sem caracteres especiais
+    const seguradoBaseCálculo = searchParams.get("seguradoBaseCálculo") || searchParams.get("seguradoBaseCalculo");
     const seguradoContribuicao = searchParams.get("seguradoContribuicao");
 
     if (!orgaoId || !exercicioId || !competenciaId || !tipo) {
