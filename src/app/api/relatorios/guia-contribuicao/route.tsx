@@ -99,8 +99,8 @@ export async function GET(req: Request) {
           email: rpps.email || undefined,
           portal: rpps.portal || undefined,
           banco: rpps.banco || "001", // Fallback direto
-          agencia: rpps.agencia || undefined,
-          conta: rpps.conta || undefined,
+          agencia: rpps.agencia || "3346-4", // Fallback direto
+          conta: rpps.conta || "18.910-3", // Fallback direto
         }
       : {
           nomeInstituto: "SANPREV",
@@ -110,8 +110,8 @@ export async function GET(req: Request) {
           email: undefined,
           portal: undefined,
           banco: "001",
-          agencia: undefined,
-          conta: undefined,
+          agencia: "3346-4",
+          conta: "18.910-3",
         };
 
     console.log("📊 RPPS DEBUG:", {
