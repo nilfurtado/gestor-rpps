@@ -58,8 +58,10 @@ export function generateBarcodeNumber(data: {
   // Forma de pagamento (2 dígitos) - 0100 para INSS
   const formaPagamento = "0100";
 
-  // CNPJ do RPPS (10 dígitos - sem formatação)
-  const cnpj = (data.rppsInfo?.cnpj || "").replace(/\D/g, "").slice(0, 14).slice(-10).padStart(10, "0");
+  // CNPJ do RPPS (10 dígitos - extrai primeiros 10 de 14)
+  // CNPJ: 00743471000190 → primeiros 10: 0074347100
+  const cnpjLimpo = (data.rppsInfo?.cnpj || "").replace(/\D/g, "").padStart(14, "0");
+  const cnpj = cnpjLimpo.substring(0, 10);
 
   // Data de vencimento (8 dígitos - DDMMAAAA)
   const dia = String(data.dataVencimento.getDate()).padStart(2, "0");
