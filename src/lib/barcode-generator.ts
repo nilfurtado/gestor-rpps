@@ -60,8 +60,13 @@ export function generateBarcodeNumber(data: {
 
   // CNPJ do RPPS (10 dígitos - extrai primeiros 10 de 14)
   // CNPJ: 00743471000190 → primeiros 10: 0074347100
-  const cnpjLimpo = (data.rppsInfo?.cnpj || "").replace(/\D/g, "").padStart(14, "0");
+  const cnpjRaw = data.rppsInfo?.cnpj || "00743471000190"; // Fallback se vazio
+  const cnpjLimpo = cnpjRaw.replace(/\D/g, "").padStart(14, "0");
   const cnpj = cnpjLimpo.substring(0, 10);
+
+  if (cnpj === "0000000000") {
+    console.warn("⚠️ AVISO: CNPJ está como zeros. rppsInfo:", data.rppsInfo);
+  }
 
   // Data de vencimento (8 dígitos - DDMMAAAA)
   const dia = String(data.dataVencimento.getDate()).padStart(2, "0");
