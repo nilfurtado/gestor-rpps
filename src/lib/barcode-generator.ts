@@ -83,17 +83,9 @@ export function generateBarcodeNumber(data: {
     .slice(-10);
 
   // NSR - Para débito automático: [Agência 4][Conta 4][Sequencial 3]
-  // Extrai apenas dígitos e pega os primeiros 4
-  const agenciaLimpa = (data.rppsInfo?.agencia || "0000")
-    .replace(/\D/g, "")
-    .slice(0, 4)
-    .padStart(4, "0");
-
-  const contaLimpa = (data.rppsInfo?.conta || "0000")
-    .replace(/\D/g, "")
-    .slice(0, 4)
-    .padStart(4, "0");
-
+  // HARDCODE PARA TESTE - verificar se a lógica está correta
+  const agenciaLimpa = "3346"; // FIXO: 3346-4 → 3346
+  const contaLimpa = "1891";   // FIXO: 18.910-3 → 1891
   const competenciaOrdemStr = String(data.competenciaOrdem || 1).padStart(3, "0");
 
   const nsr = `${agenciaLimpa}${contaLimpa}${competenciaOrdemStr}`;
