@@ -7,6 +7,7 @@ import { currencyToNumber } from "@/lib/format-currency";
 import { generateBarcodeImage } from "@/lib/barcode-generator";
 import {
   GuiaContribuicaoDocument,
+  GuiaContribuicaoPage,
   type GuiaContribuicaoData,
   type RppsGuiaInfo,
 } from "@/lib/pdf/guia-contribuicao-document";
@@ -111,76 +112,136 @@ export async function GET(req: Request) {
     const competenciaStr = `${competenciaMes}/${exercicioAno}`;
     const emittedBy = session.user.email || "Sistema SANPREV";
 
-    // Renderizar como componente único (uma guia por vez)
-    // Se for AMBAS, precisa de duas chamadas à API
-    const tipoParaRender: "PATRONAL" | "SEGURADO" =
-      tipo === "AMBAS" ? "PATRONAL" : tipo;
+    // Renderizar guias conforme tipo
+    const isBothTypes = tipo === "AMBAS";
+    const tiposParaRender: ("PATRONAL" | "SEGURADO")[] = isBothTypes
+      ? ["PATRONAL", "SEGURADO"]
+      : [tipo];
 
-    // Calcular total para QR code
-    const totalPagamento =
-      (tipo === "AMBAS"
-        ? currencyToNumber(patronalContribuicao) + currencyToNumber(seguradoContribuicao)
-        : tipo === "PATRONAL"
+    // Gerar barcodes para todos os tipos
+    const barcodeImages: Record<"PATRONAL" | "SEGURADO", string> = {};
+    for (const tipoParaRender of tiposParaRender) {
+      const totalPagamento =
+        tipoParaRender === "PATRONAL"
           ? currencyToNumber(patronalContribuicao)
-          : currencyToNumber(seguradoContribuicao)) || 0;
+          : currencyToNumber(seguradoContribuicao) || 0;
 
-    // Gerar código de barras bancário
-    const barcodeImage = await generateBarcodeImage({
-      orgaoCnpj: orgao.cnpj || "",
-      dataVencimento: new Date(
-        tipoParaRender === "PATRONAL"
-          ? patronalDataVencimento!
-          : seguradoDataVencimento!
-      ),
-      totalPagamento,
-    });
+      barcodeImages[tipoParaRender] = await generateBarcodeImage({
+        orgaoCnpj: orgao.cnpj || "",
+        dataVencimento: new Date(
+          tipoParaRender === "PATRONAL"
+            ? patronalDataVencimento!
+            : seguradoDataVencimento!
+        ),
+        totalPagamento,
+      });
+    }
 
-    const guiaData: GuiaContribuicaoData = {
-      orgaoNome: orgao.nome,
-      orgaoCnpj: orgao.cnpj || "",
-      orgaoEndereco: orgao.endereco || "",
-      orgaoNumero: orgao.numero || "",
-      orgaoBairro: orgao.bairro || "",
-      orgaoCidade: orgao.cidade || "",
-      orgaoEstado: orgao.estado || "",
-      orgaoCep: orgao.cep || "",
-      competencia: competenciaStr,
-      dataVencimento: new Date(
-        tipoParaRender === "PATRONAL"
-          ? patronalDataVencimento!
-          : seguradoDataVencimento!
-      ),
-      baseCálculo: currencyToNumber(
-        tipoParaRender === "PATRONAL"
-          ? patronalBaseCálculo
-          : seguradoBaseCálculo
-      ),
-      contribuicaoPatronal: tipoParaRender === "PATRONAL"
-        ? currencyToNumber(patronalContribuicao)
-        : 0,
-      contribuicaoSegurado: tipoParaRender === "SEGURADO"
-        ? currencyToNumber(seguradoContribuicao)
-        : 0,
-      tipo: tipoParaRender,
+    // Criar documento com múltiplas páginas se necessário
+    const renderDocument = () => {
+      if (isBothTypes) {
+        return (
+          <Document title="Guia de Contribuição Previdenciária" author={rppsInfo?.nomeInstituto || "SANPREV"}>
+            {tiposParaRender.map((tipoParaRender, index) => {
+              const guiaData: GuiaContribuicaoData = {
+                orgaoNome: orgao.nome,
+                orgaoCnpj: orgao.cnpj || "",
+                orgaoEndereco: orgao.endereco || "",
+                orgaoNumero: orgao.numero || "",
+                orgaoBairro: orgao.bairro || "",
+                orgaoCidade: orgao.cidade || "",
+                orgaoEstado: orgao.estado || "",
+                orgaoCep: orgao.cep || "",
+                competencia: competenciaStr,
+                dataVencimento: new Date(
+                  tipoParaRender === "PATRONAL"
+                    ? patronalDataVencimento!
+                    : seguradoDataVencimento!
+                ),
+                baseCálculo: currencyToNumber(
+                  tipoParaRender === "PATRONAL"
+                    ? patronalBaseCálculo
+                    : seguradoBaseCálculo
+                ),
+                contribuicaoPatronal: tipoParaRender === "PATRONAL"
+                  ? currencyToNumber(patronalContribuicao)
+                  : 0,
+                contribuicaoSegurado: tipoParaRender === "SEGURADO"
+                  ? currencyToNumber(seguradoContribuicao)
+                  : 0,
+                tipo: tipoParaRender,
+              };
+
+              return (
+                <GuiaContribuicaoPage
+                  key={index}
+                  data={guiaData}
+                  rpps={rppsInfo}
+                  logoBase64={logoBase64}
+                  emittedBy={emittedBy}
+                  qrCodeImage={barcodeImages[tipoParaRender]}
+                />
+              );
+            })}
+          </Document>
+        );
+      } else {
+        const tipoParaRender = tipo;
+        const guiaData: GuiaContribuicaoData = {
+          orgaoNome: orgao.nome,
+          orgaoCnpj: orgao.cnpj || "",
+          orgaoEndereco: orgao.endereco || "",
+          orgaoNumero: orgao.numero || "",
+          orgaoBairro: orgao.bairro || "",
+          orgaoCidade: orgao.cidade || "",
+          orgaoEstado: orgao.estado || "",
+          orgaoCep: orgao.cep || "",
+          competencia: competenciaStr,
+          dataVencimento: new Date(
+            tipoParaRender === "PATRONAL"
+              ? patronalDataVencimento!
+              : seguradoDataVencimento!
+          ),
+          baseCálculo: currencyToNumber(
+            tipoParaRender === "PATRONAL"
+              ? patronalBaseCálculo
+              : seguradoBaseCálculo
+          ),
+          contribuicaoPatronal: tipoParaRender === "PATRONAL"
+            ? currencyToNumber(patronalContribuicao)
+            : 0,
+          contribuicaoSegurado: tipoParaRender === "SEGURADO"
+            ? currencyToNumber(seguradoContribuicao)
+            : 0,
+          tipo: tipoParaRender,
+        };
+
+        return (
+          <GuiaContribuicaoDocument
+            data={guiaData}
+            rpps={rppsInfo}
+            logoBase64={logoBase64}
+            emittedBy={emittedBy}
+            qrCodeImage={barcodeImages[tipoParaRender]}
+          />
+        );
+      }
     };
 
-    const instance = pdf(
-      <GuiaContribuicaoDocument
-        data={guiaData}
-        rpps={rppsInfo}
-        logoBase64={logoBase64}
-        emittedBy={emittedBy}
-        qrCodeImage={barcodeImage}
-      />
-    );
+    const instance = pdf(renderDocument());
 
     const blob = await instance.toBlob();
     const buffer = Buffer.from(await blob.arrayBuffer());
 
+    const fileName =
+      tipo === "AMBAS"
+        ? `guia-ambas-${orgao.sigla}-${competenciaStr.replace("/", "-")}.pdf`
+        : `guia-${tipo.toLowerCase()}-${orgao.sigla}-${competenciaStr.replace("/", "-")}.pdf`;
+
     return new NextResponse(buffer, {
       headers: {
         "Content-Type": "application/pdf",
-        "Content-Disposition": `attachment; filename="guia-${tipoParaRender.toLowerCase()}-${orgao.sigla}-${competenciaStr.replace("/", "-")}.pdf"`,
+        "Content-Disposition": `attachment; filename="${fileName}"`,
       },
     });
   } catch (err) {

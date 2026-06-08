@@ -39,7 +39,7 @@ interface Props {
   qrCodeImage?: string;
 }
 
-export function GuiaContribuicaoDocument({
+export function GuiaContribuicaoPage({
   data,
   rpps,
   logoBase64,
@@ -47,7 +47,6 @@ export function GuiaContribuicaoDocument({
   qrCodeImage,
 }: Props) {
   const generatedAt = new Date();
-  const docTitle = rpps?.nomeInstituto || "SANPREV";
 
   const enderecoCompleto = [
     data.orgaoEndereco,
@@ -68,7 +67,6 @@ export function GuiaContribuicaoDocument({
         : data.contribuicaoSegurado) || 0;
 
   return (
-    <Document title="Guia de Contribuição Previdenciária" author={docTitle}>
       <Page size="A4" orientation="portrait" style={reportStyles.page}>
         {/* Header */}
         <PdfInstitutionalHeader
@@ -216,6 +214,27 @@ export function GuiaContribuicaoDocument({
           generatedAt={generatedAt.toLocaleString("pt-BR")}
         />
       </Page>
+  );
+}
+
+export function GuiaContribuicaoDocument({
+  data,
+  rpps,
+  logoBase64,
+  emittedBy,
+  qrCodeImage,
+}: Props) {
+  const docTitle = rpps?.nomeInstituto || "SANPREV";
+
+  return (
+    <Document title="Guia de Contribuição Previdenciária" author={docTitle}>
+      <GuiaContribuicaoPage
+        data={data}
+        rpps={rpps}
+        logoBase64={logoBase64}
+        emittedBy={emittedBy}
+        qrCodeImage={qrCodeImage}
+      />
     </Document>
   );
 }
