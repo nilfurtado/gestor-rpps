@@ -8,11 +8,11 @@ Transformar campo "Acréscimo (R$)" em cálculo automático que registra acrésc
 ## 📐 FÓRMULA ÚNICA
 
 ```
-Acréscimo/Diferença = Valor a Recolher - Valor Recolhido
+Acréscimo/Diferença = Valor Recolhido - Valor a Recolher
 
 Interpretação:
-├─ Se > 0  → DIFERENÇA + (Faltou pagar) ❌
-├─ Se < 0  → ACRESCIMO - (Pagou a mais) ⭐
+├─ Se > 0  → ACRESCIMO (Pagou a mais) ⭐
+├─ Se < 0  → DIFERENÇA (Faltou pagar) ❌
 └─ Se = 0  → QUITADO (Exato) ✅
 ```
 
@@ -31,11 +31,11 @@ Salvo: Sim, no banco
 ```
 Campo: Acréscimo (R$)
 Status: ✅ Automático (calculado)
-Fórmula: Valor a Recolher - Valor Recolhido
+Fórmula: Valor Recolhido - Valor a Recolher
 Salvo: Sim, com tipo (ACRESCIMO/DIFERENCA/QUITADO)
 
-Se > 0  → DIFERENÇA (positivo, faltou pagar)
-Se < 0  → ACRESCIMO (negativo, pagou a mais)
+Se > 0  → ACRESCIMO (positivo, pagou a mais)
+Se < 0  → DIFERENÇA (negativo, faltou pagar)
 Se = 0  → QUITADO (zero, exato)
 ```
 
@@ -53,15 +53,15 @@ Multas (opcional):    R$ ?
 
 ### **Cálculos (Sistema)**
 ```
-1. Valor Esperado = Base × Alíquota ÷ 100 = R$ 19.219,89
-2. Total = Valor Esperado + Multas
-3. Acréscimo/Diferença = Total - Valor Recolhido
+1. Valor a Recolher = Base × Alíquota ÷ 100 = R$ 19.219,89
+2. Total a Recolher = Valor a Recolher + Multas
+3. Acréscimo/Diferença = Valor Recolhido - Total a Recolher
 ```
 
 ### **Saída (Readonly com Cor)**
 ```
-Se > 0 → DIFERENÇA (vermelho) ❌
-Se < 0 → ACRESCIMO (amarelo) ⭐
+Se > 0 → ACRESCIMO (amarelo) ⭐
+Se < 0 → DIFERENÇA (vermelho) ❌
 Se = 0 → QUITADO (verde) ✅
 ```
 
@@ -72,8 +72,8 @@ Se = 0 → QUITADO (verde) ✅
 ### **Nova Coluna**
 ```sql
 ALTER TABLE lancamentos ADD COLUMN acrescimo_tipo ENUM(
-  'ACRESCIMO',   -- Pagou a mais (-)
-  'DIFERENCA',   -- Faltou pagar (+)
+  'ACRESCIMO',   -- Pagou a mais (+)
+  'DIFERENCA',   -- Faltou pagar (-)
   'QUITADO'      -- Exato (0)
 ) DEFAULT 'QUITADO';
 ```
@@ -89,48 +89,48 @@ Salvo: Sempre, na inserção/atualização
 
 ## 📊 EXEMPLOS
 
-### **Exemplo 1: DIFERENÇA (Faltou Pagar)**
+### **Exemplo 1: ACRESCIMO (Pagou a Mais)**
 ```
-Esperado: R$ 19.219,89
-Recolhido: R$ 15.000,00
-─────────────────────────
-Cálculo: 19.219,89 - 15.000,00 = +4.219,89
-
-SAÍDA:
-├─ Campo: +4.219,89
-├─ Cor: 🔴 Vermelho
-├─ Tipo: DIFERENÇA
-├─ Percentual: 21,96%
-└─ Mensagem: "Faltam R$ 4.219,89"
-
-BANCO:
-├─ acrescimo: 4.219,89
-└─ acrescimo_tipo: 'DIFERENCA'
-```
-
-### **Exemplo 2: ACRESCIMO (Pagou a Mais)**
-```
-Esperado: R$ 19.219,89
 Recolhido: R$ 20.000,00
+a Recolher: R$ 19.219,89
 ─────────────────────────
-Cálculo: 19.219,89 - 20.000,00 = -780,11
+Cálculo: 20.000,00 - 19.219,89 = +780,11
 
 SAÍDA:
-├─ Campo: -780,11
+├─ Campo: +780,11
 ├─ Cor: 🟡 Amarelo
 ├─ Tipo: ACRESCIMO
-├─ Percentual: -4,06%
+├─ Percentual: +4,06%
 └─ Mensagem: "Recolheu R$ 780,11 a mais"
 
 BANCO:
-├─ acrescimo: -780,11
+├─ acrescimo: 780,11
 └─ acrescimo_tipo: 'ACRESCIMO'
+```
+
+### **Exemplo 2: DIFERENÇA (Faltou Pagar)**
+```
+Recolhido: R$ 15.000,00
+a Recolher: R$ 19.219,89
+─────────────────────────
+Cálculo: 15.000,00 - 19.219,89 = -4.219,89
+
+SAÍDA:
+├─ Campo: -4.219,89
+├─ Cor: 🔴 Vermelho
+├─ Tipo: DIFERENÇA
+├─ Percentual: -21,96%
+└─ Mensagem: "Faltam R$ 4.219,89"
+
+BANCO:
+├─ acrescimo: -4.219,89
+└─ acrescimo_tipo: 'DIFERENCA'
 ```
 
 ### **Exemplo 3: QUITADO (Exato)**
 ```
-Esperado: R$ 19.219,89
 Recolhido: R$ 19.219,89
+a Recolher: R$ 19.219,89
 ─────────────────────────
 Cálculo: 19.219,89 - 19.219,89 = 0,00
 
@@ -165,7 +165,7 @@ export function calcularAcrescimoAuto(
   mensagem: string;
 } {
   const total = valorARecolher + multas;
-  const acrescimo = total - valorRecolhido;
+  const acrescimo = valorRecolhido - total;
   const percentual = (acrescimo / total) * 100;
   
   let tipo: 'ACRESCIMO' | 'DIFERENCA' | 'QUITADO';
@@ -175,11 +175,11 @@ export function calcularAcrescimoAuto(
     tipo = 'QUITADO';
     mensagem = '✅ Valor exato';
   } else if (acrescimo > 0) {
-    tipo = 'DIFERENCA';
-    mensagem = `❌ Faltam R$ ${acrescimo.toFixed(2)} (${percentual.toFixed(2)}%)`;
-  } else {
     tipo = 'ACRESCIMO';
-    mensagem = `⭐ Recolheu R$ ${Math.abs(acrescimo).toFixed(2)} a mais`;
+    mensagem = `⭐ Recolheu R$ ${acrescimo.toFixed(2)} a mais (${percentual.toFixed(2)}%)`;
+  } else {
+    tipo = 'DIFERENCA';
+    mensagem = `❌ Faltam R$ ${Math.abs(acrescimo).toFixed(2)} (${Math.abs(percentual).toFixed(2)}%)`;
   }
   
   return {
@@ -267,21 +267,21 @@ ALTER TABLE lancamentos ADD COLUMN acrescimo_tipo ENUM(
 | Situação | Valor | Tipo | Cor | Mensagem |
 |----------|-------|------|-----|----------|
 | Exato | 0,00 | QUITADO | 🟢 | Valor exato |
-| Faltou pagar | +X.XXX,XX | DIFERENÇA | 🔴 | Faltam R$ |
-| Pagou a mais | -X.XXX,XX | ACRESCIMO | 🟡 | Recolheu a mais |
+| Pagou a mais | +X.XXX,XX | ACRESCIMO | 🟡 | Recolheu a mais |
+| Faltou pagar | -X.XXX,XX | DIFERENÇA | 🔴 | Faltam R$ |
 
 ---
 
 ## 🚀 RELATÓRIOS
 
 ```sql
--- Total faltando
-SELECT SUM(acrescimo) FROM lancamentos 
-WHERE acrescimo_tipo = 'DIFERENCA';
-
 -- Total recolhido a mais
-SELECT SUM(ABS(acrescimo)) FROM lancamentos 
+SELECT SUM(acrescimo) FROM lancamentos 
 WHERE acrescimo_tipo = 'ACRESCIMO';
+
+-- Total faltando
+SELECT SUM(ABS(acrescimo)) FROM lancamentos 
+WHERE acrescimo_tipo = 'DIFERENCA';
 
 -- Quitados
 SELECT COUNT(*) FROM lancamentos 
