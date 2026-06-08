@@ -11,9 +11,9 @@ Transformar campo "Acréscimo (R$)" em cálculo automático + registrar **valore
 Acréscimo/Diferença = Valor Recolhido - Valor a Recolher
 
 Interpretação:
-├─ Se > 0  → ACRESCIMO (Pagou a mais) ⭐ [valor positivo]
-├─ Se < 0  → DIFERENÇA (Faltou pagar) ❌ [valor negativo]
-└─ Se = 0  → QUITADO (Exato) ✅ [valor zero]
+├─ Se > 0  → ACRESCIMO (Pagou a mais) ⭐ 🔵 AZUL [valor positivo]
+├─ Se < 0  → DIFERENÇA (Faltou pagar) ❌ 🔴 VERMELHO [valor negativo]
+└─ Se = 0  → QUITADO (Exato) ✅ 🟢 VERDE [valor zero]
 ```
 
 ---
@@ -59,7 +59,7 @@ Multas (opcional):    R$ ?
 ```
 Campo mostra valor com cor e mensagem
 ├─ Verde: 0,00 (QUITADO)
-├─ Amarelo: +780,11 (ACRESCIMO)
+├─ Azul: +780,11 (ACRESCIMO)
 └─ Vermelho: -4.219,89 (DIFERENÇA)
 ```
 
@@ -82,7 +82,7 @@ Cálculo: 20.000,00 - 19.219,89 = +780,11
 
 FORMULÁRIO:
 ├─ Campo: +780,11
-├─ Cor: 🟡 Amarelo
+├─ Cor: 🟡 Azul
 └─ Mensagem: "Recolheu R$ 780,11 a mais"
 
 BANCO REGISTRA:
@@ -155,7 +155,7 @@ export function calcularAcrescimoAuto(
     mensagem = '✅ Valor exato';
   } else if (acrescimo > 0) {
     tipo = 'ACRESCIMO';
-    cor = 'bg-yellow-50 border-yellow-200';
+    cor = 'bg-blue-50 border-blue-200';
     mensagem = `⭐ Recolheu R$ ${acrescimo.toFixed(2)} a mais`;
   } else {
     tipo = 'DIFERENCA';
