@@ -28,8 +28,12 @@ export async function generateBarcodeImage(data: {
 }): Promise<string> {
   try {
     const barcodeNumber = generateBarcodeNumber(data);
-    const qrImage = await QRCode.toDataURL(barcodeNumber, {
-      errorCorrectionLevel: "H",
+    // Formatar número do código de barras com espaços (FEBRABAN)
+    // Formato: 0000 0000 0000 0000 0000 0000 0000 00
+    const formattedBarcode = `${barcodeNumber.slice(0, 4)} ${barcodeNumber.slice(4, 8)} ${barcodeNumber.slice(8, 12)} ${barcodeNumber.slice(12, 16)} ${barcodeNumber.slice(16, 20)} ${barcodeNumber.slice(20, 24)} ${barcodeNumber.slice(24, 28)} ${barcodeNumber.slice(28)}`;
+
+    const qrImage = await QRCode.toDataURL(formattedBarcode, {
+      errorCorrectionLevel: "M",
       type: "image/png",
       quality: 0.95,
       margin: 1,
