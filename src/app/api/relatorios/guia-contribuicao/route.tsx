@@ -93,16 +93,31 @@ export async function GET(req: Request) {
     const rppsInfo: RppsGuiaInfo | null = rpps
       ? {
           nomeInstituto: rpps.nomeInstituto,
-          cnpj: rpps.cnpj,
+          cnpj: rpps.cnpj || "00743471000190", // Fallback direto
           enderecoCompleto: rpps.enderecoCompleto,
           telefone: rpps.telefone,
           email: rpps.email || undefined,
           portal: rpps.portal || undefined,
-          banco: rpps.banco || undefined,
+          banco: rpps.banco || "001", // Fallback direto
           agencia: rpps.agencia || undefined,
           conta: rpps.conta || undefined,
         }
-      : null;
+      : {
+          nomeInstituto: "SANPREV",
+          cnpj: "00743471000190", // Fallback se rpps for null
+          enderecoCompleto: undefined,
+          telefone: undefined,
+          email: undefined,
+          portal: undefined,
+          banco: "001",
+          agencia: undefined,
+          conta: undefined,
+        };
+
+    console.log("📊 RPPS DEBUG:", {
+      rpps: rpps ? { id: rpps.id, cnpj: rpps.cnpj, banco: rpps.banco } : null,
+      rppsInfo,
+    });
 
     const competenciaMes = competencia.mes;
     const exercicioAno = exercicio.ano;
