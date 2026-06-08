@@ -1,14 +1,14 @@
-# 📋 PLANO: Campo Acréscimo Automático com Registro no Banco
+# 📋 PLANO: Campo Acréscimo (R$) Automático
 
 ## 🎯 OBJETIVO
-Transformar campo "Acréscimo (R$)" em cálculo automático que registra acréscimos e diferenças no banco de dados.
+Transformar campo "Acréscimo (R$)" em cálculo automático (readonly).
 
 ---
 
-## 📐 FÓRMULA ÚNICA
+## 📐 FÓRMULA
 
 ```
-Acréscimo/Diferença = Valor Recolhido - Valor a Recolher
+Acréscimo = Valor Recolhido - Valor a Recolher
 
 Interpretação:
 ├─ Se > 0  → ACRESCIMO (Pagou a mais) ⭐
@@ -18,32 +18,9 @@ Interpretação:
 
 ---
 
-## 📊 COMPORTAMENTO DO CAMPO
+## 🔄 FLUXO SIMPLES
 
-### **ANTES (Atual)**
-```
-Campo: Acréscimo (R$)
-Status: ❌ Manual (usuário preenche)
-Salvo: Sim, no banco
-```
-
-### **DEPOIS (Proposto)**
-```
-Campo: Acréscimo (R$)
-Status: ✅ Automático (calculado)
-Fórmula: Valor Recolhido - Valor a Recolher
-Salvo: Sim, com tipo (ACRESCIMO/DIFERENCA/QUITADO)
-
-Se > 0  → ACRESCIMO (positivo, pagou a mais)
-Se < 0  → DIFERENÇA (negativo, faltou pagar)
-Se = 0  → QUITADO (zero, exato)
-```
-
----
-
-## 🔄 FLUXO
-
-### **Entrada (Usuário)**
+### **Entrada (Usuário preenche)**
 ```
 Base de Previdência:  R$ 137.284,80
 Alíquota:             14%
@@ -54,103 +31,68 @@ Multas (opcional):    R$ ?
 ### **Cálculos (Sistema)**
 ```
 1. Valor a Recolher = Base × Alíquota ÷ 100 = R$ 19.219,89
-2. Total a Recolher = Valor a Recolher + Multas
-3. Acréscimo/Diferença = Valor Recolhido - Total a Recolher
+2. Total = Valor a Recolher + Multas
+3. Acréscimo = Valor Recolhido - Total
 ```
 
-### **Saída (Readonly com Cor)**
+### **Campo Acréscimo (Readonly com Cor)**
 ```
-Se > 0 → ACRESCIMO (amarelo) ⭐
-Se < 0 → DIFERENÇA (vermelho) ❌
-Se = 0 → QUITADO (verde) ✅
-```
-
----
-
-## 💾 BANCO DE DADOS
-
-### **Nova Coluna**
-```sql
-ALTER TABLE lancamentos ADD COLUMN acrescimo_tipo ENUM(
-  'ACRESCIMO',   -- Pagou a mais (+)
-  'DIFERENCA',   -- Faltou pagar (-)
-  'QUITADO'      -- Exato (0)
-) DEFAULT 'QUITADO';
-```
-
-### **Coluna Existente (acrescimo)**
-```
-Tipo: DECIMAL(12,2)
-Valor: Calculado automaticamente
-Salvo: Sempre, na inserção/atualização
+Entrada:   Valor Recolhido
+              ↓
+Cálculo:   Total a Recolher = Valor a Recolher + Multas
+              ↓
+Output:    Campo Acréscimo = Valor Recolhido - Total
+           (readonly, colored, com mensagem)
 ```
 
 ---
 
 ## 📊 EXEMPLOS
 
-### **Exemplo 1: ACRESCIMO (Pagou a Mais)**
+### **1. ACRESCIMO (Pagou a Mais): +780,11**
 ```
 Recolhido: R$ 20.000,00
 a Recolher: R$ 19.219,89
-─────────────────────────
-Cálculo: 20.000,00 - 19.219,89 = +780,11
+──────────────────────
+= +780,11
 
-SAÍDA:
+EXIBIÇÃO:
 ├─ Campo: +780,11
 ├─ Cor: 🟡 Amarelo
-├─ Tipo: ACRESCIMO
-├─ Percentual: +4,06%
 └─ Mensagem: "Recolheu R$ 780,11 a mais"
-
-BANCO:
-├─ acrescimo: 780,11
-└─ acrescimo_tipo: 'ACRESCIMO'
 ```
 
-### **Exemplo 2: DIFERENÇA (Faltou Pagar)**
+### **2. DIFERENÇA (Faltou Pagar): -4.219,89**
 ```
 Recolhido: R$ 15.000,00
 a Recolher: R$ 19.219,89
-─────────────────────────
-Cálculo: 15.000,00 - 19.219,89 = -4.219,89
+──────────────────────
+= -4.219,89
 
-SAÍDA:
+EXIBIÇÃO:
 ├─ Campo: -4.219,89
 ├─ Cor: 🔴 Vermelho
-├─ Tipo: DIFERENÇA
-├─ Percentual: -21,96%
 └─ Mensagem: "Faltam R$ 4.219,89"
-
-BANCO:
-├─ acrescimo: -4.219,89
-└─ acrescimo_tipo: 'DIFERENCA'
 ```
 
-### **Exemplo 3: QUITADO (Exato)**
+### **3. QUITADO (Exato): 0,00**
 ```
 Recolhido: R$ 19.219,89
 a Recolher: R$ 19.219,89
-─────────────────────────
-Cálculo: 19.219,89 - 19.219,89 = 0,00
+──────────────────────
+= 0,00
 
-SAÍDA:
+EXIBIÇÃO:
 ├─ Campo: 0,00
 ├─ Cor: 🟢 Verde
-├─ Tipo: QUITADO
-├─ Percentual: 0%
 └─ Mensagem: "Valor exato"
-
-BANCO:
-├─ acrescimo: 0,00
-└─ acrescimo_tipo: 'QUITADO'
 ```
 
 ---
 
-## 🔧 IMPLEMENTAÇÃO
+## 🔧 IMPLEMENTAÇÃO (2 HORAS)
 
-### **Função (30 min)**
+### **Passo 1: Função de Cálculo (30 min)**
 ```typescript
 // src/lib/calc/acrescimo-auto.ts
 
@@ -161,38 +103,45 @@ export function calcularAcrescimoAuto(
 ): {
   acrescimo: number;
   tipo: 'ACRESCIMO' | 'DIFERENCA' | 'QUITADO';
-  percentual: number;
+  cor: string;
   mensagem: string;
 } {
   const total = valorARecolher + multas;
   const acrescimo = valorRecolhido - total;
-  const percentual = (acrescimo / total) * 100;
   
   let tipo: 'ACRESCIMO' | 'DIFERENCA' | 'QUITADO';
+  let cor: string;
   let mensagem: string;
   
   if (Math.abs(acrescimo) < 0.01) {
     tipo = 'QUITADO';
+    cor = 'bg-green-50 border-green-200';
     mensagem = '✅ Valor exato';
   } else if (acrescimo > 0) {
     tipo = 'ACRESCIMO';
-    mensagem = `⭐ Recolheu R$ ${acrescimo.toFixed(2)} a mais (${percentual.toFixed(2)}%)`;
+    cor = 'bg-yellow-50 border-yellow-200';
+    mensagem = `⭐ Recolheu R$ ${acrescimo.toFixed(2)} a mais`;
   } else {
     tipo = 'DIFERENCA';
-    mensagem = `❌ Faltam R$ ${Math.abs(acrescimo).toFixed(2)} (${Math.abs(percentual).toFixed(2)}%)`;
+    cor = 'bg-red-50 border-red-200';
+    mensagem = `❌ Faltam R$ ${Math.abs(acrescimo).toFixed(2)}`;
   }
   
   return {
     acrescimo: Number(acrescimo.toFixed(2)),
     tipo,
-    percentual: Number(percentual.toFixed(2)),
+    cor,
     mensagem,
   };
 }
 ```
 
-### **Formulário (1h)**
+### **Passo 2: Integração no Formulário (1h)**
 ```typescript
+// No lancamento-form.tsx
+
+import { calcularAcrescimoAuto } from '@/lib/calc/acrescimo-auto';
+
 const resultado = useMemo(() => {
   const vRecolhido = currencyToNumber(valorRecolhido);
   const vMultas = currencyToNumber(multas);
@@ -203,87 +152,56 @@ const resultado = useMemo(() => {
   return null;
 }, [valorRecolherCalculado, valorRecolhido, multas]);
 
-// Campo com cores
-<div className={`
-  p-3 rounded border
-  ${resultado?.tipo === 'QUITADO' ? 'bg-green-50' : ''}
-  ${resultado?.tipo === 'DIFERENCA' ? 'bg-red-50' : ''}
-  ${resultado?.tipo === 'ACRESCIMO' ? 'bg-yellow-50' : ''}
-`}>
-  <label>Acréscimo (R$)</label>
-  <input 
+// Campo Acréscimo (readonly)
+<div className={`p-3 rounded border ${resultado?.cor}`}>
+  <Label>Acréscimo (R$)</Label>
+  <Input
     type="text"
     value={resultado?.acrescimo.toFixed(2) ?? '0,00'}
     readOnly
     disabled
   />
-  <p className="text-sm">{resultado?.mensagem}</p>
+  <p className="text-sm mt-1">{resultado?.mensagem}</p>
 </div>
 
-// Payload
+// Salvar no payload
 const payload = {
-  ...dados,
+  ...campos,
   acrescimo: resultado?.acrescimo ?? 0,
-  acrescimo_tipo: resultado?.tipo ?? 'QUITADO',
 };
 ```
 
-### **Migration (1h)**
-```sql
--- Criar migration
-ALTER TABLE lancamentos ADD COLUMN acrescimo_tipo ENUM(
-  'ACRESCIMO',
-  'DIFERENCA', 
-  'QUITADO'
-) DEFAULT 'QUITADO' AFTER acrescimo;
+### **Passo 3: Testes (30 min)**
+```
+Teste 1: Recolhido > a Recolher → ACRESCIMO (amarelo)
+Teste 2: Recolhido < a Recolher → DIFERENÇA (vermelho)
+Teste 3: Recolhido = a Recolher → QUITADO (verde)
+Teste 4: Com multas → cálculo correto
 ```
 
 ---
 
-## ✅ CHECKLIST (3 HORAS)
+## ✅ CHECKLIST
 
-### **Fase 1: Função (30 min)**
 - [ ] Criar `calcularAcrescimoAuto()`
+- [ ] Integrar useMemo no formulário
+- [ ] Campo readonly com cores
+- [ ] Salvar valor no banco
 - [ ] Testar 3 cenários
 
-### **Fase 2: Migration (1h)**
-- [ ] Adicionar coluna schema
-- [ ] Criar migration Prisma
-- [ ] Deploy
-
-### **Fase 3: Integração (1h)**
-- [ ] useMemo no formulário
-- [ ] Renderizar com cores
-- [ ] Integrar payload
-
-### **Fase 4: UI (30 min)**
-- [ ] Cores e mensagens
-- [ ] Responsividade
+**Total: 2 horas**
 
 ---
 
-## 📝 TABELA FINAL
+## 📝 RESUMO
 
-| Situação | Valor | Tipo | Cor | Mensagem |
-|----------|-------|------|-----|----------|
-| Exato | 0,00 | QUITADO | 🟢 | Valor exato |
-| Pagou a mais | +X.XXX,XX | ACRESCIMO | 🟡 | Recolheu a mais |
-| Faltou pagar | -X.XXX,XX | DIFERENÇA | 🔴 | Faltam R$ |
+| Campo | Status | Mudança |
+|-------|--------|---------|
+| Acréscimo (R$) | ✅ Automático | Agora calcula sozinho |
+| Cor | ✅ Novo | Verde/Amarelo/Vermelho |
+| Mensagem | ✅ Novo | Mostra interpretação |
+| Banco | ✅ Mesmo | Salva valor calculado |
 
 ---
 
-## 🚀 RELATÓRIOS
-
-```sql
--- Total recolhido a mais
-SELECT SUM(acrescimo) FROM lancamentos 
-WHERE acrescimo_tipo = 'ACRESCIMO';
-
--- Total faltando
-SELECT SUM(ABS(acrescimo)) FROM lancamentos 
-WHERE acrescimo_tipo = 'DIFERENCA';
-
--- Quitados
-SELECT COUNT(*) FROM lancamentos 
-WHERE acrescimo_tipo = 'QUITADO';
-```
+**Apenas o campo Acréscimo muda. Nada de novo no banco!** 🎯
