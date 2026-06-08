@@ -138,6 +138,11 @@ export async function generateBarcodeImage(data: {
   try {
     const barcodeNumber = generateBarcodeNumber(data);
 
+    if (!barcodeNumber || barcodeNumber.length < 40) {
+      console.warn("Código de barras inválido:", barcodeNumber);
+      return "";
+    }
+
     // Formatar com espaços (FEBRABAN padrão: 5 + 5 + 5 + 5 + 5 + 5 + 5 + 2)
     const formattedBarcode = `${barcodeNumber.slice(0, 5)} ${barcodeNumber.slice(5, 10)} ${barcodeNumber.slice(10, 15)} ${barcodeNumber.slice(15, 20)} ${barcodeNumber.slice(20, 25)} ${barcodeNumber.slice(25, 30)} ${barcodeNumber.slice(30, 35)} ${barcodeNumber.slice(35, 40)} ${barcodeNumber.slice(40, 45)} ${barcodeNumber.slice(45)}`;
 
@@ -146,11 +151,16 @@ export async function generateBarcodeImage(data: {
       type: "image/png",
       quality: 0.95,
       margin: 1,
-      width: 150,
+      width: 200,
+      color: {
+        dark: "#000000",
+        light: "#FFFFFF",
+      },
     });
+
     return qrImage;
   } catch (error) {
-    console.error("Erro ao gerar QR code:", error);
+    console.error("❌ Erro ao gerar QR code:", error);
     return "";
   }
 }

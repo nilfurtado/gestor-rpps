@@ -187,11 +187,13 @@ export function GuiaContribuicaoPage({
             </View>
 
             {/* QR Code (direita) */}
-            {qrCodeImage && (
-              <View style={{ width: 120, height: 120, borderWidth: 1, borderColor: "#ddd", padding: 4, backgroundColor: "#fafafa", borderRadius: 2 }}>
+            <View style={{ width: 120, height: 120, borderWidth: 1, borderColor: "#ddd", padding: 4, backgroundColor: "#fafafa", borderRadius: 2, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              {qrCodeImage && qrCodeImage.trim() ? (
                 <Image src={qrCodeImage} style={{ width: "100%", height: "100%" }} />
-              </View>
-            )}
+              ) : (
+                <Text style={{ fontSize: 8, color: "#999", textAlign: "center" }}>QR Code</Text>
+              )}
+            </View>
           </View>
 
           {/* Código de Barras (linha cheia) */}
