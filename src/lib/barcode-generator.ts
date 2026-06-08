@@ -51,10 +51,21 @@ export function generateBarcodeNumber(data: {
 
   // NSR - Número Sequencial (11 dígitos)
   // Formato: [OrgãoID 5dig][Ano 2dig][Mês 2dig][Ordem 2dig]
-  const orgaoIdStr = String(data.orgaoId).padStart(5, "0");
-  const anoStr = String(data.exercicioAno).slice(-2);
-  const mesNum = String(parseInt(data.competenciaMes) || 1).padStart(2, "0");
-  const ordemStr = String(data.competenciaOrdem).padStart(2, "0");
+  const orgaoIdStr = String(data.orgaoId || 0).padStart(5, "0");
+  const anoStr = String(data.exercicioAno || 0).slice(-2).padStart(2, "0");
+  // competenciaMes pode vir como string "janeiro" ou número "1"
+  let mesNum = "01";
+  if (typeof data.competenciaMes === "string") {
+    const mesMap: Record<string, string> = {
+      janeiro: "01", fevereiro: "02", março: "03", abril: "04",
+      maio: "05", junho: "06", julho: "07", agosto: "08",
+      setembro: "09", outubro: "10", novembro: "11", dezembro: "12",
+    };
+    mesNum = mesMap[data.competenciaMes.toLowerCase()] || "01";
+  } else {
+    mesNum = String(data.competenciaMes || 1).padStart(2, "0");
+  }
+  const ordemStr = String(data.competenciaOrdem || 1).padStart(2, "0");
   const nsr = `${orgaoIdStr}${anoStr}${mesNum}${ordemStr}`;
 
   // Código de origem (2 dígitos) - 00 padrão

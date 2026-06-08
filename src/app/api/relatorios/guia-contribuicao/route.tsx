@@ -117,14 +117,6 @@ export async function GET(req: Request) {
 
     // Gerar barcodes para todos os tipos
     const barcodeImages: Record<"PATRONAL" | "SEGURADO", string> = {};
-
-    console.log("DEBUG BARCODE:", {
-      rppsInfo,
-      rpps,
-      competencia,
-      competenciaOrdem: competencia.ordem,
-    });
-
     for (const tipoParaRender of tiposParaRender) {
       const totalPagamento =
         tipoParaRender === "PATRONAL"
