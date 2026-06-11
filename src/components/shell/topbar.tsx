@@ -4,7 +4,9 @@ import { usePathname } from "next/navigation";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ChevronRight, LogOut, UserCircle2 } from "lucide-react";
+import { useState } from "react";
 import type { Role } from "@prisma/client";
+import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -46,6 +48,7 @@ export function Topbar({ userName, userEmail, userRole }: TopbarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const segments = pathname.split("/").filter(Boolean);
+  const [isUserHovered, setIsUserHovered] = useState(false);
 
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-border bg-background/95 px-4 backdrop-blur sm:px-6 lg:px-8">
@@ -79,9 +82,27 @@ export function Topbar({ userName, userEmail, userRole }: TopbarProps) {
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="sm" className="gap-2" aria-label="Conta do usuário">
-              <UserCircle2 className="h-5 w-5" />
-              <span className="hidden max-w-[12rem] truncate sm:inline">
+            <Button
+              variant="ghost"
+              size="sm"
+              className={cn(
+                "gap-2 transition-all duration-200",
+                isUserHovered && "bg-secondary shadow-sm"
+              )}
+              onMouseEnter={() => setIsUserHovered(true)}
+              onMouseLeave={() => setIsUserHovered(false)}
+              aria-label="Conta do usuário"
+            >
+              <UserCircle2
+                className={cn(
+                  "h-5 w-5 transition-all duration-300",
+                  isUserHovered && "scale-110 drop-shadow-lg animate-pulse"
+                )}
+              />
+              <span className={cn(
+                "hidden max-w-[12rem] truncate sm:inline transition-all duration-200",
+                isUserHovered && "translate-x-1"
+              )}>
                 {userName ?? userEmail ?? "Usuário"}
               </span>
             </Button>
