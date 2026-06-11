@@ -15,6 +15,7 @@ import {
   X,
 } from "lucide-react";
 import { useState } from "react";
+import { useTransition } from "react";
 import type { Role } from "@prisma/client";
 import { Logo, LogoTextOnly } from "@/components/brand/logo";
 import { useLogo } from "@/lib/logo-context";
@@ -56,27 +57,50 @@ function NavItem({
   active: boolean;
   onClick: () => void;
 }) {
+  const [isHovered, setIsHovered] = useState(false);
+  const [isClicked, setIsClicked] = useState(false);
+
+  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    setIsClicked(true);
+    onClick();
+    setTimeout(() => setIsClicked(false), 600);
+  };
+
   return (
     <Link
       href={href}
-      onClick={onClick}
+      onClick={handleClick}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
       aria-current={active ? "page" : undefined}
       className={cn(
-        "flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-all duration-200",
+        "flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-all duration-200 relative overflow-hidden",
         active
-          ? "bg-sidebar-accent text-sidebar-accent-foreground"
+          ? "bg-sidebar-accent text-sidebar-accent-foreground shadow-sm"
           : "text-sidebar-foreground/80 hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground"
       )}
     >
+      {/* Ripple effect */}
+      {isClicked && (
+        <div className="absolute inset-0 bg-white/20 rounded-md animate-ping" />
+      )}
+
       <Icon
         className={cn(
-          "h-5 w-5 transition-all duration-200",
-          active && "animate-pulse scale-110"
+          "h-5 w-5 transition-all duration-300 flex-shrink-0",
+          active && "animate-pulse scale-110",
+          isHovered && "scale-125 drop-shadow-lg",
+          isClicked && "scale-95"
         )}
         aria-hidden="true"
         style={{ color }}
       />
-      <span>{label}</span>
+      <span className={cn(
+        "transition-all duration-200",
+        isHovered && "translate-x-1"
+      )}>
+        {label}
+      </span>
     </Link>
   );
 }
