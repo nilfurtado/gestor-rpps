@@ -27,30 +27,32 @@ type NavRule = (role: Role | null | undefined) => boolean;
 const visibleToAll: NavRule = () => true;
 const gestorOnly: NavRule = (r) => r === "GESTOR";
 
-const NAV_PRINCIPAL: { href: string; label: string; icon: React.ElementType; visible: NavRule }[] = [
-  { href: "/dashboard",   label: "Dashboard",   icon: LayoutDashboard, visible: visibleToAll },
-  { href: "/orgaos",      label: "Órgãos",       icon: Building2,       visible: visibleToAll },
-  { href: "/lancamentos", label: "Lançamentos",  icon: Receipt,         visible: visibleToAll },
-  { href: "/acordos",     label: "Acordos",      icon: Handshake,       visible: visibleToAll },
-  { href: "/exercicios",  label: "Exercícios",   icon: CalendarRange,   visible: visibleToAll },
-  { href: "/relatorios",  label: "Relatórios",   icon: FileBarChart,    visible: visibleToAll },
-  { href: "/usuarios",    label: "Usuários",     icon: Users,           visible: gestorOnly   },
+const NAV_PRINCIPAL: { href: string; label: string; icon: React.ElementType; color: string; visible: NavRule }[] = [
+  { href: "/dashboard",   label: "Dashboard",   icon: LayoutDashboard, color: "#3b82f6", visible: visibleToAll }, // Azul
+  { href: "/orgaos",      label: "Órgãos",       icon: Building2,       color: "#8b5cf6", visible: visibleToAll }, // Roxo
+  { href: "/lancamentos", label: "Lançamentos",  icon: Receipt,         color: "#10b981", visible: visibleToAll }, // Verde
+  { href: "/acordos",     label: "Acordos",      icon: Handshake,       color: "#f59e0b", visible: visibleToAll }, // Âmbar
+  { href: "/exercicios",  label: "Exercícios",   icon: CalendarRange,   color: "#ec4899", visible: visibleToAll }, // Rosa
+  { href: "/relatorios",  label: "Relatórios",   icon: FileBarChart,    color: "#ef4444", visible: visibleToAll }, // Vermelho
+  { href: "/usuarios",    label: "Usuários",     icon: Users,           color: "#06b6d4", visible: gestorOnly   }, // Ciano
 ];
 
-const NAV_INSTITUCIONAL: { href: string; label: string; icon: React.ElementType; visible: NavRule }[] = [
-  { href: "/rpps", label: "Informações do RPPS", icon: Landmark, visible: gestorOnly },
+const NAV_INSTITUCIONAL: { href: string; label: string; icon: React.ElementType; color: string; visible: NavRule }[] = [
+  { href: "/rpps", label: "Informações do RPPS", icon: Landmark, color: "#14b8a6", visible: gestorOnly }, // Teal
 ];
 
 function NavItem({
   href,
   label,
   icon: Icon,
+  color,
   active,
   onClick,
 }: {
   href: string;
   label: string;
   icon: React.ElementType;
+  color: string;
   active: boolean;
   onClick: () => void;
 }) {
@@ -66,7 +68,7 @@ function NavItem({
           : "text-sidebar-foreground/80 hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground"
       )}
     >
-      <Icon className="h-5 w-5" aria-hidden="true" />
+      <Icon className="h-5 w-5" aria-hidden="true" style={{ color }} />
       <span>{label}</span>
     </Link>
   );
@@ -151,6 +153,7 @@ export function Sidebar({ role }: { role: Role | null }) {
                 href={item.href}
                 label={item.label}
                 icon={item.icon}
+                color={item.color}
                 active={pathname === item.href || pathname.startsWith(`${item.href}/`)}
                 onClick={close}
               />
@@ -171,6 +174,7 @@ export function Sidebar({ role }: { role: Role | null }) {
                     href={item.href}
                     label={item.label}
                     icon={item.icon}
+                    color={item.color}
                     active={pathname === item.href || pathname.startsWith(`${item.href}/`)}
                     onClick={close}
                   />
