@@ -29,11 +29,11 @@ const gestorOnly: NavRule = (r) => r === "GESTOR";
 
 const NAV_PRINCIPAL: { href: string; label: string; icon: React.ElementType; color: string; visible: NavRule }[] = [
   { href: "/dashboard",   label: "Dashboard",   icon: LayoutDashboard, color: "#3b82f6", visible: visibleToAll }, // Azul
-  { href: "/orgaos",      label: "Órgãos",       icon: Building2,       color: "#8b5cf6", visible: visibleToAll }, // Roxo
   { href: "/lancamentos", label: "Lançamentos",  icon: Receipt,         color: "#10b981", visible: visibleToAll }, // Verde
   { href: "/acordos",     label: "Acordos",      icon: Handshake,       color: "#f59e0b", visible: visibleToAll }, // Âmbar
-  { href: "/exercicios",  label: "Exercícios",   icon: CalendarRange,   color: "#ec4899", visible: visibleToAll }, // Rosa
   { href: "/relatorios",  label: "Relatórios",   icon: FileBarChart,    color: "#ef4444", visible: visibleToAll }, // Vermelho
+  { href: "/orgaos",      label: "Órgãos",       icon: Building2,       color: "#8b5cf6", visible: visibleToAll }, // Roxo
+  { href: "/exercicios",  label: "Exercícios",   icon: CalendarRange,   color: "#ec4899", visible: visibleToAll }, // Rosa
   { href: "/usuarios",    label: "Usuários",     icon: Users,           color: "#06b6d4", visible: gestorOnly   }, // Ciano
 ];
 
