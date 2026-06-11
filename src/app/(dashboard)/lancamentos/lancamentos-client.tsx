@@ -88,9 +88,14 @@ export function LancamentosClient({ lancamentos: initialLancamentos, orgaos, exe
       const valorRecolhidoEfetivo = valorRecolhido + Math.max(0, acrescimo);
       const deficitCalculado = Math.max(0, valorRecolher - valorRecolhidoEfetivo);
 
+      const isPago = l.status === "PAGO";
+      const deficitFinal = isPago ? 0 : deficitCalculado;
+      const inadimplenciaFinal = isPago ? 0 : Number(l.inadimplencia);
+
       return {
         ...l,
-        deficit: l.status === "PAGO" ? 0 : deficitCalculado,
+        deficit: deficitFinal,
+        inadimplencia: inadimplenciaFinal,
       };
     });
   }, [lancamentos]);
