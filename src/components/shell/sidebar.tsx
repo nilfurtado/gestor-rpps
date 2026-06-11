@@ -62,13 +62,20 @@ function NavItem({
       onClick={onClick}
       aria-current={active ? "page" : undefined}
       className={cn(
-        "flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-colors",
+        "flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-all duration-200",
         active
           ? "bg-sidebar-accent text-sidebar-accent-foreground"
           : "text-sidebar-foreground/80 hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground"
       )}
     >
-      <Icon className="h-5 w-5" aria-hidden="true" style={{ color }} />
+      <Icon
+        className={cn(
+          "h-5 w-5 transition-all duration-200",
+          active && "animate-pulse scale-110"
+        )}
+        aria-hidden="true"
+        style={{ color }}
+      />
       <span>{label}</span>
     </Link>
   );
