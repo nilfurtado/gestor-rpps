@@ -17,6 +17,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { StatusBadge } from "@/components/lancamentos/status-badge";
+import { JustificativaDiferenca } from "@/components/formulario/justificativa-diferenca";
 import { calcularLancamento } from "@/lib/calc/lancamento";
 import { calcularAcrescimoAuto } from "@/lib/calc/acrescimo-auto";
 import { formatBRL, formatPercent } from "@/lib/format";
@@ -38,6 +39,9 @@ export interface LancamentoInitial {
   parcelado: boolean;
   dataVencimento: string | null;
   observacoes: string | null;
+  justificativaDiferenca?: string | null;
+  diferenca_aprovada?: boolean;
+  dataAprovacao?: string | null;
 }
 
 export interface LancamentoKey {
@@ -101,6 +105,10 @@ export function LancamentoForm({
       : new Date().toISOString().split("T")[0]
   );
   const [observacoes, setObservacoes] = useState<string>(initial?.observacoes ?? "");
+  const [justificativaDiferenca, setJustificativaDiferenca] = useState<string>(initial?.justificativaDiferenca ?? "");
+  const [diferenca_aprovada, setDiferenca_aprovada] = useState(initial?.diferenca_aprovada ?? false);
+  const [dataAprovacao, setDataAprovacao] = useState<string | null>(initial?.dataAprovacao ?? null);
+  const [showAprovado, setShowAprovado] = useState(initial?.diferenca_aprovada ?? false);
 
   // Cálculo automático de Valor a Recolher = Folha Base × Alíquota ÷ 100
   const valorRecolherCalculado = useMemo(() => {
@@ -161,6 +169,44 @@ export function LancamentoForm({
     const cmp = competencias.find((c) => c.id === duplicateConflict.competenciaId);
     return `${org?.sigla ?? "?"} · ${cmp?.mes ?? "?"} · ${exe?.ano ?? "?"} · ${duplicateConflict.tipo === "PATRONAL" ? "Patronal" : "Segurado"}`;
   }, [duplicateConflict, orgaos, exercicios, competencias]);
+
+  async function handleAprovarDiferenca(motivo: string, detalhe: string) {
+    try {
+      const payload = {
+        lancamentoId: initial!.id,
+        motivo,
+        detalhe,
+      };
+      console.log("Enviando para API:", payload);
+
+      const res = await fetch("/api/lancamentos/aprovar-diferenca", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const responseText = await res.text();
+      console.log("Resposta da API:", { status: res.status, body: responseText });
+
+      if (!res.ok) {
+        toast.error(`Erro ${res.status}: ${responseText}`);
+        return;
+      }
+
+      const data = JSON.parse(responseText);
+      setShowAprovado(true);
+      setDataAprovacao(new Date().toISOString());
+      toast.success("Diferença aprovada com sucesso! ✅");
+
+      // Recarregar página após 3 segundos
+      setTimeout(() => {
+        window.location.reload();
+      }, 3000);
+    } catch (err) {
+      console.error("Erro ao aprovar diferença:", err);
+      toast.error(`Erro: ${err instanceof Error ? err.message : "Erro desconhecido"}`);
+    }
+  }
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -379,6 +425,18 @@ export function LancamentoForm({
         </label>
       </section>
 
+      {/* ── JUSTIFICATIVA DE DIFERENÇA ────────────────── */}
+      {isEdit && resultadoAcrescimo?.acrescimo && resultadoAcrescimo.acrescimo < 0 && (
+        <JustificativaDiferenca
+          acrescimo={resultadoAcrescimo.acrescimo}
+          justificativa={justificativaDiferenca}
+          aprovada={showAprovado}
+          dataAprovacao={dataAprovacao || undefined}
+          onAprovar={handleAprovarDiferenca}
+          disabled={pending || showAprovado}
+        />
+      )}
+
       {/* ── PREVIEW DE LANÇAMENTOS ─────────────────────── */}
       <section aria-labelledby="sec-prev">
         <SectionTitle id="sec-prev">Preview</SectionTitle>
@@ -423,7 +481,7 @@ export function LancamentoForm({
 
           {/* Status */}
           <CalcPill label="Status" tone="default">
-            <StatusBadge status={preview.status} />
+            <StatusBadge status={diferenca_aprovada ? "PAGO" : preview.status} />
           </CalcPill>
         </div>
       </section>

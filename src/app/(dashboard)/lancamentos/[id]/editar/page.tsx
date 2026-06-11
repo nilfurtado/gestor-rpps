@@ -57,10 +57,16 @@ export default async function EditarLancamentoPage({ params }: Ctx) {
     multas: lancamento.multas != null ? Number(lancamento.multas) : null,
     juros: lancamento.juros != null ? Number(lancamento.juros) : null,
     parcelado: lancamento.parcelado,
+    acrescimo: lancamento.acrescimo != null ? Number(lancamento.acrescimo) : 0,
     dataVencimento: lancamento.dataVencimento
       ? lancamento.dataVencimento.toISOString()
       : null,
     observacoes: lancamento.observacoes,
+    justificativaDiferenca: lancamento.justificativaDiferenca,
+    diferenca_aprovada: lancamento.diferenca_aprovada,
+    dataAprovacao: lancamento.dataAprovacao
+      ? lancamento.dataAprovacao.toISOString()
+      : null,
   };
 
   return (

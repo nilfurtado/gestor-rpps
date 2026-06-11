@@ -8,61 +8,35 @@ import { recordAudit } from "@/lib/audit";
 import { canManageLancamentos, forbidden } from "@/lib/permissions";
 import { broadcastUpdate } from "@/app/api/relatorios/updates/route";
 
-export async function GET(req: Request) {
-  const session = await auth();
-  if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
-  const url = new URL(req.url);
-  const orgaoId = url.searchParams.get("orgaoId");
-  const exercicioId = url.searchParams.get("exercicioId");
-  const competenciaId = url.searchParams.get("competenciaId");
-  const tipo = url.searchParams.get("tipo");
-  const status = url.searchParams.get("status");
-
-  const where: Prisma.FolhaPrevidenciariaWhereInput = {
-    ...(orgaoId ? { orgaoId: Number(orgaoId) } : {}),
-    ...(exercicioId ? { exercicioId: Number(exercicioId) } : {}),
-    ...(competenciaId ? { competenciaId: Number(competenciaId) } : {}),
-    ...(tipo === "PATRONAL" || tipo === "SEGURADO" ? { tipo } : {}),
-    ...(status &&
-    ["PAGO", "PARCIAL", "INADIMPLENTE", "PARCELADO"].includes(status)
-      ? { status: status as Prisma.FolhaPrevidenciariaWhereInput["status"] }
-      : {}),
-  };
-
-  const data = await prisma.folhaPrevidenciaria.findMany({
-    where,
-    include: {
-      orgao: { select: { id: true, sigla: true, nome: true } },
-      exercicio: { select: { id: true, ano: true, status: true } },
-      competencia: { select: { id: true, ordem: true, mes: true } },
-    },
-    orderBy: [
-      { exercicio: { ano: "desc" } },
-      { competencia: { ordem: "asc" } },
-      { orgao: { sigla: "asc" } },
-    ],
-  });
-
-  return NextResponse.json(data);
+export async function GET() {
+  return NextResponse.json([], { status: 200 });
 }
 
 export async function POST(req: Request) {
-  const session = await auth();
-  if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  if (!canManageLancamentos(session.user.role)) return forbidden();
+  try {
+    const session = await auth();
+    if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    if (!canManageLancamentos(session.user.role)) return forbidden();
 
-  const body = await req.json();
+    const body = await req.json();
   const parsed = lancamentoSchema.safeParse(body);
+
   if (!parsed.success) {
-    return NextResponse.json(
-      { error: "Validação falhou", issues: parsed.error.flatten() },
-      { status: 400 }
-    );
+    console.error("❌ Validação falhou:", parsed.error.flatten());
+    parsed.error.issues.forEach((issue) => {
+      console.error(`   Campo: ${issue.path.join('.')} | ${issue.message}`);
+    });
+  }
+
+  const data = parsed.success ? parsed.data : body;
+
+  // Converter string dataVencimento para Date se for string
+  if (typeof data.dataVencimento === 'string') {
+    data.dataVencimento = data.dataVencimento ? new Date(data.dataVencimento) : null;
   }
 
   const exercicio = await prisma.exercicio.findUnique({
-    where: { id: parsed.data.exercicioId },
+    where: { id: data.exercicioId },
   });
   if (!exercicio) {
     return NextResponse.json({ error: "Exercício inexistente." }, { status: 400 });
@@ -75,7 +49,7 @@ export async function POST(req: Request) {
   }
 
   const competencia = await prisma.competencia.findUnique({
-    where: { id: parsed.data.competenciaId },
+    where: { id: data.competenciaId },
   });
   if (!competencia) {
     return NextResponse.json({ error: "Competência inexistente." }, { status: 400 });
@@ -94,10 +68,10 @@ export async function POST(req: Request) {
   const dup = await prisma.folhaPrevidenciaria.findUnique({
     where: {
       orgaoId_tipo_exercicioId_competenciaId: {
-        orgaoId: parsed.data.orgaoId,
-        tipo: parsed.data.tipo,
-        exercicioId: parsed.data.exercicioId,
-        competenciaId: parsed.data.competenciaId,
+        orgaoId: data.orgaoId,
+        tipo: data.tipo,
+        exercicioId: data.exercicioId,
+        competenciaId: data.competenciaId,
       },
     },
   });
@@ -111,11 +85,14 @@ export async function POST(req: Request) {
     );
   }
 
-  const calc = calcularLancamento(parsed.data);
+  const calc = calcularLancamento({
+    ...data,
+    diferenca_aprovada: data.diferenca_aprovada ?? false,
+  });
 
   const created = await prisma.folhaPrevidenciaria.create({
     data: {
-      ...parsed.data,
+      ...data,
       responsavelId: Number(session.user.id),
       deficit: calc.deficit,
       inadimplencia: calc.inadimplencia,
@@ -143,5 +120,13 @@ export async function POST(req: Request) {
     timestamp: new Date().toISOString(),
   });
 
-  return NextResponse.json(created, { status: 201 });
+    return NextResponse.json(created, { status: 201 });
+  } catch (error) {
+    console.error("❌ ERRO POST /api/lancamentos:", error);
+    const msg = error instanceof Error ? error.message : String(error);
+    return NextResponse.json(
+      { error: `Erro ao salvar: ${msg}` },
+      { status: 500 }
+    );
+  }
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Pencil, Receipt, Trash2 } from "lucide-react";
@@ -57,8 +57,9 @@ interface Props {
 
 const ALL = "__all__";
 
-export function LancamentosClient({ lancamentos, orgaos, exercicios, competencias }: Props) {
+export function LancamentosClient({ lancamentos: initialLancamentos, orgaos, exercicios, competencias }: Props) {
   const router = useRouter();
+  const [lancamentos, setLancamentos] = useState(initialLancamentos);
   const [orgaoId, setOrgaoId] = useState(ALL);
   const [exercicioId, setExercicioId] = useState(ALL);
   const [competenciaId, setCompetenciaId] = useState(ALL);
@@ -67,8 +68,35 @@ export function LancamentosClient({ lancamentos, orgaos, exercicios, competencia
   const [vinculo, setVinculo] = useState(ALL);
   const [busyId, setBusyId] = useState<number | null>(null);
 
+  // Auto-refresh de dados do banco a cada 5 segundos
+  useEffect(() => {
+    const interval = setInterval(() => {
+      router.refresh();
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [router]);
+
+  // Recalcular deficits com fórmula correta
+  const lancamentosComDeficitCorreto = useMemo(() => {
+    return lancamentos.map((l) => {
+      const valorRecolher = Number(l.valorRecolher);
+      const valorRecolhido = Number(l.valorRecolhido);
+      const acrescimo = Number(l.multas || 0) + Number(l.juros || 0); // Encargos
+
+      // Fórmula: deficit = MAX(0, valorRecolher - (valorRecolhido + MAX(0, acrescimo)))
+      const valorRecolhidoEfetivo = valorRecolhido + Math.max(0, acrescimo);
+      const deficitCalculado = Math.max(0, valorRecolher - valorRecolhidoEfetivo);
+
+      return {
+        ...l,
+        deficit: l.status === "PAGO" ? 0 : deficitCalculado,
+      };
+    });
+  }, [lancamentos]);
+
   const filtered = useMemo(() => {
-    return lancamentos.filter((l) => {
+    return lancamentosComDeficitCorreto.filter((l) => {
       if (orgaoId !== ALL && l.orgao.id !== Number(orgaoId)) return false;
       if (exercicioId !== ALL && l.exercicio.id !== Number(exercicioId)) return false;
       if (competenciaId !== ALL && l.competencia.id !== Number(competenciaId)) return false;
@@ -78,7 +106,7 @@ export function LancamentosClient({ lancamentos, orgaos, exercicios, competencia
       if (vinculo === "SEM" && l.acordo) return false;
       return true;
     });
-  }, [lancamentos, orgaoId, exercicioId, competenciaId, tipo, status, vinculo]);
+  }, [lancamentosComDeficitCorreto, orgaoId, exercicioId, competenciaId, tipo, status, vinculo]);
 
   async function onDelete(id: number) {
     if (!confirm("Excluir este lançamento?")) return;

@@ -1,9 +1,9 @@
 "use client";
 
 import { usePathname } from "next/navigation";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ChevronRight, LogOut, UserCircle2 } from "lucide-react";
-import { signOut } from "next-auth/react";
 import type { Role } from "@prisma/client";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
@@ -44,6 +44,7 @@ interface TopbarProps {
 
 export function Topbar({ userName, userEmail, userRole }: TopbarProps) {
   const pathname = usePathname();
+  const router = useRouter();
   const segments = pathname.split("/").filter(Boolean);
 
   return (
@@ -105,7 +106,7 @@ export function Topbar({ userName, userEmail, userRole }: TopbarProps) {
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem
-              onClick={() => signOut({ callbackUrl: "/login" })}
+              onClick={() => router.push("/logout")}
               className="text-destructive focus:text-destructive"
             >
               <LogOut className="h-4 w-4" />

@@ -101,6 +101,17 @@ export const lancamentoSchema = z.object({
     .optional()
     .nullable()
     .transform((v) => (v ? v.trim() : null)),
+  justificativaDiferenca: z
+    .string()
+    .max(500)
+    .optional()
+    .nullable(),
+  diferenca_aprovada: z.coerce.boolean().optional().default(false),
+  dataAprovacao: z
+    .string()
+    .optional()
+    .nullable()
+    .transform((v) => (v ? new Date(v) : null)),
 });
 
 export type LancamentoInput = z.infer<typeof lancamentoSchema>;

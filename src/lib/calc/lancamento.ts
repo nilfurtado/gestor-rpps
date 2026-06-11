@@ -9,6 +9,7 @@ interface CalcInput {
   juros?: DecimalLike;
   acrescimo?: DecimalLike;
   parcelado?: boolean;
+  diferenca_aprovada?: boolean;
 }
 
 export interface CalcResult {
@@ -44,12 +45,16 @@ export function calcularLancamento(input: CalcInput): CalcResult {
 
   // ─── CÁLCULOS COM ARREDONDAMENTO (toFixed 2) ───
 
-  // Valor Recolhido Efetivo = Valor Recolhido + Acréscimo
-  const valorRecolhidoEfetivo = valorRecolhido + acrescimo;
+  // Valor Recolhido Efetivo = Valor Recolhido + Acréscimo (só se positivo)
+  // Quando acrescimo < 0 (diferença), não diminui o valor recolhido
+  const valorRecolhidoEfetivo = valorRecolhido + Math.max(0, acrescimo);
 
-  // Déficit
-  const deficit = Math.max(0, valorRecolher - valorRecolhidoEfetivo);
-  const deficitBruto = Math.max(0, valorRecolher - valorRecolhidoEfetivo);
+  // Déficit: se diferença foi aprovada, não há deficit
+  let deficitBruto = Math.max(0, valorRecolher - valorRecolhidoEfetivo);
+  if (input.diferenca_aprovada && acrescimo < 0) {
+    deficitBruto = 0;
+  }
+  const deficit = deficitBruto;
 
   // Inadimplência
   const inadimplenciaBruta = valorRecolher > 0 ? (deficitBruto / valorRecolher) * 100 : 0;
@@ -91,8 +96,14 @@ export function calcularLancamento(input: CalcInput): CalcResult {
     status = "PARCIAL";
   }
 
+  // Se status é PAGO, deficit deve ser ZERO
+  let deficitFinal = Number(deficit.toFixed(2));
+  if (status === "PAGO") {
+    deficitFinal = 0;
+  }
+
   return {
-    deficit: Number(deficit.toFixed(2)),
+    deficit: deficitFinal,
     deficitBruto,
     inadimplencia,
     inadimplenciaBruta,

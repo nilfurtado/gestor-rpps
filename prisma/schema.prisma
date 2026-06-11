@@ -82,6 +82,11 @@ model FolhaPrevidenciaria {
   responsavel             User?           @relation(fields: [responsavelId], references: [id])
   dataVencimento          DateTime?
   observacoes             String?
+  justificativaDiferenca  String?         // Justificativa quando há diferença (acrescimo < 0)
+  diferenca_aprovada      Boolean         @default(false)  // Se diferença foi aprovada
+  dataAprovacao           DateTime?       // Quando foi aprovada
+  usuarioAprovadorId      Int?            // Quem aprovou
+  usuarioAprovador        User?           @relation("AprovadasPor", fields: [usuarioAprovadorId], references: [id])
   acordos                 Acordo[]        @relation("AcordoLancamentos")
   createdAt               DateTime        @default(now())
   updatedAt               DateTime        @updatedAt
@@ -93,14 +98,15 @@ model FolhaPrevidenciaria {
 }
 
 model User {
-  id           Int                    @id @default(autoincrement())
-  email        String                 @unique
-  nome         String
-  passwordHash String
-  role         Role                   @default(OPERADOR)
-  createdAt    DateTime               @default(now())
-  lancamentos  FolhaPrevidenciaria[]
-  acordos      Acordo[]
+  id                    Int                    @id @default(autoincrement())
+  email                 String                 @unique
+  nome                  String
+  passwordHash          String
+  role                  Role                   @default(OPERADOR)
+  createdAt             DateTime               @default(now())
+  lancamentos           FolhaPrevidenciaria[]
+  diferencasAprovadas   FolhaPrevidenciaria[]  @relation("AprovadasPor")
+  acordos               Acordo[]
 
   @@map("users")
 }
@@ -174,7 +180,6 @@ enum TipoAcrescimo {
 enum Role {
   GESTOR
   OPERADOR
-  AUDITOR
 }
 
 enum TipoDebitoAcordo {

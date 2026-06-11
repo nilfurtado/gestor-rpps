@@ -216,7 +216,28 @@ export async function getDashboardData(exercicioAno?: number): Promise<Dashboard
     },
   });
 
-  const totalArrecadado = lancamentos.reduce((acc, l) => acc + Number(l.valorRecolhido), 0);
+  // Recalcular deficits com fórmula correta
+  lancamentos.forEach((l) => {
+    const valorRecolher = Number(l.valorRecolher);
+    const valorRecolhido = Number(l.valorRecolhido);
+    const acrescimo = Number(l.acrescimo || 0);
+
+    // Fórmula: deficit = MAX(0, valorRecolher - (valorRecolhido + MAX(0, acrescimo)))
+    const valorRecolhidoEfetivo = valorRecolhido + Math.max(0, acrescimo);
+    const deficitCalculado = Math.max(0, valorRecolher - valorRecolhidoEfetivo);
+
+    // Se foi aprovado, deficit = 0
+    if (l.diferenca_aprovada) {
+      l.deficit = 0;
+    } else {
+      l.deficit = deficitCalculado;
+    }
+  });
+
+  const totalArrecadado = lancamentos.reduce(
+    (acc, l) => acc + Number(l.valorRecolhido) + (Number(l.acrescimo) > 0 ? Number(l.acrescimo) : 0),
+    0
+  );
   const totalEmAtraso = lancamentos
     .filter((l) => l.status === "PARCIAL" || l.status === "INADIMPLENTE")
     .reduce((acc, l) => acc + Number(l.deficit), 0);
@@ -235,7 +256,10 @@ export async function getDashboardData(exercicioAno?: number): Promise<Dashboard
     return {
       mes: c.mes,
       ordem: c.ordem,
-      arrecadado: ls.reduce((s, l) => s + Number(l.valorRecolhido), 0),
+      arrecadado: ls.reduce(
+        (s, l) => s + Number(l.valorRecolhido) + (Number(l.acrescimo) > 0 ? Number(l.acrescimo) : 0),
+        0
+      ),
       previsto: ls.reduce((s, l) => s + Number(l.valorRecolher), 0),
     };
   });
