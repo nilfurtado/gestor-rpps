@@ -406,8 +406,8 @@ export function LancamentoForm({
             />
           </Field>
           <Field label={`${resultadoAcrescimo?.rótulo || 'Acréscimo'} (R$)`}>
-            <div className={`rounded-md border h-9 flex items-center px-3 text-sm ${resultadoAcrescimo?.cor || 'bg-gray-50 border-gray-200'}`}>
-              <span className="tabular-nums">
+            <div className={`rounded-md border h-9 flex items-center px-3 text-sm ${resultadoAcrescimo?.cor || 'bg-secondary border-border dark:bg-slate-800 dark:border-slate-700'}`}>
+              <span className="tabular-nums dark:text-foreground">
                 {resultadoAcrescimo?.valorExibicao ?? '0,00'}
               </span>
             </div>
