@@ -25,19 +25,19 @@ export function calcularAcrescimoAuto(
 
   if (Math.abs(acrescimo) < 0.01) {
     tipo = 'QUITADO';
-    cor = 'bg-green-50 border-green-200';
+    cor = 'bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800';
     mensagem = '';
     rótulo = 'Quitado';
     valorExibicao = '0,00';
   } else if (acrescimo > 0) {
     tipo = 'ACRESCIMO';
-    cor = 'bg-blue-50 border-blue-200';
+    cor = 'bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-800';
     mensagem = '';
     rótulo = 'Acréscimo';
     valorExibicao = `+R$ ${acrescimo.toFixed(2).replace('.', ',')}`;
   } else {
     tipo = 'DIFERENCA';
-    cor = 'bg-red-50 border-red-200';
+    cor = 'bg-red-50 dark:bg-red-950 border-red-200 dark:border-red-800';
     const diferenca = Math.abs(acrescimo);
     mensagem = '';
     rótulo = 'Diferença';
