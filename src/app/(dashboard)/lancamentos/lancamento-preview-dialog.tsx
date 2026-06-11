@@ -18,7 +18,7 @@ import { calcularLancamento } from "@/lib/calc/lancamento";
 interface LancamentoPreviewProps {
   lancamento: {
     id: number;
-    orgao: { sigla: string; nome: string };
+    orgao: { sigla: string; nome: string; cor?: string };
     competencia: { mes: string };
     exercicio: { ano: number };
     tipo: string;
@@ -61,7 +61,16 @@ export function LancamentoPreviewDialog({ lancamento: l }: LancamentoPreviewProp
         <DialogHeader>
           <DialogTitle>Preview de Lançamento</DialogTitle>
           <DialogDescription>
-            {l.orgao.sigla} · {l.competencia.mes}/{l.exercicio.ano}
+            <div className="flex items-center gap-2">
+              <div
+                className="w-3 h-3 rounded-full"
+                style={{ backgroundColor: l.orgao.cor || "#0F5132" }}
+              />
+              <span className="font-semibold">{l.orgao.sigla}</span>
+              <span className="text-xs">({l.orgao.nome})</span>
+              <span>·</span>
+              <span>{l.competencia.mes}/{l.exercicio.ano}</span>
+            </div>
           </DialogDescription>
         </DialogHeader>
 
@@ -70,9 +79,15 @@ export function LancamentoPreviewDialog({ lancamento: l }: LancamentoPreviewProp
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             {/* Ente */}
             <PreviewItem label="Ente">
-              <div>
-                <div className="font-semibold">{l.orgao.sigla}</div>
-                <div className="text-sm text-muted-foreground">{l.orgao.nome}</div>
+              <div className="flex items-center gap-2">
+                <div
+                  className="w-3 h-3 rounded-full flex-shrink-0"
+                  style={{ backgroundColor: l.orgao.cor || "#0F5132" }}
+                />
+                <div className="flex-1">
+                  <div className="font-semibold">{l.orgao.sigla}</div>
+                  <div className="text-xs text-muted-foreground">{l.orgao.nome}</div>
+                </div>
               </div>
             </PreviewItem>
 

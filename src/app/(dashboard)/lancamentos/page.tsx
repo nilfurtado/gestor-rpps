@@ -12,7 +12,7 @@ export default async function LancamentosPage() {
   const [lancamentos, orgaos, exercicios, competencias] = await Promise.all([
     prisma.folhaPrevidenciaria.findMany({
       include: {
-        orgao: { select: { id: true, sigla: true, nome: true } },
+        orgao: { select: { id: true, sigla: true, nome: true, cor: true } },
         exercicio: { select: { id: true, ano: true, status: true } },
         competencia: { select: { id: true, ordem: true, mes: true } },
         acordos: {
@@ -33,7 +33,7 @@ export default async function LancamentosPage() {
 
   const rows = lancamentos.map((l) => ({
     id: l.id,
-    orgao: l.orgao,
+    orgao: { ...l.orgao },
     tipo: l.tipo,
     exercicio: l.exercicio,
     competencia: l.competencia,

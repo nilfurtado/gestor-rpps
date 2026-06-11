@@ -223,11 +223,23 @@ export function LancamentosClient({ lancamentos: initialLancamentos, orgaos, exe
               {filtered.map((l) => (
                 <TableRow key={l.id}>
                   <TableCell className="px-3 py-2.5">
-                    <div className="font-semibold leading-tight text-foreground">
-                      {l.orgao.sigla}
-                    </div>
-                    <div className="text-[11px] leading-tight text-muted-foreground">
-                      {l.tipo === "PATRONAL" ? "Patronal" : "Segurado"}
+                    <div className="flex items-center gap-2">
+                      <div
+                        className="w-3 h-3 rounded-full flex-shrink-0"
+                        style={{ backgroundColor: l.orgao.cor || "#0F5132" }}
+                        title={l.orgao.nome}
+                      />
+                      <div>
+                        <div className="font-semibold leading-tight text-foreground text-sm">
+                          {l.orgao.sigla}
+                        </div>
+                        <div className="text-[11px] leading-tight text-muted-foreground">
+                          {l.orgao.nome}
+                        </div>
+                        <div className="text-[11px] leading-tight text-muted-foreground">
+                          {l.tipo === "PATRONAL" ? "Patronal" : "Segurado"}
+                        </div>
+                      </div>
                     </div>
                   </TableCell>
                   <TableCell className="px-3 py-2.5">
