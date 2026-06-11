@@ -60,19 +60,19 @@ export function LancamentoPreviewDialog({ lancamento: l }: LancamentoPreviewProp
       <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle>Preview de Lançamento</DialogTitle>
-          <DialogDescription>
-            <div className="flex items-center gap-2">
-              <div
-                className="w-3 h-3 rounded-full"
-                style={{ backgroundColor: l.orgao.cor || "#0F5132" }}
-              />
-              <span className="font-semibold">{l.orgao.sigla}</span>
-              <span className="text-xs">({l.orgao.nome})</span>
-              <span>·</span>
-              <span>{l.competencia.mes}/{l.exercicio.ano}</span>
-            </div>
-          </DialogDescription>
+          <DialogDescription>Resumo dos dados do lançamento</DialogDescription>
         </DialogHeader>
+
+        <div className="flex items-center gap-2 -mt-3">
+          <div
+            className="w-3 h-3 rounded-full"
+            style={{ backgroundColor: l.orgao.cor || "#0F5132" }}
+          />
+          <span className="font-semibold text-sm">{l.orgao.sigla}</span>
+          <span className="text-xs text-muted-foreground">({l.orgao.nome})</span>
+          <span className="text-muted-foreground">·</span>
+          <span className="text-sm">{l.competencia.mes}/{l.exercicio.ano}</span>
+        </div>
 
         {/* ── PREVIEW ─────────────────────────────────── */}
         <div className="space-y-4 py-4">
