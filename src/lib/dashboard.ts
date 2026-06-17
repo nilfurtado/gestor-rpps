@@ -148,6 +148,12 @@ export interface DashboardData {
     valorPago: number;
     status: string;
   }[];
+  suplementarStats: {
+    _count: number;
+    _sum: {
+      folhaSuplementar: number | null;
+    };
+  };
   pareto: ParetoData[];
   alertasCriticos: CriticalAlert[];
   evolucaoAnual: AnnualEvolutionData[];
@@ -202,6 +208,12 @@ export async function getDashboardData(exercicioAno?: number): Promise<Dashboard
       deficitAcumulado: [],
       topInadimplentes: [],
       acordosSummario: [],
+      suplementarStats: {
+        _count: 0,
+        _sum: {
+          folhaSuplementar: null,
+        },
+      },
       pareto: [],
       alertasCriticos: [],
       evolucaoAnual: [],
@@ -341,6 +353,13 @@ export async function getDashboardData(exercicioAno?: number): Promise<Dashboard
     status: a.status,
   }));
 
+  // Stats de Folha Suplementar
+  const suplementarStats = await prisma.folhaPrevidenciaria.aggregate({
+    where: { exercicioId: exercicio.id, folhaSuplementar: { gt: 0 } },
+    _count: true,
+    _sum: { folhaSuplementar: true },
+  });
+
   const pareto = calcularPareto(byOrgao);
   const alertasCriticos = calcularAlertasCriticos(lancamentos, byOrgao);
   const evolucaoAnual = await calcularEvolucaoAnual();
@@ -359,6 +378,12 @@ export async function getDashboardData(exercicioAno?: number): Promise<Dashboard
     deficitAcumulado,
     topInadimplentes,
     acordosSummario,
+    suplementarStats: {
+      _count: suplementarStats._count,
+      _sum: {
+        folhaSuplementar: suplementarStats._sum.folhaSuplementar,
+      },
+    },
     pareto,
     alertasCriticos,
     evolucaoAnual,

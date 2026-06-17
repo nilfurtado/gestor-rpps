@@ -87,6 +87,23 @@ export default async function DashboardPage() {
         />
       </section>
 
+      <section className="mt-6">
+        <h3 className="text-lg font-semibold mb-4">Estatísticas adicionais</h3>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium">Lançamentos com Suplementar</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{d.suplementarStats._count}</div>
+              <p className="text-xs text-muted-foreground mt-1">
+                Total: {formatBRL(Number(d.suplementarStats._sum.folhaSuplementar || 0))}
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      </section>
+
       <section className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
         <Card>
           <CardHeader>
