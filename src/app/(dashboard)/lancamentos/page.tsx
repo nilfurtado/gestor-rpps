@@ -50,6 +50,8 @@ export default async function LancamentosPage() {
       : null,
     multas: l.multas ? Number(l.multas) : undefined,
     juros: l.juros ? Number(l.juros) : undefined,
+    folhaBase: l.folhaBase ? Number(l.folhaBase) : undefined,
+    folhaSuplementar: l.folhaSuplementar ? Number(l.folhaSuplementar) : undefined,
   }));
 
   return (

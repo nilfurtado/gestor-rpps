@@ -46,6 +46,8 @@ interface LancamentoRow {
   acordo: { id: number; numero: string } | null;
   multas?: number;
   juros?: number;
+  folhaBase?: number;
+  folhaSuplementar?: number;
 }
 
 interface Props {
@@ -215,6 +217,15 @@ export function LancamentosClient({ lancamentos: initialLancamentos, orgaos, exe
               <TableRow>
                 <TableHead className="h-10 px-3">Órgão</TableHead>
                 <TableHead className="h-10 px-3">Período</TableHead>
+                <TableHead className="hidden h-10 px-3 text-right lg:table-cell">
+                  Folha Base
+                </TableHead>
+                <TableHead className="hidden h-10 px-3 text-right lg:table-cell">
+                  <div className="text-right">
+                    <span>Folha Total (R$)</span>
+                    <span className="text-muted-foreground text-xs block">(base + supl.)</span>
+                  </div>
+                </TableHead>
                 <TableHead className="h-10 px-3 text-right">A recolher</TableHead>
                 <TableHead className="hidden h-10 px-3 text-right md:table-cell">
                   Recolhido
@@ -252,6 +263,17 @@ export function LancamentosClient({ lancamentos: initialLancamentos, orgaos, exe
                     <div className="text-[11px] leading-tight tabular-nums text-muted-foreground">
                       {l.exercicio.ano}
                     </div>
+                  </TableCell>
+                  <TableCell className="hidden px-3 py-2.5 text-right tabular-nums lg:table-cell">
+                    {l.folhaBase ? formatBRL(l.folhaBase) : "-"}
+                  </TableCell>
+                  <TableCell className="hidden px-3 py-2.5 text-right tabular-nums lg:table-cell">
+                    {(() => {
+                      const folhaBase = l.folhaBase ? Number(l.folhaBase) : 0;
+                      const folhaSuplementar = l.folhaSuplementar ? Number(l.folhaSuplementar) : 0;
+                      const folhaTotal = folhaBase + folhaSuplementar;
+                      return folhaTotal > 0 ? formatBRL(folhaTotal) : "-";
+                    })()}
                   </TableCell>
                   <TableCell className="px-3 py-2.5 text-right tabular-nums">
                     {formatBRL(l.valorRecolher)}
