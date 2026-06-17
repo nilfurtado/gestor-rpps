@@ -65,6 +65,7 @@ model FolhaPrevidenciaria {
   valorRecolhido          Decimal
   quantidadeServidores    Int?
   folhaBase               Decimal?
+  folhaSuplementar        Decimal?        @default(0)      // Valor suplementar adicionado à folha base
   multas                  Decimal?        @default(0)
   juros                   Decimal?        @default(0)
   acrescimo               Decimal?        @default(0)
@@ -88,6 +89,7 @@ model FolhaPrevidenciaria {
   usuarioAprovadorId      Int?            // Quem aprovou
   usuarioAprovador        User?           @relation("AprovadasPor", fields: [usuarioAprovadorId], references: [id])
   acordos                 Acordo[]        @relation("AcordoLancamentos")
+  folhasSupplementares    FolhaSupplementar[] @relation("FolhaPrevidenciariaSupplementares")
   createdAt               DateTime        @default(now())
   updatedAt               DateTime        @updatedAt
 
@@ -95,6 +97,28 @@ model FolhaPrevidenciaria {
   @@index([exercicioId, competenciaId])
   @@index([status])
   @@map("folhas_previdenciarias")
+}
+
+model FolhaSupplementar {
+  id                    Int                  @id @default(autoincrement())
+  folhaPrevidenciariaId Int
+  folhaPrevidenciaria   FolhaPrevidenciaria  @relation("FolhaPrevidenciariaSupplementares", fields: [folhaPrevidenciariaId], references: [id], onDelete: Cascade)
+
+  motivo                String               // RESCISAO, COMPLEMENTACAO, FERIAS, OUTRO
+  descricao             String?              // Descrição detalhada (opcional)
+  folhaBase             Decimal              // Valor a ser adicionado
+
+  status                LancamentoStatus     @default(SEM_MOVIMENTO)  // Automático ao criar
+
+  observacoes           String?
+
+  createdAt             DateTime             @default(now())
+  updatedAt             DateTime             @updatedAt
+
+  @@unique([folhaPrevidenciariaId, motivo])
+  @@index([folhaPrevidenciariaId])
+  @@index([status])
+  @@map("folhas_suplementares")
 }
 
 model User {
