@@ -9,7 +9,6 @@ import { SuggestionsCard } from "./suggestions-card";
 import { BackupDescriptionDialog } from "./backup-description-dialog";
 import { Plus, RotateCw } from "lucide-react";
 import type { Backup } from "@/types/backup";
-import { analyzeSystemState, generateAutoDescription } from "@/lib/system-analysis-service";
 
 export default function BackupPage() {
   const [backups, setBackups] = useState<Backup[]>([]);
@@ -49,13 +48,14 @@ export default function BackupPage() {
   const handleCreateBackup = async () => {
     setCreating(true);
     try {
-      const state = await analyzeSystemState();
-      const suggested = generateAutoDescription(state);
-      setSuggestedDescription(suggested);
+      const res = await fetch("/api/admin/backup/suggestion");
+      const data = await res.json();
+      setSuggestedDescription(data.suggestion || "SISTEMA-OK");
       setShowDescriptionDialog(true);
     } catch (error) {
-      console.error("Erro ao analisar sistema:", error);
-      setShowDescriptionDialog(true); // Abrir modal mesmo com erro
+      console.error("Erro ao obter sugestão:", error);
+      setSuggestedDescription("SISTEMA-OK"); // Sugestão padrão em caso de erro
+      setShowDescriptionDialog(true);
     } finally {
       setCreating(false);
     }
