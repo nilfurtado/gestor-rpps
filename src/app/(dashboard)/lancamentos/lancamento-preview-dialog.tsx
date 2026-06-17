@@ -18,7 +18,7 @@ import { calcularLancamento } from "@/lib/calc/lancamento";
 interface LancamentoPreviewProps {
   lancamento: {
     id: number;
-    orgao: { sigla: string; nome: string; cor?: string };
+    orgao: { sigla: string; nome: string; cor?: string | null };
     competencia: { mes: string };
     exercicio: { ano: number };
     tipo: string;
