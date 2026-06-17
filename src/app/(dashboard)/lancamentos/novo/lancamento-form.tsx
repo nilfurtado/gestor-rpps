@@ -33,6 +33,7 @@ export interface LancamentoInitial {
   valorRecolhido: number;
   quantidadeServidores: number | null;
   folhaBase: number | null;
+  folhaSuplementar: number | null;
   multas: number | null;
   juros: number | null;
   acrescimo: number | null;
@@ -92,6 +93,9 @@ export function LancamentoForm({
   const [folhaBase, setFolhaBase] = useState<string>(
     initial?.folhaBase != null ? formatCurrency(Number(initial.folhaBase)) : ""
   );
+  const [folhaSuplementar, setFolhaSuplementar] = useState<string>(
+    initial?.folhaSuplementar != null ? formatCurrency(Number(initial.folhaSuplementar)) : ""
+  );
   const [multas, setMultas] = useState<string>(
     initial?.multas != null ? formatCurrency(Number(initial.multas)) : ""
   );
@@ -110,20 +114,22 @@ export function LancamentoForm({
   const [dataAprovacao, setDataAprovacao] = useState<string | null>(initial?.dataAprovacao ?? null);
   const [showAprovado, setShowAprovado] = useState(initial?.diferenca_aprovada ?? false);
 
-  // Cálculo automático de Valor a Recolher = Folha Base × Alíquota ÷ 100
+  // Cálculo automático de Valor a Recolher = (Folha Base + Folha Suplementar) × Alíquota ÷ 100
   const valorRecolherCalculado = useMemo(() => {
     const folha = currencyToNumber(folhaBase);
+    const folhaSupl = currencyToNumber(folhaSuplementar);
+    const folhaTotal = folha + folhaSupl;
     const aliq = Number(aliquota) || 0;
 
     // Se ambos estão preenchidos, calcula com arredondamento para 2 decimais
-    if (folha && aliq > 0) {
-      const result = (folha * aliq) / 100;
+    if (folhaTotal && aliq > 0) {
+      const result = (folhaTotal * aliq) / 100;
       return Number(result.toFixed(2));
     }
 
     // Senão, retorna 0
     return 0;
-  }, [folhaBase, aliquota]);
+  }, [folhaBase, folhaSuplementar, aliquota]);
 
   const resultadoAcrescimo = useMemo(() => {
     const vRecolhido = currencyToNumber(valorRecolhido);
@@ -232,6 +238,7 @@ export function LancamentoForm({
           valorRecolhido: currencyToNumber(valorRecolhido),
           quantidadeServidores: quantidadeServidores ? Number(quantidadeServidores) : null,
           folhaBase: folhaBase ? currencyToNumber(folhaBase) : null,
+          folhaSuplementar: folhaSuplementar ? currencyToNumber(folhaSuplementar) : null,
           multas: multas ? currencyToNumber(multas) : null,
           juros: juros ? currencyToNumber(juros) : null,
           acrescimo: resultadoAcrescimo?.acrescimo ?? null,
@@ -355,6 +362,13 @@ export function LancamentoForm({
               onChange={(e) => setFolhaBase(e.target.value)}
               className="h-9 tabular-nums"
               required
+            />
+          </Field>
+          <Field label="Folha suplementar (R$)">
+            <CurrencyInput
+              value={folhaSuplementar}
+              onChange={(e) => setFolhaSuplementar(e.target.value)}
+              className="h-9 tabular-nums"
             />
           </Field>
           <Field label="Alíquota (%) *">

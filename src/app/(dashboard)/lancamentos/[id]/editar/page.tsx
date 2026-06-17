@@ -54,6 +54,7 @@ export default async function EditarLancamentoPage({ params }: Ctx) {
     valorRecolhido: Number(lancamento.valorRecolhido),
     quantidadeServidores: lancamento.quantidadeServidores,
     folhaBase: lancamento.folhaBase != null ? Number(lancamento.folhaBase) : null,
+    folhaSuplementar: lancamento.folhaSuplementar != null ? Number(lancamento.folhaSuplementar) : null,
     multas: lancamento.multas != null ? Number(lancamento.multas) : null,
     juros: lancamento.juros != null ? Number(lancamento.juros) : null,
     parcelado: lancamento.parcelado,
