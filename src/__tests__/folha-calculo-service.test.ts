@@ -12,41 +12,31 @@ describe("Folha Cálculo Service", () => {
 
   beforeEach(async () => {
     const timestamp = Date.now();
+    const rand = Math.floor(Math.random() * 900000) + 100000;
     const orgao = await prisma.orgao.create({
       data: {
-        nome: `Teste Órgão Calc ${timestamp}`,
-        sigla: `TC${timestamp % 10000}`,
+        nome: `Teste Órgão Calc ${timestamp}-${rand}`,
+        sigla: `C${rand % 100000}`.slice(0, 5),
       },
     });
     orgaoId = orgao.id;
 
-    const anoExercicio = 2000 + Math.floor((timestamp / 1000) % 25);
-    let exercicio = await prisma.exercicio.findUnique({
+    // Use upsert to avoid race conditions between concurrent test files
+    const anoExercicio = 2100 + (rand % 200);
+    const exercicio = await prisma.exercicio.upsert({
       where: { ano: anoExercicio },
+      update: {},
+      create: { ano: anoExercicio },
     });
-
-    if (!exercicio) {
-      exercicio = await prisma.exercicio.create({
-        data: {
-          ano: anoExercicio,
-        },
-      });
-    }
     exercicioId = exercicio.id;
 
-    const ordemComp = 2 + Math.floor((timestamp / 1000000) % 10);
-    let competencia = await prisma.competencia.findUnique({
+    // Use upsert to avoid race conditions between concurrent test files
+    const ordemComp = 300 + (rand % 500);
+    const competencia = await prisma.competencia.upsert({
       where: { ordem: ordemComp },
+      update: {},
+      create: { mes: "FEV", ordem: ordemComp },
     });
-
-    if (!competencia) {
-      competencia = await prisma.competencia.create({
-        data: {
-          mes: "FEV",
-          ordem: ordemComp,
-        },
-      });
-    }
     competenciaId = competencia.id;
 
     const folha = await prisma.folhaPrevidenciaria.create({
