@@ -306,7 +306,7 @@ export default async function DashboardPage() {
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">
-                    {formatBRL(totalSuplementerValue._sum?.folhaBase || 0)}
+                    {formatBRL(Number(totalSuplementerValue._sum?.folhaBase || 0))}
                   </div>
                 </CardContent>
               </Card>
