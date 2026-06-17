@@ -13,6 +13,7 @@ import {
   Menu,
   Users,
   X,
+  HardDrive,
 } from "lucide-react";
 import { useState } from "react";
 import { useTransition } from "react";
@@ -40,6 +41,7 @@ const NAV_PRINCIPAL: { href: string; label: string; icon: React.ElementType; col
 
 const NAV_INSTITUCIONAL: { href: string; label: string; icon: React.ElementType; color: string; visible: NavRule }[] = [
   { href: "/rpps", label: "Informações do RPPS", icon: Landmark, color: "#14b8a6", visible: gestorOnly }, // Teal
+  { href: "/admin/backup", label: "Backup & Logs", icon: HardDrive, color: "#6366f1", visible: gestorOnly }, // Indigo
 ];
 
 function NavItem({
