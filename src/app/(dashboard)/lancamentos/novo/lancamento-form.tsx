@@ -364,12 +364,17 @@ export function LancamentoForm({
               required
             />
           </Field>
-          <Field label="Folha suplementar (R$)">
+          <Field label={<>Folha suplementar (R$) <span className="text-muted-foreground text-xs">(opcional)</span></>}>
             <CurrencyInput
               value={folhaSuplementar}
               onChange={(e) => setFolhaSuplementar(e.target.value)}
               className="h-9 tabular-nums"
             />
+          </Field>
+          <Field label={<>Folha total (R$) <span className="text-muted-foreground text-xs">(calculado)</span></>}>
+            <div className="rounded-md border border-border bg-primary/5 h-9 flex items-center px-3 text-sm font-semibold tabular-nums text-foreground">
+              {formatBRL(currencyToNumber(folhaBase) + currencyToNumber(folhaSuplementar))}
+            </div>
           </Field>
           <Field label="Alíquota (%) *">
             <Input
@@ -540,7 +545,7 @@ function SectionTitle({ id, children }: { id?: string; children: React.ReactNode
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Field({ label, children }: { label: React.ReactNode; children: React.ReactNode }) {
   return (
     <div className="space-y-1.5">
       <Label className="text-xs font-medium">{label}</Label>
