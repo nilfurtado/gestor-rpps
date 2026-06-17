@@ -221,10 +221,7 @@ export function LancamentosClient({ lancamentos: initialLancamentos, orgaos, exe
                   Folha Base
                 </TableHead>
                 <TableHead className="hidden h-10 px-3 text-right lg:table-cell">
-                  <div className="text-right">
-                    <span>Folha Total (R$)</span>
-                    <span className="text-muted-foreground text-xs block">(base + supl.)</span>
-                  </div>
+                  Folha Total (R$)
                 </TableHead>
                 <TableHead className="h-10 px-3 text-right">A recolher</TableHead>
                 <TableHead className="hidden h-10 px-3 text-right md:table-cell">
