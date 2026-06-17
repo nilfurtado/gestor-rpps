@@ -19,6 +19,9 @@ export default async function LancamentosPage() {
           select: { id: true, numero: true, status: true },
           orderBy: { dataAcordo: "desc" },
         },
+        folhasSupplementares: {
+          select: { id: true },
+        },
       },
       orderBy: [
         { exercicio: { ano: "desc" } },
@@ -50,6 +53,7 @@ export default async function LancamentosPage() {
       : null,
     multas: l.multas ? Number(l.multas) : undefined,
     juros: l.juros ? Number(l.juros) : undefined,
+    totalSupplementares: l.folhasSupplementares.length,
   }));
 
   return (
