@@ -90,6 +90,7 @@ export function BackupTable({
           <TableRow>
             <TableHead>Status</TableHead>
             <TableHead>Arquivo</TableHead>
+            <TableHead>Descrição</TableHead>
             <TableHead>Tamanho</TableHead>
             <TableHead>Data</TableHead>
             <TableHead className="text-right">Ações</TableHead>
@@ -98,7 +99,7 @@ export function BackupTable({
         <TableBody>
           {backups.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={5} className="text-center text-muted-foreground">
+              <TableCell colSpan={6} className="text-center text-muted-foreground">
                 Nenhum backup encontrado
               </TableCell>
             </TableRow>
@@ -114,6 +115,13 @@ export function BackupTable({
                 </TableCell>
                 <TableCell className="font-mono text-sm">
                   {backup.filename}
+                </TableCell>
+                <TableCell>
+                  {backup.description ? (
+                    <span className="font-medium">{backup.description}</span>
+                  ) : (
+                    <span className="text-muted-foreground">—</span>
+                  )}
                 </TableCell>
                 <TableCell>{formatBytes(backup.size)}</TableCell>
                 <TableCell>
