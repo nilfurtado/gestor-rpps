@@ -7,6 +7,7 @@ export interface Backup {
   createdAt: Date;
   status: BackupStatus;
   downloadUrl?: string;
+  description?: string;
 }
 
 export type LogLevel = "info" | "warn" | "error" | "debug";
