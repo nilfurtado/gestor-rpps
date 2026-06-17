@@ -9,6 +9,7 @@ import { SuggestionsCard } from "./suggestions-card";
 import { BackupDescriptionDialog } from "./backup-description-dialog";
 import { Plus, RotateCw } from "lucide-react";
 import type { Backup } from "@/types/backup";
+import { analyzeSystemState, generateAutoDescription } from "@/lib/system-analysis-service";
 
 export default function BackupPage() {
   const [backups, setBackups] = useState<Backup[]>([]);
@@ -16,6 +17,7 @@ export default function BackupPage() {
   const [creating, setCreating] = useState(false);
   const [showDescriptionDialog, setShowDescriptionDialog] = useState(false);
   const [stats, setStats] = useState({ total: 0, errors: 0, warnings: 0, info: 0 });
+  const [suggestedDescription, setSuggestedDescription] = useState("");
 
   const fetchBackups = async () => {
     try {
@@ -44,8 +46,19 @@ export default function BackupPage() {
     fetchStats();
   }, []);
 
-  const handleCreateBackup = () => {
-    setShowDescriptionDialog(true);
+  const handleCreateBackup = async () => {
+    setCreating(true);
+    try {
+      const state = await analyzeSystemState();
+      const suggested = generateAutoDescription(state);
+      setSuggestedDescription(suggested);
+      setShowDescriptionDialog(true);
+    } catch (error) {
+      console.error("Erro ao analisar sistema:", error);
+      setShowDescriptionDialog(true); // Abrir modal mesmo com erro
+    } finally {
+      setCreating(false);
+    }
   };
 
   const handleConfirmBackup = async (description: string) => {
@@ -182,6 +195,7 @@ export default function BackupPage() {
         isOpen={showDescriptionDialog}
         onConfirm={handleConfirmBackup}
         onCancel={() => setShowDescriptionDialog(false)}
+        suggestedDescription={suggestedDescription}
       />
     </div>
   );
