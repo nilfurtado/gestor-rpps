@@ -50,7 +50,7 @@ export async function PATCH(req: Request, { params }: Ctx) {
   if (body.valorRecolhido !== undefined) dataToUpdate.valorRecolhido = Number(body.valorRecolhido);
   if (body.quantidadeServidores !== undefined) dataToUpdate.quantidadeServidores = body.quantidadeServidores ? Number(body.quantidadeServidores) : null;
   if (body.folhaBase !== undefined) dataToUpdate.folhaBase = body.folhaBase ? Number(body.folhaBase) : null;
-  if (body.folhaSuplementar !== undefined) dataToUpdate.folhaSuplementar = body.folhaSuplementar ? Number(body.folhaSuplementar) : null;
+  if (body.folhaSuplementar !== undefined) dataToUpdate.folhaSuplementar = body.folhaSuplementar != null ? Number(body.folhaSuplementar) : 0;
   if (body.multas !== undefined) dataToUpdate.multas = body.multas ? Number(body.multas) : null;
   if (body.juros !== undefined) dataToUpdate.juros = body.juros ? Number(body.juros) : null;
   if (body.acrescimo !== undefined) dataToUpdate.acrescimo = Number(body.acrescimo);
