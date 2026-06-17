@@ -35,7 +35,7 @@ export async function createFolhaSuplementer(
       motivo: input.motivo,
       descricao: input.descricao,
       folhaBase: input.folhaBase,
-      status: "LANCADO",
+      status: "SEM_MOVIMENTO",
       observacoes: input.observacoes,
     },
     include: { folhaPrevidenciaria: true },
