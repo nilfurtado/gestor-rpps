@@ -3,6 +3,7 @@ import path from "path";
 import { exec } from "child_process";
 import { promisify } from "util";
 import type { Backup } from "@/types/backup";
+import { saveBackupMetadata } from "@/lib/backup-metadata-service";
 
 const execAsync = promisify(exec);
 const BACKUP_DIR = path.join(process.cwd(), "backups");
@@ -52,7 +53,7 @@ export async function listBackups(): Promise<Backup[]> {
 }
 
 /** Cria um novo backup, limpando backups antigos automaticamente (máximo 8). */
-export async function createBackup(): Promise<Backup> {
+export async function createBackup(description?: string): Promise<Backup> {
   await ensureBackupDir();
 
   const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
@@ -70,13 +71,21 @@ export async function createBackup(): Promise<Backup> {
 
     await cleanOldBackups();
 
-    return {
+    const backup: Backup = {
       id: filename.replace(".db", ""),
       filename,
       size: stats.size,
       createdAt: new Date(),
       status: "healthy",
+      description,
     };
+
+    // Salvar metadados se descrição foi fornecida
+    if (description) {
+      await saveBackupMetadata(backup.id, filename, description);
+    }
+
+    return backup;
   } catch (error) {
     console.error("Erro ao criar backup:", error);
     throw new Error(`Falha ao criar backup: ${error}`);
