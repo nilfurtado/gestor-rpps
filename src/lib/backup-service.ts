@@ -3,7 +3,7 @@ import path from "path";
 import { exec } from "child_process";
 import { promisify } from "util";
 import type { Backup } from "@/types/backup";
-import { saveBackupMetadata } from "@/lib/backup-metadata-service";
+import { saveBackupMetadata, getBackupMetadata } from "@/lib/backup-metadata-service";
 
 const execAsync = promisify(exec);
 const BACKUP_DIR = path.join(process.cwd(), "backups");
@@ -33,13 +33,18 @@ export async function listBackups(): Promise<Backup[]> {
       const filePath = path.join(BACKUP_DIR, file);
       const stats = await fs.stat(filePath);
       const timestamp = stats.birthtimeMs || stats.mtimeMs;
+      const backupId = file.replace(".db", "");
+
+      // Buscar metadados (descrição) do banco de dados
+      const metadata = await getBackupMetadata(backupId);
 
       backups.push({
-        id: file.replace(".db", ""),
+        id: backupId,
         filename: file,
         size: stats.size,
         createdAt: new Date(timestamp),
         status: "healthy",
+        description: metadata?.description || undefined,
       });
     }
 
