@@ -2,14 +2,21 @@
 
 > **Para aprovação:** Revise este plano e confirme se está alinhado com os requisitos de negócio.
 
-**Objetivo:** Criar funcionalidade para lançar valores complementares na folha de pagamento, para correções, pagamentos retroativos, diferenças salariais, rescisões e demais eventos não contemplados na folha principal.
+**Objetivo:** Criar funcionalidade para lançar valores complementares na folha de pagamento, para rescisões, complementações, férias e demais eventos não contemplados na folha principal.
+
+**Regras de Negócio Confirmadas:**
+1. ✅ Sem fluxo de aprovação (status muda automaticamente)
+2. ✅ Pode editar suplementar (recalcula valores)
+3. ✅ Pode deletar suplementar (recalcula removendo)
+4. ✅ Motivos: RESCISAO, COMPLEMENTACAO, FÉRIAS, OUTRO
+5. ❌ Sem auditoria de quem criou/editou
 
 **Arquitetura:**
 1. Modelo de dados `FolhaSupplementar` (relacionado a `FolhaPrevidenciaria`)
 2. APIs CRUD para gerenciar folhas suplementares
 3. UI para listar, criar, editar, deletar e visualizar suplementares
 4. Integração automática com cálculos (folha base + suplementar)
-5. Dashboard com resumos
+5. Recálculo automático ao criar/editar/deletar
 
 **Tech Stack:**
 - Prisma (modelo `FolhaSupplementar`)
@@ -75,17 +82,11 @@ model FolhaSupplementar {
   folhaPrevidenciariaId Int
   folhaPrevidenciaria   FolhaPrevidenciaria  @relation(fields: [folhaPrevidenciariaId], references: [id], onDelete: Cascade)
   
-  motivo                String               // "Correção", "Retroativo", "Diferença Salarial", "Rescisão", etc
+  motivo                String               // RESCISAO, COMPLEMENTACAO, FERIAS, OUTRO
   descricao             String?              // Descrição detalhada (opcional)
   folhaBase             Decimal              // Valor a ser adicionado
   
-  status                LancamentoStatus     @default(PENDENTE)
-  responsavelId         Int?
-  responsavel           User?                @relation(fields: [responsavelId], references: [id])
-  
-  dataAprovacao         DateTime?
-  usuarioAprovadorId    Int?
-  usuarioAprovador      User?                @relation("AprovadasPorSuplem", fields: [usuarioAprovadorId], references: [id])
+  status                LancamentoStatus     @default(LANCADO)  // Muda automaticamente ao criar
   
   observacoes           String?
   
@@ -129,12 +130,9 @@ export type FolhaSupplementar = {
 }
 
 export type MotivosSuplemento = 
-  | "CORRECAO"
-  | "RETROATIVO"
-  | "DIFERENCA_SALARIAL"
   | "RESCISAO"
-  | "ADIANTAMENTO"
   | "COMPLEMENTACAO"
+  | "FERIAS"
   | "OUTRO"
 
 export interface CreateFolhaSuplementerInput {
@@ -170,8 +168,6 @@ export async function updateFolhaSuplementer(id: number, input: Partial<CreateFo
 // Deletar suplementar
 export async function deleteFolhaSuplementer(id: number): Promise<void>
 
-// Aprovar suplementar
-export async function aprovarFolhaSuplementer(id: number, usuarioAprovadorId: number): Promise<FolhaSuplementer>
 
 // Obter valor total suplementar de uma folha
 export async function getTotalSuplementerFolha(folhaPrevidenciariaId: number): Promise<Decimal>
@@ -219,15 +215,13 @@ export async function calcularFolhaTotal(folhaId: number): Promise<{
 **Files:**
 - Create: `src/app/api/admin/folha-suplementar/route.ts`
 - Create: `src/app/api/admin/folha-suplementar/[id]/route.ts`
-- Create: `src/app/api/admin/folha-suplementar/[id]/aprovar/route.ts`
 
 **Endpoints:**
 - `GET /api/admin/folha-suplementar?folhaId=123` → Lista suplementares
-- `POST /api/admin/folha-suplementar` → Cria suplementar
+- `POST /api/admin/folha-suplementar` → Cria suplementar (status automático LANCADO)
 - `GET /api/admin/folha-suplementar/[id]` → Obtém uma
-- `PUT /api/admin/folha-suplementar/[id]` → Atualiza
-- `DELETE /api/admin/folha-suplementar/[id]` → Deleta
-- `POST /api/admin/folha-suplementar/[id]/aprovar` → Aprova
+- `PUT /api/admin/folha-suplementar/[id]` → Atualiza (recalcula valores)
+- `DELETE /api/admin/folha-suplementar/[id]` → Deleta (recalcula removendo)
 
 ---
 
@@ -309,16 +303,25 @@ export async function calcularFolhaTotal(folhaId: number): Promise<{
 
 ---
 
+## ✅ Confirmações Finalizadas
+
+✅ **Edição:** Pode editar suplementar (recalcula valores)  
+✅ **Deleção:** Pode deletar suplementar (recalcula removendo)  
+✅ **Motivos:** RESCISAO, COMPLEMENTACAO, FÉRIAS, OUTRO  
+✅ **Auditoria:** Não necessária  
+✅ **Aprovação:** Automática (sem fluxo, status = LANCADO)  
+
 ## Pontos de Atenção
 
 ⚠️ **Cálculos Previdenciários:**
 - Todos os cálculos (acrescimo, multas, juros, etc) devem usar `folhaTotal`
 - Revisar função `calcularFolhaTotal()` em `folha-calculo-service.ts`
+- **Recalcular ao criar/editar/deletar suplementar**
 
-⚠️ **Aprovações:**
-- Apenas admin/gestor pode aprovar
-- Suplementar aprovada é imutável
-- Log de quem aprovou e quando
+⚠️ **Recálculo Automático:**
+- Ao CRIAR suplementar → recalcula valores
+- Ao EDITAR suplementar → recalcula valores
+- Ao DELETAR suplementar → recalcula removendo
 
 ⚠️ **Backward Compatibility:**
 - Folhas existentes sem suplementar continuam funcionando
@@ -326,24 +329,24 @@ export async function calcularFolhaTotal(folhaId: number): Promise<{
 
 ⚠️ **Integridade de Dados:**
 - Uma suplementar só pode pertencer a UMA folha previdenciária
-- Motivos devem estar pré-definidos (enum)
+- Motivos devem estar pré-definidos (enum: RESCISAO, COMPLEMENTACAO, FERIAS, OUTRO)
 
 ---
 
-## Próximas Etapas Após Aprovação
+## 📊 Resumo Final
 
-1. ✅ Validar regras de negócio
-2. ✅ Confirmar campos necessários
-3. ✅ Definir permissões (quem pode criar/aprovar)
-4. ✅ Revisar fluxo de aprovações
-5. Então: Iniciar desenvolvimento com subagents
+- **9 Tarefas** definidas
+- **Estimativa:** 8-10 horas
+- **Complexidade:** Média
+- **Status:** ✅ **APROVADO E PRONTO PARA IMPLEMENTAÇÃO**
+
+Todas as regras de negócio foram confirmadas e o plano está alinhado com os requisitos.
 
 ---
 
-## Questões para Esclarecimento
+## 🚀 Próxima Ação
 
-1. **Permissões:** Quem pode criar suplementares? Apenas Gestor ou qualquer usuário?
-2. **Aprovação:** É sempre obrigatória? Quem aprova?
-3. **Auditoria:** Precisa manter histórico de todas as alterações?
-4. **Relatórios:** Precisa de relatório de suplementares por período/órgão?
-5. **Exportação:** Deve incluir suplementares em exportação de folha para PDF?
+**Iniciar desenvolvimento com subagents (9 tarefas)?**
+
+1. ✅ **SIM, comece implementação**
+2. 🔄 **NÃO, ajuste algo primeiro**
