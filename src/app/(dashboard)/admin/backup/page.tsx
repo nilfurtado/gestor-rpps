@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { BackupTable } from "./backup-table";
 import { LogsViewer } from "./logs-viewer";
 import { SuggestionsCard } from "./suggestions-card";
+import { BackupDescriptionDialog } from "./backup-description-dialog";
 import { Plus, RotateCw } from "lucide-react";
 import type { Backup } from "@/types/backup";
 
@@ -13,6 +14,7 @@ export default function BackupPage() {
   const [backups, setBackups] = useState<Backup[]>([]);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
+  const [showDescriptionDialog, setShowDescriptionDialog] = useState(false);
   const [stats, setStats] = useState({ total: 0, errors: 0, warnings: 0, info: 0 });
 
   const fetchBackups = async () => {
@@ -42,10 +44,19 @@ export default function BackupPage() {
     fetchStats();
   }, []);
 
-  const handleCreateBackup = async () => {
+  const handleCreateBackup = () => {
+    setShowDescriptionDialog(true);
+  };
+
+  const handleConfirmBackup = async (description: string) => {
     setCreating(true);
+    setShowDescriptionDialog(false);
     try {
-      const res = await fetch("/api/admin/backup", { method: "POST" });
+      const res = await fetch("/api/admin/backup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ description }),
+      });
       if (res.ok) {
         toast.success("Backup criado com sucesso!");
         await fetchBackups();
@@ -166,6 +177,12 @@ export default function BackupPage() {
         <h2 className="text-xl font-semibold">Logs do Sistema</h2>
         <LogsViewer />
       </div>
+
+      <BackupDescriptionDialog
+        isOpen={showDescriptionDialog}
+        onConfirm={handleConfirmBackup}
+        onCancel={() => setShowDescriptionDialog(false)}
+      />
     </div>
   );
 }
