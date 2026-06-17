@@ -5,7 +5,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth();
@@ -17,12 +17,13 @@ export async function POST(
       );
     }
 
-    await restoreBackup(params.id);
+    const { id } = await params;
+    await restoreBackup(id);
 
     logsService.addLog(
       "warn",
       "Backup restaurado",
-      { backupId: params.id },
+      { backupId: id },
       session.user.email
     );
 
@@ -31,7 +32,7 @@ export async function POST(
     logsService.addLog(
       "error",
       "Erro ao restaurar backup",
-      { backupId: params.id, error }
+      { backupId: id, error }
     );
     return NextResponse.json(
       { error: "Erro ao restaurar backup" },
