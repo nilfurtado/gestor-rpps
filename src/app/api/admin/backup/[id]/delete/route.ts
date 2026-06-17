@@ -24,7 +24,7 @@ export async function DELETE(
       "info",
       "Backup deletado",
       { backupId: id },
-      session.user.email
+      session.user.email || undefined
     );
 
     return NextResponse.json({ success: true });
