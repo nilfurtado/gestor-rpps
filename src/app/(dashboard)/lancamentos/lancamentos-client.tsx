@@ -31,7 +31,7 @@ import { LancamentoPreviewDialog } from "./lancamento-preview-dialog";
 
 interface LancamentoRow {
   id: number;
-  orgao: { id: number; sigla: string; nome: string; cor?: string };
+  orgao: { id: number; sigla: string; nome: string; cor: string | null };
   tipo: TipoContribuicao;
   exercicio: { id: number; ano: number; status: string };
   competencia: { id: number; ordem: number; mes: string };
