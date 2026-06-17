@@ -32,9 +32,9 @@ export async function POST(request: NextRequest) {
 
     // Recalcular deficit com diferença_aprovada = true
     const calc = calcularLancamento({
-      valorRecolher: lancamentoAntes.valorRecolher,
-      valorRecolhido: lancamentoAntes.valorRecolhido,
-      acrescimo: lancamentoAntes.acrescimo,
+      valorRecolher: Number(lancamentoAntes.valorRecolher),
+      valorRecolhido: Number(lancamentoAntes.valorRecolhido),
+      acrescimo: Number(lancamentoAntes.acrescimo || 0),
       diferenca_aprovada: true, // ← Key: aprovado agora
     });
 
