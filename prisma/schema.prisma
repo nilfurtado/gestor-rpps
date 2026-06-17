@@ -243,3 +243,14 @@ model Acordo {
   @@index([orgaoId, status])
   @@map("acordos")
 }
+
+model BackupMetadata {
+  id            String   @id @default(cuid())
+  backupId      String   @unique
+  filename      String
+  description   String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("backup_metadata")
+}
