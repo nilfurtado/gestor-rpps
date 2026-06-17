@@ -5,7 +5,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth();
@@ -17,12 +17,13 @@ export async function DELETE(
       );
     }
 
-    await deleteBackup(params.id);
+    const { id } = await params;
+    await deleteBackup(id);
 
     logsService.addLog(
       "info",
       "Backup deletado",
-      { backupId: params.id },
+      { backupId: id },
       session.user.email
     );
 
@@ -31,7 +32,7 @@ export async function DELETE(
     logsService.addLog(
       "error",
       "Erro ao deletar backup",
-      { backupId: params.id, error }
+      { backupId: id, error }
     );
     return NextResponse.json(
       { error: "Erro ao deletar backup" },
