@@ -41,12 +41,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const backup = await createBackup();
+    const { description } = await request.json();
+
+    const backup = await createBackup(description);
 
     logsService.addLog(
       "info",
       "Backup criado com sucesso",
-      { backupId: backup.id, size: backup.size },
+      { backupId: backup.id, size: backup.size, description },
       session.user.email
     );
 
