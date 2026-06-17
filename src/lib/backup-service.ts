@@ -9,6 +9,7 @@ const BACKUP_DIR = path.join(process.cwd(), "backups");
 const DB_PATH = path.join(process.cwd(), "prisma", "dev.db");
 const MAX_BACKUPS = 8;
 
+/** Cria o diretório de backups se não existir. */
 export async function ensureBackupDir() {
   try {
     await fs.mkdir(BACKUP_DIR, { recursive: true });
@@ -17,6 +18,7 @@ export async function ensureBackupDir() {
   }
 }
 
+/** Lista todos os backups ordenados por data (mais recentes primeiro). */
 export async function listBackups(): Promise<Backup[]> {
   await ensureBackupDir();
 
@@ -49,6 +51,7 @@ export async function listBackups(): Promise<Backup[]> {
   }
 }
 
+/** Cria um novo backup, limpando backups antigos automaticamente (máximo 8). */
 export async function createBackup(): Promise<Backup> {
   await ensureBackupDir();
 
@@ -80,6 +83,7 @@ export async function createBackup(): Promise<Backup> {
   }
 }
 
+/** Restaura um backup específico. Cria backup da versão atual antes de restaurar. */
 export async function restoreBackup(id: string): Promise<void> {
   const backupPath = path.join(BACKUP_DIR, `${id}.db`);
 
@@ -98,6 +102,7 @@ export async function restoreBackup(id: string): Promise<void> {
   }
 }
 
+/** Remove um backup do diretório de backups. */
 export async function deleteBackup(id: string): Promise<void> {
   const backupPath = path.join(BACKUP_DIR, `${id}.db`);
 
