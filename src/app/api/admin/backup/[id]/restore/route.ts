@@ -7,6 +7,7 @@ export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  let id: string | null = null;
   try {
     const session = await auth();
 
@@ -17,14 +18,15 @@ export async function POST(
       );
     }
 
-    const { id } = await params;
+    const resolved = await params;
+    id = resolved.id;
     await restoreBackup(id);
 
     logsService.addLog(
       "warn",
       "Backup restaurado",
       { backupId: id },
-      session.user.email
+      session.user.email || undefined
     );
 
     return NextResponse.json({ success: true });

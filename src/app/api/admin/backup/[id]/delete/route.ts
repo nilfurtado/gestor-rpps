@@ -7,6 +7,7 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  let id: string | null = null;
   try {
     const session = await auth();
 
@@ -17,7 +18,8 @@ export async function DELETE(
       );
     }
 
-    const { id } = await params;
+    const resolved = await params;
+    id = resolved.id;
     await deleteBackup(id);
 
     logsService.addLog(
