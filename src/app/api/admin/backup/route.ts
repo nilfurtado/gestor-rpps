@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
       "info",
       "Backup criado com sucesso",
       { backupId: backup.id, size: backup.size, description },
-      session.user.email
+      session.user.email || undefined
     );
 
     return NextResponse.json({ backup });
