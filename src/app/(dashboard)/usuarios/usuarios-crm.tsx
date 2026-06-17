@@ -72,7 +72,6 @@ function RoleBadge({ role }: { role: Role }) {
   const styles: Record<Role, string> = {
     GESTOR: "bg-primary/10 text-primary border-primary/20",
     OPERADOR: "bg-accent/10 text-accent-foreground border-accent/30",
-    AUDITOR: "bg-muted text-muted-foreground border-border",
   };
   return (
     <Badge variant="outline" className={styles[role]}>
