@@ -32,6 +32,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { formatBRL, formatDate, formatPercent } from "@/lib/format";
+import { prisma } from "@/lib/db";
+import { MOTIVOS_SUPLEMENTO } from "@/types/folha-suplementar";
 
 export const metadata = { title: "Dashboard — Santana Previdência" };
 export const dynamic = "force-dynamic";
@@ -39,6 +41,23 @@ export const dynamic = "force-dynamic";
 export default async function DashboardPage() {
   await ensureExercicioAtual();
   const d = await getDashboardData();
+
+  // Estatísticas de Folhas Suplementares
+  const suplementarStats = await prisma.folhaSupplementar.groupBy({
+    by: ["status"],
+    _count: true,
+  });
+
+  const totalSuplementerValue = await prisma.folhaSupplementar.aggregate({
+    _sum: { folhaBase: true },
+  });
+
+  const motivosCount = await prisma.folhaSupplementar.groupBy({
+    by: ["motivo"],
+    _count: { id: true },
+    orderBy: { _count: { id: "desc" } },
+    take: 3,
+  });
 
   return (
     <>
@@ -255,6 +274,63 @@ export default async function DashboardPage() {
             )}
           </CardContent>
         </Card>
+      </section>
+
+      <section className="mt-8">
+        <h2 className="text-lg font-semibold mb-4">Estatísticas de Folhas Suplementares</h2>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {suplementarStats.length === 0 ? (
+            <Card className="col-span-full">
+              <CardContent className="pt-6">
+                <EmptyState icon={CalendarClock} title="Nenhuma folha suplementar registrada" />
+              </CardContent>
+            </Card>
+          ) : (
+            <>
+              {suplementarStats.map((stat) => (
+                <Card key={stat.status}>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm font-medium">
+                      Suplementares {stat.status === "PAGO" ? "Pagas" : stat.status === "PARCIAL" ? "Parciais" : stat.status === "SEM_MOVIMENTO" ? "Sem movimento" : stat.status}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">{stat._count}</div>
+                  </CardContent>
+                </Card>
+              ))}
+
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium">Valor Total Suplementar</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">
+                    {formatBRL(totalSuplementerValue._sum?.folhaBase || 0)}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {motivosCount.length > 0 && (
+                <Card className="col-span-2 md:col-span-4">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm font-medium">Motivos Mais Comuns</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-2">
+                      {motivosCount.map((m) => (
+                        <div key={m.motivo} className="flex justify-between text-sm">
+                          <span>{MOTIVOS_SUPLEMENTO[m.motivo as keyof typeof MOTIVOS_SUPLEMENTO]}</span>
+                          <span className="font-semibold">{m._count.id}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </>
+          )}
+        </div>
       </section>
 
       <section className="mt-6">
