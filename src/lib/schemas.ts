@@ -86,6 +86,7 @@ export const lancamentoSchema = z.object({
   valorRecolhido: z.coerce.number().min(0).optional().nullable().default(0),
   quantidadeServidores: z.coerce.number().int().min(0).optional().nullable(),
   folhaBase: z.coerce.number().min(0).optional().nullable(),
+  folhaSuplementar: z.coerce.number().min(0).optional().nullable().default(0),
   multas: z.coerce.number().min(0).optional().nullable(),
   juros: z.coerce.number().min(0).optional().nullable(),
   acrescimo: z.coerce.number().min(0).optional().nullable().default(0),

@@ -93,6 +93,7 @@ export async function POST(req: Request) {
   const created = await prisma.folhaPrevidenciaria.create({
     data: {
       ...data,
+      folhaSuplementar: data.folhaSuplementar ?? 0,
       responsavelId: Number(session.user.id),
       deficit: calc.deficit,
       inadimplencia: calc.inadimplencia,
