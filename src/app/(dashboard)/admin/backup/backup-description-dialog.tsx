@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -17,15 +17,29 @@ interface BackupDescriptionDialogProps {
   isOpen: boolean;
   onConfirm: (description: string) => void;
   onCancel: () => void;
+  suggestedDescription?: string;
 }
 
 export function BackupDescriptionDialog({
   isOpen,
   onConfirm,
   onCancel,
+  suggestedDescription = "",
 }: BackupDescriptionDialogProps) {
   const [description, setDescription] = useState("");
   const [error, setError] = useState("");
+
+  const handleOpen = useCallback(() => {
+    if (suggestedDescription && !description) {
+      setDescription(suggestedDescription);
+    }
+  }, [suggestedDescription, description]);
+
+  useEffect(() => {
+    if (isOpen) {
+      handleOpen();
+    }
+  }, [isOpen, handleOpen]);
 
   const validateDescription = (value: string): boolean => {
     if (value.length > 50) {
@@ -86,6 +100,25 @@ export function BackupDescriptionDialog({
               </span>
               {error && <span className="text-red-500">{error}</span>}
             </div>
+            {suggestedDescription && (
+              <div className="mt-2 flex gap-2">
+                <span className="text-xs text-muted-foreground">
+                  💡 Sugestão: {suggestedDescription}
+                </span>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => {
+                    setDescription(suggestedDescription);
+                    setError("");
+                  }}
+                  className="text-xs"
+                >
+                  Usar
+                </Button>
+              </div>
+            )}
           </div>
         </div>
         <DialogFooter>
