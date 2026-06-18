@@ -98,6 +98,13 @@ export function LancamentoPreviewDialog({ lancamento: l }: LancamentoPreviewProp
               </div>
             </PreviewItem>
 
+            {/* Tipo */}
+            <PreviewItem label="Tipo">
+              <div className="font-semibold">
+                {l.tipo === "PATRONAL" ? "Patronal" : "Segurado"}
+              </div>
+            </PreviewItem>
+
             {/* A Recolher */}
             <PreviewItem label="A Recolher">
               <div className="font-semibold tabular-nums">{formatBRL(l.valorRecolher)}</div>
