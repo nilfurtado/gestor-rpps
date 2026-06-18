@@ -260,6 +260,9 @@ export function LancamentosClient({ lancamentos: initialLancamentos, orgaos, exe
                     <div className="text-[11px] leading-tight tabular-nums text-muted-foreground">
                       {l.exercicio.ano}
                     </div>
+                    <div className="text-[10px] leading-tight text-muted-foreground mt-1">
+                      {l.tipo === "PATRONAL" ? "Patronal" : "Segurado"}
+                    </div>
                   </TableCell>
                   <TableCell className="hidden px-3 py-2.5 text-right tabular-nums lg:table-cell">
                     {l.folhaBase ? formatBRL(l.folhaBase) : "-"}
