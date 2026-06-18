@@ -478,6 +478,13 @@ export function LancamentoForm({
             </span>
           </CalcPill>
 
+          {/* Tipo */}
+          <CalcPill label="Tipo" tone="default">
+            <span className="text-xs sm:text-sm">
+              {tipo === "PATRONAL" ? "Patronal" : "Segurado"}
+            </span>
+          </CalcPill>
+
           {/* A Recolher */}
           <CalcPill label="A Recolher" tone="default">
             <span className="text-xs sm:text-sm">{formatBRL(valorRecolherCalculado)}</span>
