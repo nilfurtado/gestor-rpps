@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -28,11 +28,25 @@ interface LancamentoPreviewProps {
     juros?: number;
     status: string;
     parcelado: boolean;
+    folhas?: Array<{ nomeTipo: string }>;
+    folhaTotal?: number;
   };
 }
 
 export function LancamentoPreviewDialog({ lancamento: l }: LancamentoPreviewProps) {
   const [open, setOpen] = useState(false);
+  const [folhas, setFolhas] = useState(l.folhas);
+
+  useEffect(() => {
+    if (open && !folhas && l.id) {
+      fetch(`/api/lancamentos/${l.id}`)
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.folhas) setFolhas(data.folhas);
+        })
+        .catch(() => {});
+    }
+  }, [open, folhas, l.id]);
 
   const preview = useMemo(() => {
     return calcularLancamento({
@@ -76,21 +90,20 @@ export function LancamentoPreviewDialog({ lancamento: l }: LancamentoPreviewProp
 
         {/* ── PREVIEW ─────────────────────────────────── */}
         <div className="space-y-4 py-4">
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            {/* Ente */}
-            <PreviewItem label="Ente">
-              <div className="flex items-center gap-2">
-                <div
-                  className="w-3 h-3 rounded-full flex-shrink-0"
-                  style={{ backgroundColor: l.orgao.cor || "#0F5132" }}
-                />
-                <div className="flex-1">
-                  <div className="font-semibold">{l.orgao.sigla}</div>
-                  <div className="text-xs text-muted-foreground">{l.orgao.nome}</div>
-                </div>
-              </div>
-            </PreviewItem>
+          {/* Ente Compacto */}
+          <div className="flex items-center gap-2 px-3 py-2 rounded-lg border border-border/50 bg-muted/30">
+            <div
+              className="w-2 h-2 rounded-full flex-shrink-0"
+              style={{ backgroundColor: l.orgao.cor || "#0F5132" }}
+            />
+            <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+              Ente
+            </span>
+            <span className="font-semibold text-sm">{l.orgao.sigla}</span>
+            <span className="text-xs text-muted-foreground">{l.orgao.nome}</span>
+          </div>
 
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             {/* Competência */}
             <PreviewItem label="Competência">
               <div className="font-semibold">
@@ -104,6 +117,22 @@ export function LancamentoPreviewDialog({ lancamento: l }: LancamentoPreviewProp
                 {l.tipo === "PATRONAL" ? "Patronal" : "Segurado"}
               </div>
             </PreviewItem>
+
+            {/* Resumo das Folhas */}
+            {folhas && folhas.length > 0 && (
+              <PreviewItem label="Resumo das Folhas">
+                <div className="font-semibold text-sm">
+                  {folhas.map((f) => f.nomeTipo).join(" + ")}
+                </div>
+              </PreviewItem>
+            )}
+
+            {/* Folha Total */}
+            {l.folhaTotal !== undefined && (
+              <PreviewItem label="Folha Total">
+                <div className="font-semibold tabular-nums">{formatBRL(l.folhaTotal)}</div>
+              </PreviewItem>
+            )}
 
             {/* A Recolher */}
             <PreviewItem label="A Recolher">
