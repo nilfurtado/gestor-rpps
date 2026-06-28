@@ -15,7 +15,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
 
 interface ModalNovaFolhaProps {
   open: boolean;
@@ -103,11 +102,13 @@ export function ModalNovaFolha({ open, onOpenChange, onNovoTipo }: ModalNovaFolh
           </div>
 
           <div className="flex items-center gap-2">
-            <Checkbox
+            <input
               id="obrigatorio"
+              type="checkbox"
               checked={obrigatorio}
-              onCheckedChange={(checked) => setObrigatorio(checked as boolean)}
+              onChange={(e) => setObrigatorio(e.target.checked)}
               disabled={loading}
+              className="h-4 w-4 rounded border-input"
             />
             <Label htmlFor="obrigatorio" className="font-normal cursor-pointer">
               Tornar obrigatória para novos lançamentos
