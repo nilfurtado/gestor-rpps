@@ -27,6 +27,7 @@ import {
 import { EmptyState } from "@/components/empty-state";
 import { StatusBadge } from "@/components/lancamentos/status-badge";
 import { formatBRL, formatPercent } from "@/lib/format";
+import { criarUrlEditar } from "@/lib/slug-utils";
 import { LancamentoPreviewDialog } from "./lancamento-preview-dialog";
 
 interface LancamentoRow {
@@ -331,7 +332,7 @@ export function LancamentosClient({ lancamentos: initialLancamentos, orgaos, exe
                         className="h-8 w-8"
                         aria-label="Editar lançamento"
                       >
-                        <Link href={`/lancamentos/${l.id}/editar`}>
+                        <Link href={criarUrlEditar(l.orgao.sigla, l.competencia.mes, l.exercicio.ano)}>
                           <Pencil className="h-3.5 w-3.5" />
                         </Link>
                       </Button>

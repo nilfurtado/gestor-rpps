@@ -31,6 +31,7 @@ import {
   calcularDeficitTotal,
 } from "@/lib/tipo-folha-service";
 import { getTipoFolhaColor } from "@/lib/tipo-folha-colors";
+import { criarUrlEditar } from "@/lib/slug-utils";
 import type { TipoFolhaRow } from "@/types/lancamento";
 
 export interface LancamentoInitial {
@@ -481,12 +482,19 @@ export function LancamentoForm({
               <p className="text-destructive/90">
                 {conflictLabel}. Edite o registro existente em vez de criar um novo.
               </p>
-              <a
-                href={`/lancamentos/${duplicateConflict.id}/editar`}
-                className="inline-block font-semibold underline-offset-2 hover:underline"
-              >
-                Abrir lançamento existente →
-              </a>
+              {duplicateConflict && (() => {
+                const org = orgaos.find((o) => o.id === duplicateConflict.orgaoId);
+                const cmp = competencias.find((c) => c.id === duplicateConflict.competenciaId);
+                const exe = exercicios.find((e) => e.id === duplicateConflict.exercicioId);
+                return org && cmp && exe ? (
+                  <a
+                    href={criarUrlEditar(org.sigla, cmp.mes, exe.ano)}
+                    className="inline-block font-semibold underline-offset-2 hover:underline"
+                  >
+                    Abrir lançamento existente →
+                  </a>
+                ) : null;
+              })()}
             </div>
           </div>
         ) : null}

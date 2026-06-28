@@ -17,16 +17,48 @@ interface Ctx {
   params: Promise<{ id: string }>;
 }
 
+// Decodifica slug como: "sigla-mes-ano" → busca no banco
+async function buscarLancamentoPorSlug(slug: string) {
+  const partes = slug.split("-");
+  if (partes.length < 3) return null;
+
+  const ano = Number(partes[partes.length - 1]);
+  const sigla = partes.slice(0, -2).join("-").toUpperCase();
+  const mesSlug = partes[partes.length - 2];
+
+  const meses: Record<string, string> = {
+    janeiro: "Janeiro",
+    fevereiro: "Fevereiro",
+    marco: "Março",
+    abril: "Abril",
+    maio: "Maio",
+    junho: "Junho",
+    julho: "Julho",
+    agosto: "Agosto",
+    setembro: "Setembro",
+    outubro: "Outubro",
+    novembro: "Novembro",
+    dezembro: "Dezembro",
+  };
+
+  const mes = meses[mesSlug];
+  if (!mes || isNaN(ano)) return null;
+
+  return await prisma.folhaPrevidenciaria.findFirst({
+    where: {
+      orgao: { sigla },
+      competencia: { mes },
+      exercicio: { ano },
+    },
+    include: { orgao: true, exercicio: true, competencia: true },
+  });
+}
+
 export default async function EditarLancamentoPage({ params }: Ctx) {
-  const { id } = await params;
-  const lid = Number(id);
-  if (!Number.isInteger(lid)) notFound();
+  const { id: slug } = await params;
 
   const [lancamento, orgaos, exercicios, competencias] = await Promise.all([
-    prisma.folhaPrevidenciaria.findUnique({
-      where: { id: lid },
-      include: { orgao: true, exercicio: true, competencia: true },
-    }),
+    buscarLancamentoPorSlug(slug),
     prisma.orgao.findMany({
       orderBy: { sigla: "asc" },
       select: { id: true, sigla: true, nome: true },
