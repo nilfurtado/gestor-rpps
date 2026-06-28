@@ -205,8 +205,8 @@ export function LancamentoForm({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initial?.id, tiposFolha]);
 
-  // Alíquota sempre herdada do tipo (nunca editável manualmente)
-  const aliquotaFolhas = tipo === "PATRONAL" ? 15 : 10;
+  // Alíquota editável - usa valor do usuário ou padrão do tipo
+  const aliquotaFolhas = Number(aliquota) || (tipo === "PATRONAL" ? 15 : 10);
 
   // Cálculos em tempo real das folhas dinâmicas
   const folhasComCalculos = useMemo(() => {
@@ -515,12 +515,16 @@ export function LancamentoForm({
                 />
               </div>
 
-              {/* Col 2: Alíquota (readonly) */}
+              {/* Col 2: Alíquota (editável, sincronizada) */}
               <div>
-                <p className="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Alíquota</p>
-                <div className="h-9 p-2 bg-gray-100 dark:bg-gray-800 rounded border border-gray-300 dark:border-gray-600 flex items-center justify-center font-semibold text-sm">
-                  {aliquotaFolhas}%
-                </div>
+                <p className="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Alíquota (%)</p>
+                <Input
+                  type="number" step="0.01" min="0" max="100"
+                  value={aliquota}
+                  onChange={(e) => setAliquota(e.target.value)}
+                  placeholder="15"
+                  className="h-9 tabular-nums text-sm"
+                />
               </div>
 
               {/* Col 3: Valor a Recolher (calculado) */}
@@ -728,6 +732,15 @@ export function LancamentoForm({
               onChange={(e) => setFolhaBase(e.target.value)}
               className="h-9 tabular-nums"
               required
+            />
+          </Field>
+          <Field label="Alíquota (%) *">
+            <Input
+              type="number" step="0.01" min="0" max="100" required
+              value={aliquota}
+              onChange={(e) => setAliquota(e.target.value)}
+              placeholder="15"
+              className="h-9 tabular-nums"
             />
           </Field>
           <Field label="Recolhido (R$) *">
