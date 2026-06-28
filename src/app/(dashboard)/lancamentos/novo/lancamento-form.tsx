@@ -30,6 +30,7 @@ import {
   calcularTotalRecolhido,
   calcularDeficitTotal,
 } from "@/lib/tipo-folha-service";
+import { getTipoFolhaColor } from "@/lib/tipo-folha-colors";
 import type { TipoFolhaRow } from "@/types/lancamento";
 
 export interface LancamentoInitial {
@@ -577,11 +578,16 @@ export function LancamentoForm({
         {folhasComCalculos.slice(1).map((f, relIdx) => {
           const idx = relIdx + 1;
           return (
-            <div key={idx} className="bg-gray-50 dark:bg-gray-900/50 p-3 rounded border border-gray-200 dark:border-gray-700 mb-2">
+            <div key={idx} className={`p-3 rounded border mb-2 ${getTipoFolhaColor(f.nomeTipo).bg} border-current`}>
               <div className="flex justify-between items-center mb-2">
-                <Label className="font-semibold text-gray-700 dark:text-gray-300 text-sm">
-                  {f.nomeTipo}
-                </Label>
+                <div className="flex items-center gap-2">
+                  <Label className="font-semibold text-sm">
+                    {f.nomeTipo}
+                  </Label>
+                  <Badge className={`text-xs font-medium ${getTipoFolhaColor(f.nomeTipo).badge}`}>
+                    {f.nomeTipo}
+                  </Badge>
+                </div>
                 <Button
                   type="button"
                   variant="ghost"
@@ -657,24 +663,26 @@ export function LancamentoForm({
             {showAddFolha ? (
               <div className="flex flex-wrap gap-2 p-3 bg-gray-50 dark:bg-gray-900/40 rounded border border-dashed border-gray-300 dark:border-gray-600">
                 <span className="text-xs text-gray-600 dark:text-gray-400 w-full mb-1">Selecione o tipo de folha:</span>
-                {tiposDisponiveis.map((t) => (
-                  <Button
-                    key={t.id}
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    className="h-8 text-xs"
-                    onClick={() => {
-                      setFolhas((prev) => [
-                        ...prev,
-                        { tipoFolhaId: t.id, nomeTipo: t.nome, valor: "", valorRecolhido: "" },
-                      ]);
-                      setShowAddFolha(false);
-                    }}
-                  >
-                    {t.nome}
-                  </Button>
-                ))}
+                {tiposDisponiveis.map((t) => {
+                  const colors = getTipoFolhaColor(t.nome);
+                  return (
+                    <Button
+                      key={t.id}
+                      type="button"
+                      size="sm"
+                      className={`h-8 text-xs font-medium ${colors.badge}`}
+                      onClick={() => {
+                        setFolhas((prev) => [
+                          ...prev,
+                          { tipoFolhaId: t.id, nomeTipo: t.nome, valor: "", valorRecolhido: "" },
+                        ]);
+                        setShowAddFolha(false);
+                      }}
+                    >
+                      {t.nome}
+                    </Button>
+                  );
+                })}
                 <Button
                   type="button"
                   variant="ghost"
