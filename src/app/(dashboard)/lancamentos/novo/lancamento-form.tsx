@@ -730,18 +730,6 @@ export function LancamentoForm({
               required
             />
           </Field>
-          <Field label={<>Folha suplementar (R$) <span className="text-muted-foreground text-xs">(opcional)</span></>}>
-            <CurrencyInput
-              value={folhaSuplementar}
-              onChange={(e) => setFolhaSuplementar(e.target.value)}
-              className="h-9 tabular-nums"
-            />
-          </Field>
-          <Field label={<>Folha total (R$) <span className="text-muted-foreground text-xs">(calculado)</span></>}>
-            <div className="rounded-md border border-border bg-primary/5 h-9 flex items-center px-3 text-sm font-semibold tabular-nums text-foreground">
-              {formatBRL(currencyToNumber(folhaBase) + currencyToNumber(folhaSuplementar))}
-            </div>
-          </Field>
           <Field label="Alíquota (%) *">
             <Input
               type="number" step="0.01" min="0" max="100" required
