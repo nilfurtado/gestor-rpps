@@ -9,6 +9,7 @@ import { Download } from "lucide-react";
 import { FolhasTable } from "./folhas-table";
 import { ModalNovaFolha } from "./modal-nova";
 import { ModalEditar } from "./modal-editar";
+import { RequisitosLancamento } from "./requisitos-lancamento";
 import { Card } from "@/components/ui/card";
 
 interface TipoFolhaComCount extends TipoFolha {
@@ -81,6 +82,8 @@ export function FolhasClient({ tiposFolha }: FolhasClientProps) {
     link.click();
   };
 
+  const tiposObrigatorios = tiposFolha.filter((t) => t.obrigatorio && t.ativo);
+
   return (
     <>
       <div className="p-6 space-y-6">
@@ -91,6 +94,9 @@ export function FolhasClient({ tiposFolha }: FolhasClientProps) {
             Exportar CSV
           </Button>
         </div>
+
+        {/* Requisitos para Novo Lançamento */}
+        <RequisitosLancamento tiposObrigatorios={tiposObrigatorios} />
 
         {/* Filtros */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
