@@ -14,6 +14,7 @@ import {
   Users,
   X,
   HardDrive,
+  Layers,
 } from "lucide-react";
 import { useState } from "react";
 import { useTransition } from "react";
@@ -32,6 +33,7 @@ const gestorOnly: NavRule = (r) => r === "GESTOR";
 const NAV_PRINCIPAL: { href: string; label: string; icon: React.ElementType; color: string; visible: NavRule }[] = [
   { href: "/dashboard",   label: "Dashboard",   icon: LayoutDashboard, color: "#3b82f6", visible: visibleToAll }, // Azul
   { href: "/lancamentos", label: "Lançamentos",  icon: Receipt,         color: "#10b981", visible: visibleToAll }, // Verde
+  { href: "/folhas",      label: "Folhas",       icon: Layers,          color: "#8b5cf6", visible: gestorOnly   }, // Roxo
   { href: "/acordos",     label: "Acordos",      icon: Handshake,       color: "#f59e0b", visible: visibleToAll }, // Âmbar
   { href: "/relatorios",  label: "Relatórios",   icon: FileBarChart,    color: "#ef4444", visible: visibleToAll }, // Vermelho
   { href: "/orgaos",      label: "Órgãos",       icon: Building2,       color: "#8b5cf6", visible: visibleToAll }, // Roxo
