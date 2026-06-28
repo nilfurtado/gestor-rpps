@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { TipoFolha } from "@prisma/client";
 import { Loader2 } from "lucide-react";
@@ -36,11 +36,20 @@ const CORES_DISPONIVEIS = [
 ];
 
 export function ModalEditar({ tipo, open, onOpenChange, onSalvo }: ModalEditarProps) {
-  const [nome, setNome] = useState(tipo?.nome || "");
-  const [descricao, setDescricao] = useState(tipo?.descricao || "");
-  const [obrigatorio, setObrigatorio] = useState(tipo?.obrigatorio || false);
-  const [ativo, setAtivo] = useState(tipo?.ativo || true);
+  const [nome, setNome] = useState("");
+  const [descricao, setDescricao] = useState("");
+  const [obrigatorio, setObrigatorio] = useState(false);
+  const [ativo, setAtivo] = useState(true);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (tipo) {
+      setNome(tipo.nome);
+      setDescricao(tipo.descricao || "");
+      setObrigatorio(tipo.obrigatorio);
+      setAtivo(tipo.ativo);
+    }
+  }, [tipo, open]);
 
   const handleSalvar = async () => {
     if (!nome.trim()) {
