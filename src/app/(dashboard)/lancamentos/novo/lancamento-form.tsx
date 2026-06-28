@@ -738,7 +738,7 @@ export function LancamentoForm({
                     };
                     const dotColor = dotColorMap[f.nomeTipo] || "bg-gray-500";
                     return (
-                      <div key={f.id || i} className="inline-flex items-center gap-1">
+                      <div key={i} className="inline-flex items-center gap-1">
                         <span className={`inline-block h-1.5 w-1.5 rounded-full ${dotColor}`} />
                         <span className={`text-[11px] font-medium ${colors.text}`}>
                           {f.nomeTipo}
