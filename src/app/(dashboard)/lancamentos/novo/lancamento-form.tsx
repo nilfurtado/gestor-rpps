@@ -669,8 +669,9 @@ export function LancamentoForm({
                     <Button
                       key={t.id}
                       type="button"
+                      variant="outline"
                       size="sm"
-                      className={`h-8 text-xs font-medium ${colors.badge}`}
+                      className={`h-8 text-xs font-medium ${colors.text}`}
                       onClick={() => {
                         setFolhas((prev) => [
                           ...prev,
