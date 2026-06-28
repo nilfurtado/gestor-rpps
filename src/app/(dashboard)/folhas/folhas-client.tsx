@@ -4,8 +4,11 @@ import { useState } from "react";
 import { TipoFolha } from "@prisma/client";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Download } from "lucide-react";
 import { FolhasTable } from "./folhas-table";
 import { ModalNovaFolha } from "./modal-nova";
+import { ModalEditar } from "./modal-editar";
 import { Card } from "@/components/ui/card";
 
 interface TipoFolhaComCount extends TipoFolha {
@@ -21,6 +24,8 @@ export function FolhasClient({ tiposFolha }: FolhasClientProps) {
   const [filtroAtivo, setFiltroAtivo] = useState<"todos" | "ativo" | "inativo">("todos");
   const [tiposAtualizados, setTiposAtualizados] = useState(tiposFolha);
   const [openModal, setOpenModal] = useState(false);
+  const [tipoEditando, setTipoEditando] = useState<TipoFolha | null>(null);
+  const [openModalEditar, setOpenModalEditar] = useState(false);
 
   const filtered = tiposAtualizados.filter((tipo) => {
     const matchBusca =
@@ -40,9 +45,53 @@ export function FolhasClient({ tiposFolha }: FolhasClientProps) {
     setOpenModal(false);
   };
 
+  const handleEditar = (tipo: TipoFolha) => {
+    setTipoEditando(tipo);
+    setOpenModalEditar(true);
+  };
+
+  const handleTipoAtualizado = (tipoAtualizado: TipoFolha) => {
+    const novostipos = tiposAtualizados.map((t) =>
+      t.id === tipoAtualizado.id ? { ...tipoAtualizado, lancamentosCount: t.lancamentosCount } : t
+    );
+    setTiposAtualizados(novostipos);
+  };
+
+  const exportarCSV = () => {
+    const headers = ["ID", "Nome", "Descrição", "Tipo", "Origem", "Status", "Lançamentos"];
+    const rows = tiposAtualizados.map((tipo) => [
+      tipo.id,
+      tipo.nome,
+      tipo.descricao || "",
+      tipo.obrigatorio ? "Obrigatória" : "Opcional",
+      tipo.customizado ? "Customizado" : "Built-in",
+      tipo.ativo ? "Ativa" : "Inativa",
+      (tiposAtualizados.find((t) => t.id === tipo.id)?.lancamentosCount || 0).toString(),
+    ]);
+
+    const csv = [
+      headers.join(","),
+      ...rows.map((row) => row.map((cell) => `"${cell}"`).join(",")),
+    ].join("\n");
+
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = `tipos-folhas-${new Date().toISOString().split("T")[0]}.csv`;
+    link.click();
+  };
+
   return (
     <>
       <div className="p-6 space-y-6">
+        {/* Header com Botão Exportar */}
+        <div className="flex justify-end">
+          <Button variant="outline" size="sm" onClick={exportarCSV}>
+            <Download className="h-4 w-4 mr-2" />
+            Exportar CSV
+          </Button>
+        </div>
+
         {/* Filtros */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div className="space-y-2">
@@ -100,10 +149,17 @@ export function FolhasClient({ tiposFolha }: FolhasClientProps) {
           dados={filtered}
           onTiposAtualizados={setTiposAtualizados}
           allTipos={tiposAtualizados}
+          onEditar={handleEditar}
         />
       </div>
 
       <ModalNovaFolha open={openModal} onOpenChange={setOpenModal} onNovoTipo={handleNovoTipo} />
+      <ModalEditar
+        tipo={tipoEditando}
+        open={openModalEditar}
+        onOpenChange={setOpenModalEditar}
+        onSalvo={handleTipoAtualizado}
+      />
     </>
   );
 }

@@ -20,7 +20,12 @@ export async function PATCH(req: Request, { params }: Ctx) {
     }
 
     const body = await req.json();
-    const { ativo } = body;
+    const { ativo, nome, descricao } = body;
+
+    // Validações
+    if (nome && !nome.trim()) {
+      return NextResponse.json({ error: "Nome não pode estar vazio" }, { status: 400 });
+    }
 
     // Não permitir desativar tipo obrigatório se ele tem lançamentos
     if (ativo === false) {
@@ -38,9 +43,15 @@ export async function PATCH(req: Request, { params }: Ctx) {
       }
     }
 
+    // Construir objeto de update
+    const dataUpdate: Record<string, unknown> = {};
+    if (ativo !== undefined) dataUpdate.ativo = ativo;
+    if (nome !== undefined) dataUpdate.nome = nome.trim();
+    if (descricao !== undefined) dataUpdate.descricao = descricao ? descricao.trim() : null;
+
     const updated = await prisma.tipoFolha.update({
       where: { id: tipoId },
-      data: { ativo },
+      data: dataUpdate,
     });
 
     return NextResponse.json(updated);

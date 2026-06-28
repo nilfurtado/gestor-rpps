@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { TipoFolha } from "@prisma/client";
 import { toast } from "sonner";
-import { Trash2, Eye } from "lucide-react";
+import { Trash2, Edit2 } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -25,9 +25,10 @@ interface FolhasTableProps {
   dados: TipoFolhaComCount[];
   onTiposAtualizados: (tipos: TipoFolhaComCount[]) => void;
   allTipos: TipoFolhaComCount[];
+  onEditar: (tipo: TipoFolha) => void;
 }
 
-export function FolhasTable({ dados, onTiposAtualizados, allTipos }: FolhasTableProps) {
+export function FolhasTable({ dados, onTiposAtualizados, allTipos, onEditar }: FolhasTableProps) {
   const [loading, setLoading] = useState<number | null>(null);
   const [selectedTipo, setSelectedTipo] = useState<TipoFolhaComCount | null>(null);
 
@@ -82,7 +83,7 @@ export function FolhasTable({ dados, onTiposAtualizados, allTipos }: FolhasTable
   };
 
   if (dados.length === 0) {
-    return <EmptyState icon={Eye} title="Nenhum tipo encontrado" description="Tente ajustar os filtros" />;
+    return <EmptyState icon={Edit2} title="Nenhum tipo encontrado" description="Tente ajustar os filtros" />;
   }
 
   return (
@@ -132,6 +133,16 @@ export function FolhasTable({ dados, onTiposAtualizados, allTipos }: FolhasTable
                 </TableCell>
                 <TableCell className="text-right">
                   <div className="flex justify-end gap-1">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8"
+                      onClick={() => onEditar(tipo)}
+                      disabled={loading === tipo.id}
+                      title="Editar"
+                    >
+                      <Edit2 className="h-4 w-4" />
+                    </Button>
                     <Button
                       variant="ghost"
                       size="icon"
