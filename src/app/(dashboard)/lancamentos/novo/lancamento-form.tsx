@@ -205,6 +205,14 @@ export function LancamentoForm({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initial?.id, tiposFolha]);
 
+  // Sincronizar FOLHAS DE SALÁRIOS → VALORES LEGADOS em tempo real
+  useEffect(() => {
+    if (folhas.length > 0) {
+      setFolhaBase(folhas[0].valor);
+      setValorRecolhido(folhas[0].valorRecolhido);
+    }
+  }, [folhas]);
+
   // Alíquota editável - usa valor do usuário ou padrão do tipo
   const aliquotaFolhas = Number(aliquota) || (tipo === "PATRONAL" ? 15 : 10);
 
