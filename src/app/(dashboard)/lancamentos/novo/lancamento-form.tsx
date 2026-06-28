@@ -1,10 +1,11 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { AlertCircle, Loader2, Save, X } from "lucide-react";
+import { AlertCircle, Loader2, Plus, Save, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { CurrencyInput } from "@/components/ui/currency-input";
@@ -21,6 +22,15 @@ import { JustificativaDiferenca } from "@/components/formulario/justificativa-di
 import { calcularLancamento } from "@/lib/calc/lancamento";
 import { calcularAcrescimoAuto } from "@/lib/calc/acrescimo-auto";
 import { formatBRL, formatPercent } from "@/lib/format";
+import {
+  calcularValorARecolher,
+  calcularDiferenca,
+  calcularFolhaTotal,
+  calcularTotalARecolher,
+  calcularTotalRecolhido,
+  calcularDeficitTotal,
+} from "@/lib/tipo-folha-service";
+import type { TipoFolhaRow } from "@/types/lancamento";
 
 export interface LancamentoInitial {
   id: number;
@@ -113,6 +123,81 @@ export function LancamentoForm({
   const [diferenca_aprovada, setDiferenca_aprovada] = useState(initial?.diferenca_aprovada ?? false);
   const [dataAprovacao, setDataAprovacao] = useState<string | null>(initial?.dataAprovacao ?? null);
   const [showAprovado, setShowAprovado] = useState(initial?.diferenca_aprovada ?? false);
+
+  // ── FOLHAS DINÂMICAS ───────────────────────────────────────────────────────
+  const [tiposFolha, setTiposFolha] = useState<TipoFolhaRow[]>([]);
+  const [folhas, setFolhas] = useState<Array<{
+    tipoFolhaId: number;
+    nomeTipo: string;
+    valor: string;
+    valorRecolhido: string;
+  }>>(() => {
+    // Inicializar com Folha Base vazia (tipoFolhaId=1 é placeholder até carregar da API)
+    return [{
+      tipoFolhaId: 0,
+      nomeTipo: "Base",
+      valor: initial?.folhaBase != null ? formatCurrency(Number(initial.folhaBase)) : "",
+      valorRecolhido: "",
+    }];
+  });
+  const [showAddFolha, setShowAddFolha] = useState(false);
+
+  // Buscar tipos de folha ativos da API
+  useEffect(() => {
+    async function fetchTipos() {
+      try {
+        const response = await fetch("/api/tipos-folha");
+        const data = await response.json();
+        const tipos: TipoFolhaRow[] = data.data || [];
+        setTiposFolha(tipos);
+
+        // Inicializar folhas: se há dados iniciais, usar; senão, começar com Base
+        const tipoBase = tipos.find((t) => t.obrigatorio) ?? tipos[0];
+        if (tipoBase) {
+          setFolhas([{
+            tipoFolhaId: tipoBase.id,
+            nomeTipo: tipoBase.nome,
+            valor: initial?.folhaBase != null ? formatCurrency(Number(initial.folhaBase)) : "",
+            valorRecolhido: initial ? formatCurrency(Number(initial.valorRecolhido)) : "",
+          }]);
+        }
+      } catch (error) {
+        console.error("Erro ao buscar tipos de folha:", error);
+      }
+    }
+    fetchTipos();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Alíquota calculada a partir do tipo (herdada)
+  const aliquotaFolhas = Number(aliquota) || (tipo === "PATRONAL" ? 15 : 10);
+
+  // Cálculos em tempo real das folhas dinâmicas
+  const folhasComCalculos = useMemo(() => {
+    return folhas.map((f) => {
+      const valor = currencyToNumber(f.valor);
+      const recolhido = currencyToNumber(f.valorRecolhido);
+      const aRecolher = calcularValorARecolher(valor, aliquotaFolhas);
+      const diferenca = calcularDiferenca(aRecolher, recolhido);
+      return { ...f, valorNum: valor, valorARecolher: aRecolher, diferencaCalc: diferenca, valorRecolhidoNum: recolhido };
+    });
+  }, [folhas, aliquotaFolhas]);
+
+  // Totalizadores das folhas dinâmicas
+  const resumoFolhas = useMemo(() => {
+    return {
+      folhaTotal: calcularFolhaTotal(folhasComCalculos.map((f) => ({ valor: f.valorNum }))),
+      totalARecolher: calcularTotalARecolher(folhasComCalculos.map((f) => ({ valorARecolher: f.valorARecolher }))),
+      totalRecolhido: calcularTotalRecolhido(folhasComCalculos.map((f) => ({ valorRecolhido: f.valorRecolhidoNum }))),
+      deficitTotal: calcularDeficitTotal(folhasComCalculos.map((f) => ({ diferenca: f.diferencaCalc }))),
+    };
+  }, [folhasComCalculos]);
+
+  // Tipos disponíveis para adicionar (não obrigatórios e ainda não adicionados)
+  const tiposDisponiveis = useMemo(() => {
+    const idsUsados = new Set(folhas.map((f) => f.tipoFolhaId));
+    return tiposFolha.filter((t) => !t.obrigatorio && !idsUsados.has(t.id));
+  }, [tiposFolha, folhas]);
 
   // Cálculo automático de Valor a Recolher = (Folha Base + Folha Suplementar) × Alíquota ÷ 100
   const valorRecolherCalculado = useMemo(() => {
@@ -228,16 +313,25 @@ export function LancamentoForm({
     }
     start(async () => {
       try {
+        // Preparar folhas dinâmicas para envio
+        const folhasPayload = folhasComCalculos
+          .filter((f) => f.tipoFolhaId > 0 && f.valorNum > 0)
+          .map((f) => ({
+            tipoFolhaId: f.tipoFolhaId,
+            valor: f.valorNum,
+            valorRecolhido: f.valorRecolhidoNum,
+          }));
+
         const payload = {
           orgaoId: Number(orgaoId),
           tipo,
           exercicioId: Number(exercicioId),
           competenciaId: Number(competenciaId),
           aliquota: Number(aliquota || 0),
-          valorRecolher: valorRecolherCalculado,
-          valorRecolhido: currencyToNumber(valorRecolhido),
+          valorRecolher: folhasPayload.length > 0 ? resumoFolhas.totalARecolher : valorRecolherCalculado,
+          valorRecolhido: folhasPayload.length > 0 ? resumoFolhas.totalRecolhido : currencyToNumber(valorRecolhido),
           quantidadeServidores: quantidadeServidores ? Number(quantidadeServidores) : null,
-          folhaBase: folhaBase ? currencyToNumber(folhaBase) : null,
+          folhaBase: folhasPayload.length > 0 ? (folhasComCalculos[0]?.valorNum ?? null) : (folhaBase ? currencyToNumber(folhaBase) : null),
           folhaSuplementar: folhaSuplementar ? currencyToNumber(folhaSuplementar) : null,
           multas: multas ? currencyToNumber(multas) : null,
           juros: juros ? currencyToNumber(juros) : null,
@@ -246,6 +340,7 @@ export function LancamentoForm({
           parcelado,
           dataVencimento: dataVencimento || null,
           observacoes: observacoes || null,
+          ...(folhasPayload.length > 0 && { folhas: folhasPayload }),
         };
         const url = isEdit ? `/api/lancamentos/${initial!.id}` : "/api/lancamentos";
         const method = isEdit ? "PATCH" : "POST";
@@ -352,9 +447,244 @@ export function LancamentoForm({
         ) : null}
       </section>
 
+      {/* ── FOLHAS DINÂMICAS ──────────────────────────────────────── */}
+      <section aria-labelledby="sec-folhas">
+        <SectionTitle id="sec-folhas">Folhas de Salários</SectionTitle>
+
+        {/* Folha Base (obrigatória) */}
+        {folhasComCalculos[0] && (
+          <div className="bg-blue-50 dark:bg-blue-950/30 p-4 rounded border-2 border-blue-200 dark:border-blue-800 mb-3">
+            <div className="flex justify-between items-center mb-3">
+              <Label className="font-bold text-blue-900 dark:text-blue-200">
+                {folhasComCalculos[0].nomeTipo || "Folha Base"}
+              </Label>
+              <Badge variant="outline" className="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 border-blue-300 dark:border-blue-700">
+                OBRIGATÓRIA
+              </Badge>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+              {/* Col 1: Valor Folha */}
+              <div>
+                <p className="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Valor Folha</p>
+                <CurrencyInput
+                  value={folhasComCalculos[0].valor}
+                  onChange={(e) => {
+                    const novas = [...folhas];
+                    novas[0] = { ...novas[0], valor: e.target.value };
+                    setFolhas(novas);
+                  }}
+                  placeholder="R$ 0,00"
+                  className="h-9 tabular-nums"
+                />
+              </div>
+
+              {/* Col 2: Alíquota (readonly) */}
+              <div>
+                <p className="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Alíquota</p>
+                <div className="h-9 p-2 bg-gray-100 dark:bg-gray-800 rounded border border-gray-300 dark:border-gray-600 flex items-center justify-center font-semibold text-sm">
+                  {aliquotaFolhas}%
+                </div>
+              </div>
+
+              {/* Col 3: Valor a Recolher (calculado) */}
+              <div>
+                <p className="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">A Recolher (auto)</p>
+                <div className="h-9 p-2 bg-green-50 dark:bg-green-950/40 rounded border border-green-300 dark:border-green-700 flex items-center font-semibold text-sm text-green-700 dark:text-green-400 tabular-nums">
+                  {formatBRL(folhasComCalculos[0].valorARecolher)}
+                </div>
+              </div>
+
+              {/* Col 4: Valor Recolhido */}
+              <div>
+                <p className="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Valor Recolhido</p>
+                <CurrencyInput
+                  value={folhasComCalculos[0].valorRecolhido}
+                  onChange={(e) => {
+                    const novas = [...folhas];
+                    novas[0] = { ...novas[0], valorRecolhido: e.target.value };
+                    setFolhas(novas);
+                  }}
+                  placeholder="R$ 0,00"
+                  className="h-9 tabular-nums"
+                />
+              </div>
+            </div>
+
+            {/* Diferença */}
+            <div className="mt-3 p-2 bg-blue-100 dark:bg-blue-900/40 rounded flex items-center gap-2 text-sm">
+              <span className="text-gray-700 dark:text-gray-300">Diferença:</span>
+              <span className={
+                folhasComCalculos[0].diferencaCalc > 0
+                  ? "text-red-600 dark:text-red-400 font-bold tabular-nums"
+                  : "text-green-600 dark:text-green-400 font-bold tabular-nums"
+              }>
+                {formatBRL(folhasComCalculos[0].diferencaCalc)}
+              </span>
+            </div>
+          </div>
+        )}
+
+        {/* Folhas opcionais (idx >= 1) */}
+        {folhasComCalculos.slice(1).map((f, relIdx) => {
+          const idx = relIdx + 1;
+          return (
+            <div key={idx} className="bg-gray-50 dark:bg-gray-900/50 p-3 rounded border border-gray-200 dark:border-gray-700 mb-2">
+              <div className="flex justify-between items-center mb-2">
+                <Label className="font-semibold text-gray-700 dark:text-gray-300 text-sm">
+                  {f.nomeTipo}
+                </Label>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="h-7 px-2 text-destructive hover:text-destructive"
+                  onClick={() => {
+                    setFolhas((prev) => prev.filter((_, i) => i !== idx));
+                  }}
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                  Remover
+                </Button>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                <div>
+                  <p className="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Valor Folha</p>
+                  <CurrencyInput
+                    value={f.valor}
+                    onChange={(e) => {
+                      const novas = [...folhas];
+                      novas[idx] = { ...novas[idx], valor: e.target.value };
+                      setFolhas(novas);
+                    }}
+                    placeholder="R$ 0,00"
+                    className="h-9 tabular-nums"
+                  />
+                </div>
+                <div>
+                  <p className="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Alíquota</p>
+                  <div className="h-9 p-2 bg-gray-100 dark:bg-gray-800 rounded border border-gray-300 dark:border-gray-600 flex items-center justify-center font-semibold text-sm">
+                    {aliquotaFolhas}%
+                  </div>
+                </div>
+                <div>
+                  <p className="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">A Recolher (auto)</p>
+                  <div className="h-9 p-2 bg-green-50 dark:bg-green-950/40 rounded border border-green-300 dark:border-green-700 flex items-center font-semibold text-sm text-green-700 dark:text-green-400 tabular-nums">
+                    {formatBRL(f.valorARecolher)}
+                  </div>
+                </div>
+                <div>
+                  <p className="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Valor Recolhido</p>
+                  <CurrencyInput
+                    value={f.valorRecolhido}
+                    onChange={(e) => {
+                      const novas = [...folhas];
+                      novas[idx] = { ...novas[idx], valorRecolhido: e.target.value };
+                      setFolhas(novas);
+                    }}
+                    placeholder="R$ 0,00"
+                    className="h-9 tabular-nums"
+                  />
+                </div>
+              </div>
+
+              <div className="mt-2 p-1.5 bg-gray-100 dark:bg-gray-800/60 rounded flex items-center gap-2 text-xs">
+                <span className="text-gray-600 dark:text-gray-400">Diferença:</span>
+                <span className={
+                  f.diferencaCalc > 0
+                    ? "text-red-600 dark:text-red-400 font-bold tabular-nums"
+                    : "text-green-600 dark:text-green-400 font-bold tabular-nums"
+                }>
+                  {formatBRL(f.diferencaCalc)}
+                </span>
+              </div>
+            </div>
+          );
+        })}
+
+        {/* Botão Adicionar Folha Suplementar */}
+        {tiposDisponiveis.length > 0 && (
+          <div className="mt-2">
+            {showAddFolha ? (
+              <div className="flex flex-wrap gap-2 p-3 bg-gray-50 dark:bg-gray-900/40 rounded border border-dashed border-gray-300 dark:border-gray-600">
+                <span className="text-xs text-gray-600 dark:text-gray-400 w-full mb-1">Selecione o tipo de folha:</span>
+                {tiposDisponiveis.map((t) => (
+                  <Button
+                    key={t.id}
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="h-8 text-xs"
+                    onClick={() => {
+                      setFolhas((prev) => [
+                        ...prev,
+                        { tipoFolhaId: t.id, nomeTipo: t.nome, valor: "", valorRecolhido: "" },
+                      ]);
+                      setShowAddFolha(false);
+                    }}
+                  >
+                    {t.nome}
+                  </Button>
+                ))}
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 text-xs"
+                  onClick={() => setShowAddFolha(false)}
+                >
+                  Cancelar
+                </Button>
+              </div>
+            ) : (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="text-xs h-8"
+                onClick={() => setShowAddFolha(true)}
+              >
+                <Plus className="h-3.5 w-3.5" />
+                Adicionar Folha Suplementar
+              </Button>
+            )}
+          </div>
+        )}
+
+        {/* Resumo de folhas */}
+        {folhas.length > 0 && (
+          <div className="mt-3 rounded-md border border-border bg-muted/30 p-3">
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mb-2">
+              Resumo das Folhas
+            </p>
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 text-sm">
+              <div>
+                <p className="text-xs text-muted-foreground">Folha Total</p>
+                <p className="font-bold tabular-nums">{formatBRL(resumoFolhas.folhaTotal)}</p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground">Total a Recolher</p>
+                <p className="font-bold text-green-600 dark:text-green-400 tabular-nums">{formatBRL(resumoFolhas.totalARecolher)}</p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground">Total Recolhido</p>
+                <p className="font-bold text-blue-600 dark:text-blue-400 tabular-nums">{formatBRL(resumoFolhas.totalRecolhido)}</p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground">Déficit Total</p>
+                <p className={`font-bold tabular-nums ${resumoFolhas.deficitTotal > 0 ? "text-destructive" : "text-green-600 dark:text-green-400"}`}>
+                  {formatBRL(resumoFolhas.deficitTotal)}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+      </section>
+
       {/* ── VALORES ───────────────────────────────────────────────── */}
       <section aria-labelledby="sec-val">
-        <SectionTitle id="sec-val">Valores</SectionTitle>
+        <SectionTitle id="sec-val">Valores Legados</SectionTitle>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <Field label="Folha base (R$) *">
             <CurrencyInput
