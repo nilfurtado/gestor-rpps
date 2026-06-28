@@ -721,7 +721,7 @@ export function LancamentoForm({
         {folhas.length > 0 && (
           <div className="mt-3 rounded-md border border-border bg-muted/30 p-3">
             <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mb-2">
-              Resumo das Folhas
+              Resumo das Folhas — {folhas.map((f) => f.nomeTipo).join(" + ")}
             </p>
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 text-sm">
               <div>
