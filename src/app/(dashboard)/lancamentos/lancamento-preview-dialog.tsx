@@ -35,22 +35,27 @@ interface LancamentoPreviewProps {
 
 export function LancamentoPreviewDialog({ lancamento: l }: LancamentoPreviewProps) {
   const [open, setOpen] = useState(false);
-  const [folhas, setFolhas] = useState(l.folhas);
+  const [folhas, setFolhas] = useState<Array<{ nomeTipo: string }>>(l.folhas || []);
+  const [folhaTotal, setFolhaTotal] = useState<number | undefined>(l.folhaTotal);
 
   useEffect(() => {
-    if (open && !folhas && l.id) {
+    if (open && l.id) {
       fetch(`/api/lancamentos/${l.id}`)
         .then((res) => res.json())
         .then((data) => {
           if (data.data?.folhas) {
-            setFolhas(data.data.folhas.map((f: any) => ({
+            const folhasData = data.data.folhas.map((f: any) => ({
               nomeTipo: f.tipoFolha.nome
-            })));
+            }));
+            setFolhas(folhasData);
+          }
+          if (data.data?.folhaTotal !== undefined) {
+            setFolhaTotal(data.data.folhaTotal);
           }
         })
         .catch(() => {});
     }
-  }, [open, folhas, l.id]);
+  }, [open, l.id]);
 
   const preview = useMemo(() => {
     return calcularLancamento({
@@ -129,9 +134,9 @@ export function LancamentoPreviewDialog({ lancamento: l }: LancamentoPreviewProp
                   <div className="font-semibold text-sm">
                     {folhas.map((f) => f.nomeTipo).join(" + ")}
                   </div>
-                  {l.folhaTotal !== undefined && (
+                  {folhaTotal !== undefined && (
                     <div className="text-xs text-muted-foreground">
-                      Total: <span className="font-semibold text-foreground tabular-nums">{formatBRL(l.folhaTotal)}</span>
+                      Total: <span className="font-semibold text-foreground tabular-nums">{formatBRL(folhaTotal)}</span>
                     </div>
                   )}
                 </div>
