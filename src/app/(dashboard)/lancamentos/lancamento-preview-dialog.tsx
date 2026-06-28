@@ -122,19 +122,19 @@ export function LancamentoPreviewDialog({ lancamento: l }: LancamentoPreviewProp
               </div>
             </PreviewItem>
 
-            {/* Resumo das Folhas */}
+            {/* Resumo das Folhas + Folha Total */}
             {folhas && folhas.length > 0 && (
               <PreviewItem label="Resumo das Folhas">
-                <div className="font-semibold text-sm">
-                  {folhas.map((f) => f.nomeTipo).join(" + ")}
+                <div className="space-y-1">
+                  <div className="font-semibold text-sm">
+                    {folhas.map((f) => f.nomeTipo).join(" + ")}
+                  </div>
+                  {l.folhaTotal !== undefined && (
+                    <div className="text-xs text-muted-foreground">
+                      Total: <span className="font-semibold text-foreground tabular-nums">{formatBRL(l.folhaTotal)}</span>
+                    </div>
+                  )}
                 </div>
-              </PreviewItem>
-            )}
-
-            {/* Folha Total */}
-            {l.folhaTotal !== undefined && (
-              <PreviewItem label="Folha Total">
-                <div className="font-semibold tabular-nums">{formatBRL(l.folhaTotal)}</div>
               </PreviewItem>
             )}
 
