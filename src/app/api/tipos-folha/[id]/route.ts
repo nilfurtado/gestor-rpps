@@ -20,27 +20,37 @@ export async function PATCH(req: Request, { params }: Ctx) {
     }
 
     const body = await req.json();
-    const { ativo, nome, descricao } = body;
+    const { ativo, nome, descricao, obrigatorio } = body;
 
     // Validações
     if (nome && !nome.trim()) {
       return NextResponse.json({ error: "Nome não pode estar vazio" }, { status: 400 });
     }
 
+    const tipo = await prisma.tipoFolha.findUnique({ where: { id: tipoId } });
+    if (!tipo) {
+      return NextResponse.json({ error: "Tipo não encontrado" }, { status: 404 });
+    }
+
     // Não permitir desativar tipo obrigatório se ele tem lançamentos
-    if (ativo === false) {
-      const tipo = await prisma.tipoFolha.findUnique({ where: { id: tipoId } });
-      if (tipo?.obrigatorio) {
-        const temLancamentos = await prisma.lancamentoFolha.count({
-          where: { tipoFolhaId: tipoId },
-        });
-        if (temLancamentos > 0) {
-          return NextResponse.json(
-            { error: "Não é possível desativar um tipo obrigatório com lançamentos" },
-            { status: 400 }
-          );
-        }
+    if (ativo === false && (obrigatorio !== false || tipo.obrigatorio)) {
+      const temLancamentos = await prisma.lancamentoFolha.count({
+        where: { tipoFolhaId: tipoId },
+      });
+      if (temLancamentos > 0) {
+        return NextResponse.json(
+          { error: "Não é possível desativar um tipo obrigatório com lançamentos" },
+          { status: 400 }
+        );
       }
+    }
+
+    // Não permitir remover obrigatório de tipos built-in
+    if (obrigatorio === false && !tipo.customizado && tipo.obrigatorio) {
+      return NextResponse.json(
+        { error: "Não é possível remover a obrigatoriedade de tipos built-in" },
+        { status: 400 }
+      );
     }
 
     // Construir objeto de update
@@ -48,6 +58,7 @@ export async function PATCH(req: Request, { params }: Ctx) {
     if (ativo !== undefined) dataUpdate.ativo = ativo;
     if (nome !== undefined) dataUpdate.nome = nome.trim();
     if (descricao !== undefined) dataUpdate.descricao = descricao ? descricao.trim() : null;
+    if (obrigatorio !== undefined) dataUpdate.obrigatorio = obrigatorio;
 
     const updated = await prisma.tipoFolha.update({
       where: { id: tipoId },
