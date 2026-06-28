@@ -9,89 +9,98 @@ datasource db {
 }
 
 model Orgao {
-  id           Int                    @id @default(autoincrement())
-  nome         String
-  sigla        String                 @unique
-  razaoSocial  String?                // Razão Social (opcional)
-  cnpj         String?
-  cep          String?
-  endereco     String?
-  numero       String?
-  complemento  String?
-  bairro       String?
-  cidade       String?
-  estado       String?
-  cor          String?                // HEX color #RRGGBB usado em gráficos
-  status       OrgaoStatus            @default(ATIVO)
-  createdAt    DateTime               @default(now())
-  updatedAt    DateTime               @updatedAt
-  lancamentos  FolhaPrevidenciaria[]
-  acordos      Acordo[]
+  id               Int                   @id @default(autoincrement())
+  nome             String
+  sigla            String                @unique
+  cnpj             String?
+  cep              String?
+  endereco         String?
+  numero           String?
+  complemento      String?
+  bairro           String?
+  cidade           String?
+  estado           String?
+  cor              String?
+  status           OrgaoStatus           @default(ATIVO)
+  createdAt        DateTime              @default(now())
+  updatedAt        DateTime              @updatedAt
+  razaoSocial      String?
+  acordos          Acordo[]
+  folhas_pagamento folhas_pagamento[]
+  lancamentos      FolhaPrevidenciaria[]
 
   @@map("orgaos")
 }
 
 model Exercicio {
-  id          Int                    @id @default(autoincrement())
-  ano         Int                    @unique
-  status      ExercicioStatus        @default(ABERTO)
-  createdAt   DateTime               @default(now())
+  id          Int                   @id @default(autoincrement())
+  ano         Int                   @unique
+  status      ExercicioStatus       @default(ABERTO)
+  createdAt   DateTime              @default(now())
   lancamentos FolhaPrevidenciaria[]
 
   @@map("exercicios")
 }
 
 model Competencia {
-  id          Int                    @id @default(autoincrement())
-  mes         String
-  ordem       Int                    @unique
-  lancamentos FolhaPrevidenciaria[]
+  id               Int                   @id @default(autoincrement())
+  mes              String
+  ordem            Int                   @unique
+  folhas_pagamento folhas_pagamento[]
+  lancamentos      FolhaPrevidenciaria[]
 
   @@map("competencias")
 }
 
 model FolhaPrevidenciaria {
-  id                      Int              @id @default(autoincrement())
-  orgaoId                 Int
-  orgao                   Orgao            @relation(fields: [orgaoId], references: [id])
-  tipo                    TipoContribuicao
-  exercicioId             Int
-  exercicio               Exercicio        @relation(fields: [exercicioId], references: [id])
-  competenciaId           Int
-  competencia             Competencia      @relation(fields: [competenciaId], references: [id])
-  aliquota                Decimal
-  valorRecolher           Decimal
-  valorRecolherCalculado  Decimal          @default(0) // Folha Base × Alíquota ÷ 100
-  valorRecolhido          Decimal
-  quantidadeServidores    Int?
-  folhaBase               Decimal?
-  folhaSuplementar        Decimal?        @default(0)      // Valor suplementar adicionado à folha base
-  multas                  Decimal?        @default(0)
-  juros                   Decimal?        @default(0)
-  acrescimo               Decimal?        @default(0)
-  acrescimo_tipo          TipoAcrescimo   @default(QUITADO)
-  parcelado               Boolean         @default(false)
-  deficit                 Decimal
-  superavit               Decimal         @default(0)        // Valor Recolhido > Valor a Recolher
-  inadimplencia           Decimal
-  percentualPago          Decimal         @default(0)        // % de quitação
-  valorTotalDevido        Decimal         @default(0)        // Deficit + Multas + Juros
-  encargosTotal           Decimal         @default(0)        // Multas + Juros
-  valorLiquidoArrecadado  Decimal         @default(0)        // Recolhido - Multas - Juros
-  status                  LancamentoStatus
-  responsavelId           Int?
-  responsavel             User?           @relation(fields: [responsavelId], references: [id])
-  dataVencimento          DateTime?
-  observacoes             String?
-  justificativaDiferenca  String?         // Justificativa quando há diferença (acrescimo < 0)
-  diferenca_aprovada      Boolean         @default(false)  // Se diferença foi aprovada
-  dataAprovacao           DateTime?       // Quando foi aprovada
-  usuarioAprovadorId      Int?            // Quem aprovou
-  usuarioAprovador        User?           @relation("AprovadasPor", fields: [usuarioAprovadorId], references: [id])
-  acordos                 Acordo[]        @relation("AcordoLancamentos")
-  folhasSupplementares    FolhaSupplementar[] @relation("FolhaPrevidenciariaSupplementares")
-  createdAt               DateTime        @default(now())
-  updatedAt               DateTime        @updatedAt
+  id                     Int                 @id @default(autoincrement())
+  orgaoId                Int
+  tipo                   TipoContribuicao
+  exercicioId            Int
+  competenciaId          Int
+  aliquota               Decimal
+  valorRecolher          Decimal
+  valorRecolherCalculado Decimal             @default(0)
+  valorRecolhido         Decimal
+  quantidadeServidores   Int?
+  folhaBase              Decimal?
+  multas                 Decimal?            @default(0)
+  juros                  Decimal?            @default(0)
+  acrescimo              Decimal?            @default(0)
+  acrescimo_tipo         TipoAcrescimo       @default(QUITADO)
+  parcelado              Boolean             @default(false)
+  deficit                Decimal
+  superavit              Decimal             @default(0)
+  inadimplencia          Decimal
+  percentualPago         Decimal             @default(0)
+  valorTotalDevido       Decimal             @default(0)
+  encargosTotal          Decimal             @default(0)
+  valorLiquidoArrecadado Decimal             @default(0)
+  status                 LancamentoStatus
+  responsavelId          Int?
+  dataVencimento         DateTime?
+  observacoes            String?
+  justificativaDiferenca String?
+  diferenca_aprovada     Boolean             @default(false)
+  dataAprovacao          DateTime?
+  usuarioAprovadorId     Int?
+  createdAt              DateTime            @default(now())
+  updatedAt              DateTime            @updatedAt
+  folhaSuplementar       Decimal?            @default(0)
+  numeroGuia             String?             @unique
+  dataEmissao            DateTime?
+  usuarioAprovador       User?               @relation("AprovadasPor", fields: [usuarioAprovadorId], references: [id])
+  responsavel            User?               @relation(fields: [responsavelId], references: [id])
+  competencia            Competencia         @relation(fields: [competenciaId], references: [id])
+  exercicio              Exercicio           @relation(fields: [exercicioId], references: [id])
+  orgao                  Orgao               @relation(fields: [orgaoId], references: [id])
+  folhasSupplementares   FolhaSupplementar[] @relation("FolhaPrevidenciariaSupplementares")
+  acordos                Acordo[]            @relation("AcordoLancamentos")
+  folhas                 LancamentoFolha[]   @relation("folhas")
+  folhaTotal             Decimal?            @default(0)
+  totalARecolher         Decimal?            @default(0)
+  totalRecolhido         Decimal?            @default(0)
+  deficitTotal           Decimal?            @default(0)
 
   @@unique([orgaoId, tipo, exercicioId, competenciaId])
   @@index([exercicioId, competenciaId])
@@ -100,37 +109,43 @@ model FolhaPrevidenciaria {
 }
 
 model FolhaSupplementar {
-  id                    Int                  @id @default(autoincrement())
-  folhaPrevidenciariaId Int
-  folhaPrevidenciaria   FolhaPrevidenciaria  @relation("FolhaPrevidenciariaSupplementares", fields: [folhaPrevidenciariaId], references: [id], onDelete: Cascade)
+  id                     Int                 @id @default(autoincrement())
+  folhaPrevidenciariaId  Int
+  numeroComplementacao   String
+  tipoComplementacao     String
+  valorFolhaComplementar Decimal
+  aliquota               Decimal
+  contribuicaoDevida     Decimal
+  valorRecolhido         Decimal?
+  dataRepasse            DateTime?
+  descricao              String?
+  observacoes            String?
+  multas                 Decimal?
+  juros                  Decimal?
+  status                 LancamentoStatus    @default(LANCADO)
+  createdAt              DateTime            @default(now())
+  updatedAt              DateTime            @updatedAt
+  folhaPrevidenciaria    FolhaPrevidenciaria @relation("FolhaPrevidenciariaSupplementares", fields: [folhaPrevidenciariaId], references: [id], onDelete: Cascade)
 
-  motivo                String               // RESCISAO, COMPLEMENTACAO, FERIAS, OUTRO
-  descricao             String?              // Descrição detalhada (opcional)
-  folhaBase             Decimal              // Valor a ser adicionado
-
-  status                LancamentoStatus     @default(SEM_MOVIMENTO)  // Automático ao criar
-
-  observacoes           String?
-
-  createdAt             DateTime             @default(now())
-  updatedAt             DateTime             @updatedAt
-
-  @@unique([folhaPrevidenciariaId, motivo])
+  @@unique([folhaPrevidenciariaId, numeroComplementacao])
   @@index([folhaPrevidenciariaId])
   @@index([status])
+  @@index([tipoComplementacao])
   @@map("folhas_suplementares")
 }
 
 model User {
-  id                    Int                    @id @default(autoincrement())
-  email                 String                 @unique
-  nome                  String
-  passwordHash          String
-  role                  Role                   @default(OPERADOR)
-  createdAt             DateTime               @default(now())
-  lancamentos           FolhaPrevidenciaria[]
-  diferencasAprovadas   FolhaPrevidenciaria[]  @relation("AprovadasPor")
-  acordos               Acordo[]
+  id                  Int                   @id @default(autoincrement())
+  email               String                @unique
+  nome                String
+  passwordHash        String
+  role                Role                  @default(OPERADOR)
+  createdAt           DateTime              @default(now())
+  acordos             Acordo[]
+  arrecadacoes        arrecadacoes[]
+  folhas_pagamento    folhas_pagamento[]
+  diferencasAprovadas FolhaPrevidenciaria[] @relation("AprovadasPor")
+  lancamentos         FolhaPrevidenciaria[]
 
   @@map("users")
 }
@@ -150,7 +165,7 @@ model AuditLog {
 }
 
 model InstitutoRpps {
-  id                      Int      @id @default(1)
+  id                      Int       @id @default(autoincrement())
   nomeInstituto           String?
   nomeResponsavel         String?
   cnpj                    String?
@@ -160,15 +175,186 @@ model InstitutoRpps {
   nomeDepartamento        String?
   responsavelDepartamento String?
   logoPath                String?
-  logoData                Bytes?   // logo armazenado diretamente no banco (Postgres bytea)
-  logoMime                String?  // ex.: image/jpeg, image/png
-  banco                   String?  // Nome ou código do banco (ex: 001 - Banco do Brasil)
-  agencia                 String?  // Número da agência
-  conta                   String?  // Número da conta
-  tipoConta               String?  // Tipo da conta (Corrente, Poupança, etc)
-  updatedAt               DateTime @updatedAt
+  logoData                Bytes?
+  logoMime                String?
+  banco                   String?
+  agencia                 String?
+  conta                   String?
+  tipoConta               String?
+  updatedAt               DateTime  @updatedAt
+  barcodeFebraban         String?
+  ultimoBarcodeGerado     DateTime?
 
   @@map("instituto_rpps")
+}
+
+model Acordo {
+  id                   Int                   @id @default(autoincrement())
+  numero               String
+  dataAcordo           DateTime
+  orgaoId              Int
+  tipoDebito           TipoDebitoAcordo
+  valorOriginal        Decimal
+  atualizacaoMonetaria Decimal               @default(0)
+  jurosAcordo          Decimal               @default(0)
+  multaAcordo          Decimal               @default(0)
+  valorConsolidado     Decimal
+  numeroParcelas       Int
+  valorParcela         Decimal
+  diaVencimento        Int
+  primeiroVencimento   DateTime
+  parcelasPagas        Int                   @default(0)
+  valorPago            Decimal               @default(0)
+  status               StatusAcordo          @default(VIGENTE)
+  formaGarantia        FormaGarantia?
+  garantiaDetalhes     String?
+  leiAutorizativa      String?
+  observacoes          String?
+  responsavelId        Int
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
+  responsavel          User                  @relation(fields: [responsavelId], references: [id])
+  orgao                Orgao                 @relation(fields: [orgaoId], references: [id])
+  lancamentos          FolhaPrevidenciaria[] @relation("AcordoLancamentos")
+
+  @@unique([orgaoId, numero])
+  @@index([status])
+  @@index([orgaoId, status])
+  @@map("acordos")
+}
+
+model TipoFolha {
+  id               Int               @id @default(autoincrement())
+  nome             String            @unique
+  descricao        String?
+  ordem            Int               @default(0)
+  obrigatorio      Boolean           @default(false)
+  customizado      Boolean           @default(false)
+  ativo            Boolean           @default(true)
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+
+  lancamentoFolhas LancamentoFolha[]
+
+  @@index([nome])
+  @@map("tipos_folha")
+}
+
+model LancamentoFolha {
+  id             Int                 @id @default(autoincrement())
+  lancamentoId   Int
+  lancamento     FolhaPrevidenciaria @relation("folhas", fields: [lancamentoId], references: [id], onDelete: Cascade)
+  tipoFolhaId    Int
+  tipoFolha      TipoFolha           @relation(fields: [tipoFolhaId], references: [id])
+
+  valor          Decimal
+  aliquota       Decimal
+  valorARecolher Decimal
+  valorRecolhido Decimal
+  diferenca      Decimal
+
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+
+  @@unique([lancamentoId, tipoFolhaId])
+  @@index([lancamentoId])
+  @@map("lancamento_folhas")
+}
+
+model BackupMetadata {
+  id          String   @id @default(cuid())
+  backupId    String   @unique
+  filename    String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("backup_metadata")
+}
+
+model arrecadacoes {
+  id                        Int              @id @default(autoincrement())
+  folhaPagamentoId          Int
+  numeroLancamento          String
+  dataLancamento            DateTime
+  folhaBase                 Decimal
+  folhaSuplementer          Decimal          @default(0)
+  folhaComplementar         Decimal          @default(0)
+  folhaTotal                Decimal
+  baseServidor              Decimal
+  basePatronal              Decimal
+  baseSuplementer           Decimal          @default(0)
+  aliquotaServidor          Decimal
+  aliquotaPatronal          Decimal
+  aliquotaSuplementer       Decimal          @default(0)
+  contribuicaoServidor      Decimal
+  contribuicaoPatronal      Decimal
+  contribuicaoSuplementer   Decimal          @default(0)
+  totalDevido               Decimal
+  valorRecolhidoServidor    Decimal
+  valorRecolhidoPatronal    Decimal
+  valorRecolhidoSuplementer Decimal          @default(0)
+  totalRecolhido            Decimal
+  diferencaServidor         Decimal
+  diferencaPatronal         Decimal
+  diferencaSuplementer      Decimal          @default(0)
+  diferencaTotal            Decimal
+  observacao                String?
+  status                    String           @default("RASCUNHO")
+  usuarioId                 Int?
+  createdAt                 DateTime         @default(now())
+  updatedAt                 DateTime
+  users                     User?            @relation(fields: [usuarioId], references: [id])
+  folhas_pagamento          folhas_pagamento @relation(fields: [folhaPagamentoId], references: [id])
+
+  @@unique([folhaPagamentoId, numeroLancamento])
+  @@index([dataLancamento])
+  @@index([status])
+  @@index([folhaPagamentoId])
+}
+
+model folhas_pagamento {
+  id                     Int            @id @default(autoincrement())
+  orgaoId                Int
+  competenciaId          Int
+  tipoFolha              String
+  numeroFolha            String
+  descricao              String?
+  dataReferencia         DateTime
+  folhaBase              Decimal?
+  folhaSuplementer       Decimal?
+  folhaComplementar      Decimal?
+  folha13                Decimal?
+  folhaRescisao          Decimal?
+  folhaRetroativa        Decimal?
+  folhaTotal             Decimal        @default(0)
+  quantidadeServidores   Int?
+  valorTotalContribuicao Decimal        @default(0)
+  aliquotaServidor       Decimal?
+  valorServidor          Decimal?
+  aliquotaPatronal       Decimal?
+  valorPatronal          Decimal?
+  aliquotaSuplementer    Decimal?
+  valorSuplementer       Decimal?
+  dataImportacao         DateTime       @default(now())
+  origem                 String?
+  hashArquivo            String?
+  nomeArquivo            String?
+  usuarioImportacaoId    Int?
+  status                 String         @default("IMPORTADA")
+  observacao             String?
+  createdAt              DateTime       @default(now())
+  updatedAt              DateTime
+  arrecadacoes           arrecadacoes[]
+  users                  User?          @relation(fields: [usuarioImportacaoId], references: [id])
+  competencias           Competencia    @relation(fields: [competenciaId], references: [id])
+  orgaos                 Orgao          @relation(fields: [orgaoId], references: [id])
+
+  @@unique([orgaoId, competenciaId, tipoFolha, numeroFolha])
+  @@index([tipoFolha])
+  @@index([status])
+  @@index([competenciaId])
+  @@index([orgaoId])
 }
 
 enum OrgaoStatus {
@@ -192,6 +378,7 @@ enum LancamentoStatus {
   INADIMPLENTE
   PARCELADO
   SEM_MOVIMENTO
+  LANCADO
   RECOLHIMENTO_A_MAIOR
 }
 
@@ -224,57 +411,4 @@ enum StatusAcordo {
   QUITADO
   RESCINDIDO
   SUSPENSO
-}
-
-model Acordo {
-  id                   Int      @id @default(autoincrement())
-  numero               String
-  dataAcordo           DateTime
-  orgaoId              Int
-  orgao                Orgao    @relation(fields: [orgaoId], references: [id])
-  tipoDebito           TipoDebitoAcordo
-
-  valorOriginal        Decimal
-  atualizacaoMonetaria Decimal  @default(0)
-  jurosAcordo          Decimal  @default(0)
-  multaAcordo          Decimal  @default(0)
-  valorConsolidado     Decimal
-
-  numeroParcelas       Int
-  valorParcela         Decimal
-  diaVencimento        Int
-  primeiroVencimento   DateTime
-
-  parcelasPagas        Int      @default(0)
-  valorPago            Decimal  @default(0)
-  status               StatusAcordo @default(VIGENTE)
-
-  formaGarantia        FormaGarantia?
-  garantiaDetalhes     String?
-  leiAutorizativa      String?
-  observacoes          String?
-
-  responsavelId        Int
-  responsavel          User     @relation(fields: [responsavelId], references: [id])
-
-  lancamentos          FolhaPrevidenciaria[] @relation("AcordoLancamentos")
-
-  createdAt            DateTime @default(now())
-  updatedAt            DateTime @updatedAt
-
-  @@unique([orgaoId, numero])
-  @@index([status])
-  @@index([orgaoId, status])
-  @@map("acordos")
-}
-
-model BackupMetadata {
-  id            String   @id @default(cuid())
-  backupId      String   @unique
-  filename      String
-  description   String?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-
-  @@map("backup_metadata")
 }
