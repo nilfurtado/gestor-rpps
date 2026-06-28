@@ -205,8 +205,8 @@ export function LancamentoForm({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initial?.id, tiposFolha]);
 
-  // Alíquota calculada a partir do tipo (herdada)
-  const aliquotaFolhas = Number(aliquota) || (tipo === "PATRONAL" ? 15 : 10);
+  // Alíquota sempre herdada do tipo (nunca editável manualmente)
+  const aliquotaFolhas = tipo === "PATRONAL" ? 15 : 10;
 
   // Cálculos em tempo real das folhas dinâmicas
   const folhasComCalculos = useMemo(() => {
