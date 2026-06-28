@@ -719,26 +719,53 @@ export function LancamentoForm({
 
         {/* Resumo de folhas */}
         {folhas.length > 0 && (
-          <div className="mt-3 rounded-md border border-border bg-muted/30 p-3">
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mb-2">
-              Resumo das Folhas — {folhas.map((f) => f.nomeTipo).join(" + ")}
-            </p>
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 text-sm">
-              <div>
-                <p className="text-xs text-muted-foreground">Folha Total</p>
-                <p className="font-bold tabular-nums">{formatBRL(resumoFolhas.folhaTotal)}</p>
+          <div className="mt-3 rounded-lg border border-border/50 bg-gradient-to-br from-muted/40 to-muted/20 p-4 shadow-sm">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2 flex-wrap">
+                <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                  Resumo das Folhas
+                </p>
+                <div className="flex items-center gap-2 flex-wrap">
+                  {folhas.map((f, i) => {
+                    const colors = getTipoFolhaColor(f.nomeTipo);
+                    const dotColorMap: Record<string, string> = {
+                      Base: "bg-blue-500",
+                      Suplementar: "bg-indigo-500",
+                      Complementar: "bg-sky-500",
+                      "13º": "bg-green-500",
+                      Rescisão: "bg-orange-500",
+                      Retroativa: "bg-purple-500",
+                    };
+                    const dotColor = dotColorMap[f.nomeTipo] || "bg-gray-500";
+                    return (
+                      <div key={f.id || i} className="inline-flex items-center gap-1">
+                        <span className={`inline-block h-1.5 w-1.5 rounded-full ${dotColor}`} />
+                        <span className={`text-[11px] font-medium ${colors.text}`}>
+                          {f.nomeTipo}
+                        </span>
+                        {i < folhas.length - 1 && <span className="text-muted-foreground/40 text-xs">+</span>}
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
-              <div>
-                <p className="text-xs text-muted-foreground">Total a Recolher</p>
-                <p className="font-bold text-green-600 dark:text-green-400 tabular-nums">{formatBRL(resumoFolhas.totalARecolher)}</p>
+            </div>
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 text-sm">
+              <div className="space-y-1">
+                <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Folha Total</p>
+                <p className="text-lg font-bold text-foreground tabular-nums leading-tight">{formatBRL(resumoFolhas.folhaTotal)}</p>
               </div>
-              <div>
-                <p className="text-xs text-muted-foreground">Total Recolhido</p>
-                <p className="font-bold text-blue-600 dark:text-blue-400 tabular-nums">{formatBRL(resumoFolhas.totalRecolhido)}</p>
+              <div className="space-y-1">
+                <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">A Recolher</p>
+                <p className="text-lg font-bold text-green-600 dark:text-green-400 tabular-nums leading-tight">{formatBRL(resumoFolhas.totalARecolher)}</p>
               </div>
-              <div>
-                <p className="text-xs text-muted-foreground">Déficit Total</p>
-                <p className={`font-bold tabular-nums ${resumoFolhas.deficitTotal > 0 ? "text-destructive" : "text-green-600 dark:text-green-400"}`}>
+              <div className="space-y-1">
+                <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Recolhido</p>
+                <p className="text-lg font-bold text-blue-600 dark:text-blue-400 tabular-nums leading-tight">{formatBRL(resumoFolhas.totalRecolhido)}</p>
+              </div>
+              <div className="space-y-1">
+                <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Déficit</p>
+                <p className={`text-lg font-bold tabular-nums leading-tight ${resumoFolhas.deficitTotal > 0 ? "text-red-600 dark:text-red-400" : "text-green-600 dark:text-green-400"}`}>
                   {formatBRL(resumoFolhas.deficitTotal)}
                 </p>
               </div>
