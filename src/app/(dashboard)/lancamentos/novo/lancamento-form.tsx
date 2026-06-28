@@ -730,15 +730,6 @@ export function LancamentoForm({
               required
             />
           </Field>
-          <Field label="Alíquota (%) *">
-            <Input
-              type="number" step="0.01" min="0" max="100" required
-              value={aliquota}
-              onChange={(e) => setAliquota(e.target.value)}
-              placeholder="14"
-              className="h-9 tabular-nums"
-            />
-          </Field>
           <Field label="Recolhido (R$) *">
             <CurrencyInput
               value={valorRecolhido}
