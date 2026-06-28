@@ -169,6 +169,42 @@ export function LancamentoForm({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Carregar folhas salvas quando editando um lançamento existente
+  useEffect(() => {
+    if (!initial?.id || tiposFolha.length === 0) return; // Só no modo edição e após tipos carregados
+
+    async function fetchLancamento() {
+      try {
+        const res = await fetch(`/api/lancamentos/${initial!.id}`);
+        if (!res.ok) return;
+
+        const data = await res.json();
+        const lancamento = data.data;
+
+        // Se lançamento tem folhas salvas, popular o estado do form
+        if (lancamento.folhas && lancamento.folhas.length > 0) {
+          const folhasFromDb = lancamento.folhas.map((f: {
+            tipoFolhaId: number;
+            tipoFolha: { nome: string };
+            valor: number | string;
+            valorRecolhido: number | string;
+          }) => ({
+            tipoFolhaId: f.tipoFolhaId,
+            nomeTipo: f.tipoFolha.nome,
+            valor: formatCurrency(Number(f.valor)),
+            valorRecolhido: formatCurrency(Number(f.valorRecolhido)),
+          }));
+          setFolhas(folhasFromDb);
+        }
+      } catch (error) {
+        console.error("Erro ao buscar lançamento:", error);
+      }
+    }
+
+    fetchLancamento();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initial?.id, tiposFolha]);
+
   // Alíquota calculada a partir do tipo (herdada)
   const aliquotaFolhas = Number(aliquota) || (tipo === "PATRONAL" ? 15 : 10);
 

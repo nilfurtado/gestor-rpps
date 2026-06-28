@@ -10,8 +10,36 @@ interface Ctx {
   params: Promise<{ id: string }>;
 }
 
-export async function GET() {
-  return NextResponse.json(null, { status: 200 });
+export async function GET(req: Request, { params }: Ctx) {
+  try {
+    const session = await auth();
+    if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+    const { id } = await params;
+    const lid = Number(id);
+    if (!Number.isInteger(lid) || lid <= 0) {
+      return NextResponse.json({ error: "ID inválido" }, { status: 400 });
+    }
+
+    const lancamento = await prisma.folhaPrevidenciaria.findUnique({
+      where: { id: lid },
+      include: {
+        folhas: {
+          include: { tipoFolha: true },
+          orderBy: { tipoFolhaId: "asc" },
+        },
+      },
+    });
+
+    if (!lancamento) {
+      return NextResponse.json({ error: "Lançamento não encontrado" }, { status: 404 });
+    }
+
+    return NextResponse.json({ data: lancamento });
+  } catch (error) {
+    console.error("Erro ao buscar lançamento:", error);
+    return NextResponse.json({ error: "Erro interno" }, { status: 500 });
+  }
 }
 
 export async function PATCH(req: Request, { params }: Ctx) {
