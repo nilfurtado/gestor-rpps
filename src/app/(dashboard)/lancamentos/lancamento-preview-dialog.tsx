@@ -42,7 +42,11 @@ export function LancamentoPreviewDialog({ lancamento: l }: LancamentoPreviewProp
       fetch(`/api/lancamentos/${l.id}`)
         .then((res) => res.json())
         .then((data) => {
-          if (data.folhas) setFolhas(data.folhas);
+          if (data.data?.folhas) {
+            setFolhas(data.data.folhas.map((f: any) => ({
+              nomeTipo: f.tipoFolha.nome
+            })));
+          }
         })
         .catch(() => {});
     }
