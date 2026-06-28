@@ -113,6 +113,17 @@ export const lancamentoSchema = z.object({
     .optional()
     .nullable()
     .transform((v) => (v ? new Date(v) : null)),
+  folhas: z
+    .array(
+      z.object({
+        tipoFolhaId: z.number().int().positive("tipoFolhaId é obrigatório"),
+        valor: z.number().positive("valor da folha deve ser > 0"),
+        valorRecolhido: z
+          .number()
+          .nonnegative("valor recolhido deve ser >= 0"),
+      })
+    )
+    .optional(),
 });
 
 export type LancamentoInput = z.infer<typeof lancamentoSchema>;
