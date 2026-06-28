@@ -231,6 +231,7 @@ model TipoFolha {
   obrigatorio      Boolean           @default(false)
   customizado      Boolean           @default(false)
   ativo            Boolean           @default(true)
+  cor              String?           @default("text-blue-600")
   createdAt        DateTime          @default(now())
   updatedAt        DateTime          @updatedAt
 

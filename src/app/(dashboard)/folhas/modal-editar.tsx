@@ -25,14 +25,14 @@ interface ModalEditarProps {
 }
 
 const CORES_DISPONIVEIS = [
-  "text-red-600",
-  "text-orange-600",
-  "text-yellow-600",
-  "text-green-600",
-  "text-blue-600",
-  "text-purple-600",
-  "text-pink-600",
-  "text-slate-600",
+  { classe: "text-red-600", label: "Vermelho", bg: "bg-red-100 dark:bg-red-900/30" },
+  { classe: "text-orange-600", label: "Laranja", bg: "bg-orange-100 dark:bg-orange-900/30" },
+  { classe: "text-yellow-600", label: "Amarelo", bg: "bg-yellow-100 dark:bg-yellow-900/30" },
+  { classe: "text-green-600", label: "Verde", bg: "bg-green-100 dark:bg-green-900/30" },
+  { classe: "text-blue-600", label: "Azul", bg: "bg-blue-100 dark:bg-blue-900/30" },
+  { classe: "text-purple-600", label: "Roxo", bg: "bg-purple-100 dark:bg-purple-900/30" },
+  { classe: "text-pink-600", label: "Rosa", bg: "bg-pink-100 dark:bg-pink-900/30" },
+  { classe: "text-slate-600", label: "Cinza", bg: "bg-slate-100 dark:bg-slate-900/30" },
 ];
 
 export function ModalEditar({ tipo, open, onOpenChange, onSalvo }: ModalEditarProps) {
@@ -40,6 +40,7 @@ export function ModalEditar({ tipo, open, onOpenChange, onSalvo }: ModalEditarPr
   const [descricao, setDescricao] = useState("");
   const [obrigatorio, setObrigatorio] = useState(false);
   const [ativo, setAtivo] = useState(true);
+  const [cor, setCor] = useState("text-blue-600");
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -48,6 +49,7 @@ export function ModalEditar({ tipo, open, onOpenChange, onSalvo }: ModalEditarPr
       setDescricao(tipo.descricao || "");
       setObrigatorio(tipo.obrigatorio);
       setAtivo(tipo.ativo);
+      setCor((tipo as any).cor || "text-blue-600");
     }
   }, [tipo, open]);
 
@@ -74,6 +76,7 @@ export function ModalEditar({ tipo, open, onOpenChange, onSalvo }: ModalEditarPr
           descricao: descricao.trim() || null,
           obrigatorio,
           ativo,
+          cor,
         }),
       });
 
@@ -162,12 +165,28 @@ export function ModalEditar({ tipo, open, onOpenChange, onSalvo }: ModalEditarPr
           {/* Cor */}
           <div className="space-y-2">
             <Label className="text-xs uppercase tracking-wide">Cor</Label>
-            <div className={`p-3 rounded-md border border-dashed ${corAtual.bg}`}>
-              <div className={`text-sm font-semibold ${corAtual.text}`}>{nome || "Prévia"}</div>
+            <div className="grid grid-cols-4 gap-2">
+              {CORES_DISPONIVEIS.map((opcao) => (
+                <button
+                  key={opcao.classe}
+                  onClick={() => setCor(opcao.classe)}
+                  disabled={loading}
+                  className={`px-2 py-2 rounded-md text-xs font-medium transition border-2 ${
+                    cor === opcao.classe
+                      ? `border-current ${opcao.classe}`
+                      : "border-transparent bg-muted/50 hover:bg-muted"
+                  } disabled:opacity-50 disabled:cursor-not-allowed`}
+                  title={opcao.label}
+                >
+                  <div className={`h-4 rounded ${opcao.classe}`} />
+                </button>
+              ))}
             </div>
-            <p className="text-xs text-muted-foreground">
-              A cor é definida automaticamente pelo nome do tipo
-            </p>
+            <div className={`p-3 rounded-md border ${cor} ${
+              CORES_DISPONIVEIS.find(c => c.classe === cor)?.bg || "bg-blue-100"
+            }`}>
+              <div className={`text-sm font-semibold ${cor}`}>{nome || "Prévia"}</div>
+            </div>
           </div>
 
           {/* Status */}

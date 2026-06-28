@@ -20,7 +20,7 @@ export async function PATCH(req: Request, { params }: Ctx) {
     }
 
     const body = await req.json();
-    const { ativo, nome, descricao, obrigatorio } = body;
+    const { ativo, nome, descricao, obrigatorio, cor } = body;
 
     // Validações
     if (nome && !nome.trim()) {
@@ -59,6 +59,7 @@ export async function PATCH(req: Request, { params }: Ctx) {
     if (nome !== undefined) dataUpdate.nome = nome.trim();
     if (descricao !== undefined) dataUpdate.descricao = descricao ? descricao.trim() : null;
     if (obrigatorio !== undefined) dataUpdate.obrigatorio = obrigatorio;
+    if (cor !== undefined) dataUpdate.cor = cor;
 
     const updated = await prisma.tipoFolha.update({
       where: { id: tipoId },
