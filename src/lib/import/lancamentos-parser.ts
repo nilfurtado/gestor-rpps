@@ -3,6 +3,8 @@
  * Handles parsing and validation of lancamento data from CSV files
  */
 
+import { parseExcelFile } from './excel-parser';
+
 export interface ParsedLancamento {
   orgaoSigla: string;
   competenciaMes: string;
@@ -295,6 +297,34 @@ export async function parseLancamentosCSV(
   }
 
   return { rows, errors };
+}
+
+/**
+ * Parse a lancamentos file (CSV or XLSX) with automatic format detection
+ * @param file File to parse (CSV or XLSX)
+ * @returns Promise with parsed rows and any validation errors
+ */
+export async function parseLancamentosFile(
+  file: File
+): Promise<{ rows: ParsedLancamento[]; errors: ParseError[] }> {
+  const fileName = file.name.toLowerCase();
+
+  if (fileName.endsWith('.csv')) {
+    return parseLancamentosCSV(file);
+  } else if (fileName.endsWith('.xlsx') || fileName.endsWith('.xls')) {
+    return parseExcelFile(file);
+  } else {
+    return {
+      rows: [],
+      errors: [
+        {
+          row: 0,
+          field: 'file',
+          message: 'Formato de arquivo não suportado. Use CSV ou XLSX.',
+        },
+      ],
+    };
+  }
 }
 
 /**
