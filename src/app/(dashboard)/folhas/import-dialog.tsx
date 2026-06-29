@@ -135,6 +135,7 @@ export function ImportDialog({ open, onOpenChange, onSuccess }: ImportDialogProp
       return;
     }
 
+    setStage("confirming");
     setLoading(true);
     try {
       const response = await fetch("/api/lancamentos/import/confirm", {
