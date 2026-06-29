@@ -21,6 +21,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import type { PreviewRow } from "@/app/api/lancamentos/import/preview/route";
+import { parseLancamentosFile } from '@/lib/import/lancamentos-parser';
 import type { ParseError } from "@/lib/import/lancamentos-parser";
 
 interface ImportDialogProps {
@@ -68,8 +69,9 @@ export function ImportDialog({ open, onOpenChange, onSuccess }: ImportDialogProp
     if (!selectedFile) return;
 
     // Validate file type
-    if (!selectedFile.name.endsWith(".csv")) {
-      toast.error("Por favor selecione um arquivo CSV");
+    const fileName = selectedFile.name.toLowerCase();
+    if (!fileName.endsWith('.csv') && !fileName.endsWith('.xlsx')) {
+      toast.error('Formato não suportado. Use CSV ou XLSX.');
       return;
     }
 
@@ -182,7 +184,7 @@ export function ImportDialog({ open, onOpenChange, onSuccess }: ImportDialogProp
   const renderUploadStage = () => (
     <div className="space-y-4">
       <DialogDescription>
-        Selecione um arquivo CSV com as seguintes colunas: Órgão, Competência, Tipo,
+        Selecione um arquivo CSV (.csv) ou Excel (.xlsx, .xls) com as seguintes colunas: Órgão, Competência, Tipo,
         FolhaBase, Alíquota, ValorRecolhido
       </DialogDescription>
 
@@ -194,16 +196,16 @@ export function ImportDialog({ open, onOpenChange, onSuccess }: ImportDialogProp
         onDrop={handleDrop}
       >
         <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-        <p className="text-sm font-medium">Clique ou arraste um arquivo CSV</p>
+        <p className="text-sm font-medium">Clique ou arraste um arquivo CSV ou Excel</p>
         <p className="text-xs text-muted-foreground mt-1">
-          Máximo de 1 arquivo, formato CSV
+          Máximo de 1 arquivo, formato CSV (.csv) ou Excel (.xlsx, .xls)
         </p>
       </div>
 
       <input
         ref={fileInputRef}
         type="file"
-        accept=".csv"
+        accept=".csv,.xlsx,.xls"
         className="hidden"
         onChange={(e) => handleFileSelect(e.target.files?.[0] || null)}
       />

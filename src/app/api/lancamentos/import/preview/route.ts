@@ -2,7 +2,7 @@ import { NextResponse, NextRequest } from "next/server";
 import { prisma } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { canManageLancamentos, forbidden } from "@/lib/permissions";
-import { parseLancamentosCSV, type ParseError } from "@/lib/import/lancamentos-parser";
+import { parseLancamentosFile, type ParseError } from "@/lib/import/lancamentos-parser";
 
 /**
  * Preview API endpoint for lancamentos import
@@ -66,8 +66,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Parse CSV file
-    const { rows: parsedRows, errors: parseErrors } = await parseLancamentosCSV(file);
+    // Parse CSV or XLSX file
+    const { rows: parsedRows, errors: parseErrors } = await parseLancamentosFile(file);
 
     // Get current active exercício
     const exercicio = await prisma.exercicio.findFirst({
