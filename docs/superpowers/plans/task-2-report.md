@@ -2,7 +2,7 @@
 
 **Status:** DONE
 
-**Commits:** (see below after commit)
+**Commits:** a5e2abf
 
 **Test Results:** src/lib/import/excel-parser.test.ts — 6 tests passed
 
