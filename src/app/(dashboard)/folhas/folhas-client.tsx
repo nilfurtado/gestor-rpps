@@ -1,15 +1,17 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { TipoFolha } from "@prisma/client";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Download } from "lucide-react";
+import { Download, Upload } from "lucide-react";
 import { FolhasTable } from "./folhas-table";
 import { ModalNovaFolha } from "./modal-nova";
 import { ModalEditar } from "./modal-editar";
 import { RequisitosLancamento } from "./requisitos-lancamento";
+import { ImportDialog } from "./import-dialog";
 import { Card } from "@/components/ui/card";
 
 interface TipoFolhaComCount extends TipoFolha {
@@ -21,12 +23,14 @@ interface FolhasClientProps {
 }
 
 export function FolhasClient({ tiposFolha }: FolhasClientProps) {
+  const router = useRouter();
   const [busca, setBusca] = useState("");
   const [filtroAtivo, setFiltroAtivo] = useState<"todos" | "ativo" | "inativo">("todos");
   const [tiposAtualizados, setTiposAtualizados] = useState(tiposFolha);
   const [openModal, setOpenModal] = useState(false);
   const [tipoEditando, setTipoEditando] = useState<TipoFolha | null>(null);
   const [openModalEditar, setOpenModalEditar] = useState(false);
+  const [openImport, setOpenImport] = useState(false);
 
   const filtered = tiposAtualizados.filter((tipo) => {
     const matchBusca =
@@ -58,6 +62,10 @@ export function FolhasClient({ tiposFolha }: FolhasClientProps) {
     setTiposAtualizados(novostipos);
   };
 
+  const handleImportSuccess = () => {
+    router.refresh();
+  };
+
   const exportarCSV = () => {
     const headers = ["ID", "Nome", "Descrição", "Tipo", "Origem", "Status", "Lançamentos"];
     const rows = tiposAtualizados.map((tipo) => [
@@ -87,8 +95,12 @@ export function FolhasClient({ tiposFolha }: FolhasClientProps) {
   return (
     <>
       <div className="p-6 space-y-6">
-        {/* Header com Botão Exportar */}
-        <div className="flex justify-end">
+        {/* Header com Botões Importar e Exportar */}
+        <div className="flex justify-end gap-2">
+          <Button variant="outline" size="sm" onClick={() => setOpenImport(true)}>
+            <Upload className="h-4 w-4 mr-2" />
+            Importar Lançamentos
+          </Button>
           <Button variant="outline" size="sm" onClick={exportarCSV}>
             <Download className="h-4 w-4 mr-2" />
             Exportar CSV
@@ -166,6 +178,7 @@ export function FolhasClient({ tiposFolha }: FolhasClientProps) {
         onOpenChange={setOpenModalEditar}
         onSalvo={handleTipoAtualizado}
       />
+      <ImportDialog open={openImport} onOpenChange={setOpenImport} onSuccess={handleImportSuccess} />
     </>
   );
 }
