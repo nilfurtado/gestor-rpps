@@ -43,7 +43,6 @@ export function FolhasTable({ dados, onTiposAtualizados, allTipos, onEditar }: F
             <TableHead>Nome</TableHead>
             <TableHead className="hidden md:table-cell">Descrição</TableHead>
             <TableHead className="w-20 text-center">Tipo</TableHead>
-            <TableHead className="hidden sm:table-cell w-24 text-center">Origem</TableHead>
             <TableHead className="w-16 text-center">Status</TableHead>
             <TableHead className="hidden lg:table-cell text-right">Uso</TableHead>
             <TableHead className="w-20 text-right">Ações</TableHead>
@@ -76,11 +75,6 @@ export function FolhasTable({ dados, onTiposAtualizados, allTipos, onEditar }: F
                 <TableCell className="text-center">
                   <Badge variant="outline" className="text-xs">
                     {tipo.obrigatorio ? "Obrigatória" : "Opcional"}
-                  </Badge>
-                </TableCell>
-                <TableCell className="hidden sm:table-cell text-center">
-                  <Badge variant={tipo.customizado ? "default" : "secondary"} className="text-xs">
-                    {tipo.customizado ? "🟢 Custom" : "🔵 Built-in"}
                   </Badge>
                 </TableCell>
                 <TableCell className="text-center">
