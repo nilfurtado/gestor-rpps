@@ -140,9 +140,8 @@ export async function POST(req: NextRequest) {
       const deficit = valorRecolher - row.valorRecolhido;
       const inadimplencia = Math.max(0, deficit);
 
-      return {
+      const previewRow: PreviewRow = {
         ...row,
-        quantidadeServidores: row.quantidadeServidores || 0,
         exercicioId: exercicio.id,
         orgaoId: orgao?.id || null,
         competenciaId: competencia?.id || null,
@@ -154,6 +153,13 @@ export async function POST(req: NextRequest) {
         fieldErrors,
         tiposFolhasEnriched,
       };
+
+      // Only include quantidadeServidores if present
+      if (row.quantidadeServidores !== undefined) {
+        previewRow.quantidadeServidores = row.quantidadeServidores;
+      }
+
+      return previewRow;
     });
 
     // Collect all errors
