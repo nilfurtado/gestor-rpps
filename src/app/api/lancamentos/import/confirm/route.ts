@@ -138,35 +138,41 @@ export async function POST(req: NextRequest) {
 
         // Create lancamento with folhas in transaction
         const lancamento = await prisma.$transaction(async (tx) => {
+          const createData: any = {
+            orgaoId: row.orgaoId!,
+            tipo: row.tipo,
+            exercicioId: row.exercicioId,
+            competenciaId: row.competenciaId!,
+            aliquota: row.aliquota,
+            valorRecolher,
+            valorRecolherCalculado: totalARecolher,
+            valorRecolhido,
+            folhaBase: row.folhaBase,
+            deficit: calc.deficit,
+            inadimplencia: calc.inadimplencia,
+            status: row.status,
+            responsavelId: userId,
+            // Totals for dynamic folhas
+            folhaTotal:
+              folhasData.length > 0 ? folhaTotal : (row.folhaBase ?? 0),
+            totalARecolher,
+            totalRecolhido,
+            deficitTotal,
+            // Dynamic folhas
+            ...(folhasData.length > 0 && {
+              folhas: {
+                create: folhasData,
+              },
+            }),
+          };
+
+          // Only include quantidadeServidores if provided
+          if (row.quantidadeServidores !== undefined) {
+            createData.quantidadeServidores = row.quantidadeServidores;
+          }
+
           return await tx.folhaPrevidenciaria.create({
-            data: {
-              orgaoId: row.orgaoId!,
-              tipo: row.tipo,
-              exercicioId: row.exercicioId,
-              competenciaId: row.competenciaId!,
-              aliquota: row.aliquota,
-              valorRecolher,
-              valorRecolherCalculado: totalARecolher,
-              valorRecolhido,
-              quantidadeServidores: row.quantidadeServidores || 0,
-              folhaBase: row.folhaBase,
-              deficit: calc.deficit,
-              inadimplencia: calc.inadimplencia,
-              status: row.status,
-              responsavelId: userId,
-              // Totals for dynamic folhas
-              folhaTotal:
-                folhasData.length > 0 ? folhaTotal : (row.folhaBase ?? 0),
-              totalARecolher,
-              totalRecolhido,
-              deficitTotal,
-              // Dynamic folhas
-              ...(folhasData.length > 0 && {
-                folhas: {
-                  create: folhasData,
-                },
-              }),
-            },
+            data: createData,
             include: {
               orgao: true,
               exercicio: true,
