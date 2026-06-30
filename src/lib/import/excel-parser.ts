@@ -19,6 +19,11 @@ const FIELD_ALIASES: Record<string, string[]> = {
   FolhaBase: ["FolhaBase", "Folha Base", "folhabase", "folha_base"],
   Alíquota: ["Alíquota", "Aliquota", "aliquota", "alíquota"],
   ValorRecolhido: ["ValorRecolhido", "Valor Recolhido", "valor_recolhido"],
+  QuantidadeServidores: [
+    "Quantidade de Servidores",
+    "Qtd. Servidores",
+    "quantidade de servidores",
+  ],
 };
 
 const REQUIRED_CANONICAL = [
@@ -276,6 +281,26 @@ export async function parseExcelFile(file: File): Promise<ParseResult> {
       }
     }
 
+    // ── QuantidadeServidores (optional) ────────────────────────────────────
+    const qtdServidoresKey = canonicalToActual["QuantidadeServidores"];
+    let qtdServidores: number | undefined = undefined;
+
+    if (qtdServidoresKey) {
+      const qtdRaw = raw[qtdServidoresKey];
+      if (qtdRaw !== "" && qtdRaw !== null && qtdRaw !== undefined) {
+        const parsed = parseInt(String(qtdRaw), 10);
+        if (isNaN(parsed) || parsed < 0) {
+          rowErrors.push({
+            row: rowNumber,
+            field: "Quantidade de Servidores",
+            message: "Deve ser número inteiro não-negativo",
+          });
+        } else {
+          qtdServidores = parsed;
+        }
+      }
+    }
+
     // ── Optional tiposFolhas columns ───────────────────────────────────────
     const tiposFolhas: Array<{ nome: string; valor: number }> = [];
     for (const header of extraHeaders) {
@@ -309,6 +334,10 @@ export async function parseExcelFile(file: File): Promise<ParseResult> {
 
     if (tiposFolhas.length > 0) {
       lancamento.tiposFolhas = tiposFolhas;
+    }
+
+    if (qtdServidores !== undefined) {
+      lancamento.quantidadeServidores = qtdServidores;
     }
 
     rows.push(lancamento);
