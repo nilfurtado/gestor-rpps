@@ -178,4 +178,95 @@ describe("parseExcelFile", () => {
       ])
     );
   });
+
+  it("parses optional quantidadeServidores field", async () => {
+    const file = makeXlsxFile([
+      {
+        Órgão: "PM",
+        Competência: "Julho",
+        Tipo: "PATRONAL",
+        FolhaBase: 15000,
+        Alíquota: 18,
+        ValorRecolhido: 2700,
+        "Quantidade de Servidores": 120,
+      },
+    ]);
+
+    const result = await parseExcelFile(file);
+
+    expect(result.errors).toHaveLength(0);
+    expect(result.rows).toHaveLength(1);
+    expect(result.rows[0].quantidadeServidores).toBe(120);
+  });
+
+  it("parses quantidadeServidores with alternate column name", async () => {
+    const file = makeXlsxFile([
+      {
+        Órgão: "CB",
+        Competência: "Agosto",
+        Tipo: "SEGURADO",
+        FolhaBase: 8500,
+        Alíquota: 11,
+        ValorRecolhido: 935,
+        "Qtd. Servidores": 85,
+      },
+    ]);
+
+    const result = await parseExcelFile(file);
+
+    expect(result.errors).toHaveLength(0);
+    expect(result.rows).toHaveLength(1);
+    expect(result.rows[0].quantidadeServidores).toBe(85);
+  });
+
+  it("reports error for invalid quantidadeServidores value", async () => {
+    const file = makeXlsxFile([
+      {
+        Órgão: "PM",
+        Competência: "Setembro",
+        Tipo: "PATRONAL",
+        FolhaBase: 12000,
+        Alíquota: 20,
+        ValorRecolhido: 2400,
+        "Quantidade de Servidores": -5,
+      },
+    ]);
+
+    const result = await parseExcelFile(file);
+
+    expect(result.rows).toHaveLength(1);
+    const qtdError = result.errors.find(
+      (e) => e.field === "Quantidade de Servidores"
+    );
+    expect(qtdError).toBeDefined();
+    expect(qtdError!.message).toBe("Deve ser número inteiro não-negativo");
+  });
+
+  it("handles quantidadeServidores alongside tiposFolhas", async () => {
+    const file = makeXlsxFile([
+      {
+        Órgão: "SEF",
+        Competência: "Outubro",
+        Tipo: "PATRONAL",
+        FolhaBase: 20000,
+        Alíquota: 22,
+        ValorRecolhido: 4400,
+        "Quantidade de Servidores": 200,
+        FolhaCivil: 12000,
+        FolhaMilitar: 8000,
+      },
+    ]);
+
+    const result = await parseExcelFile(file);
+
+    expect(result.errors).toHaveLength(0);
+    expect(result.rows[0].quantidadeServidores).toBe(200);
+    expect(result.rows[0].tiposFolhas).toHaveLength(2);
+    expect(result.rows[0].tiposFolhas).toEqual(
+      expect.arrayContaining([
+        { nome: "FolhaCivil", valor: 12000 },
+        { nome: "FolhaMilitar", valor: 8000 },
+      ])
+    );
+  });
 });
