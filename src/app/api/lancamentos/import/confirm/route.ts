@@ -148,6 +148,7 @@ export async function POST(req: NextRequest) {
               valorRecolher,
               valorRecolherCalculado: totalARecolher,
               valorRecolhido,
+              quantidadeServidores: row.quantidadeServidores || 0,
               folhaBase: row.folhaBase,
               deficit: calc.deficit,
               inadimplencia: calc.inadimplencia,
