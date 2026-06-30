@@ -20,6 +20,7 @@ export interface PreviewRow {
   folhaBase: number;
   aliquota: number;
   valorRecolhido: number;
+  quantidadeServidores?: number;
   tiposFolhas?: Array<{ nome: string; valor: number }>;
   // Enriched fields
   exercicioId: number;
@@ -141,6 +142,7 @@ export async function POST(req: NextRequest) {
 
       return {
         ...row,
+        quantidadeServidores: row.quantidadeServidores || 0,
         exercicioId: exercicio.id,
         orgaoId: orgao?.id || null,
         competenciaId: competencia?.id || null,
