@@ -12,6 +12,7 @@ export interface ParsedLancamento {
   folhaBase: number;
   aliquota: number;
   valorRecolhido: number;
+  quantidadeServidores?: number;
   tiposFolhas?: Array<{ nome: string; valor: number }>;
 }
 
@@ -78,11 +79,20 @@ export async function parseLancamentosCSV(
     headerIndices[field] = idx;
   }
 
-  // Identify optional tipos de folhas columns (anything after the required fields)
+  // Build a full header map for optional field lookups by name
+  const headerMap: Record<string, number> = {};
+  for (let i = 0; i < headers.length; i++) {
+    headerMap[headers[i]] = i;
+  }
+
+  // Known optional numeric fields that are NOT tipos de folhas
+  const KNOWN_OPTIONAL_FIELDS = ['Quantidade de Servidores', 'Qtd. Servidores'];
+
+  // Identify optional tipos de folhas columns (anything after the required fields, excluding known optional fields)
   const tiposFolhasHeaders: Array<{ index: number; name: string }> = [];
   for (let i = 0; i < headers.length; i++) {
     const header = headers[i];
-    if (!REQUIRED_FIELDS.includes(header)) {
+    if (!REQUIRED_FIELDS.includes(header) && !KNOWN_OPTIONAL_FIELDS.includes(header)) {
       tiposFolhasHeaders.push({ index: i, name: header });
     }
   }
@@ -260,6 +270,23 @@ export async function parseLancamentosCSV(
       }
     }
 
+    // Parse optional quantidadeServidores
+    const lancamentoLine = values;
+    const quantidadeServidoresStr = lancamentoLine[headerMap['Quantidade de Servidores']] ||
+                                    lancamentoLine[headerMap['Qtd. Servidores']];
+    let quantidadeServidores: number | undefined;
+    if (quantidadeServidoresStr) {
+      quantidadeServidores = parseInt(quantidadeServidoresStr, 10);
+      if (isNaN(quantidadeServidores) || quantidadeServidores < 0) {
+        rowErrors.push({
+          row: rowNumber,
+          field: 'Quantidade de Servidores',
+          message: 'Deve ser número inteiro não-negativo'
+        });
+        quantidadeServidores = undefined;
+      }
+    }
+
     // Parse optional tipos de folhas
     const tiposFolhas: Array<{ nome: string; valor: number }> = [];
     for (const { index, name } of tiposFolhasHeaders) {
@@ -287,6 +314,10 @@ export async function parseLancamentosCSV(
       aliquota,
       valorRecolhido,
     };
+
+    if (quantidadeServidores !== undefined) {
+      lancamento.quantidadeServidores = quantidadeServidores;
+    }
 
     if (tiposFolhas.length > 0) {
       lancamento.tiposFolhas = tiposFolhas;
